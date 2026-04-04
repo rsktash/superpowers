@@ -104,6 +104,10 @@ When multiple skills could apply, use this order:
 "Let's build X" → brainstorming first, then implementation skills.
 "Fix this bug" → debugging first, then domain-specific skills.
 
+## Spec/Plan Storage
+
+This fork uses beads (`bd` CLI) as the single source of truth for specs, plans, and task progress. The brainstorming, writing-plans, executing-plans, and subagent-driven-development skills all use `bd` commands instead of writing markdown files. Run `bd ready` to see what work is available.
+
 ## Skill Types
 
 **Rigid** (TDD, debugging): Follow exactly. Don't adapt away discipline.
