@@ -15,8 +15,9 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
-**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
-- (User preferences for plan location override this default)
+**Input:** Receives a root bead ID from the brainstorming skill. All tasks are created as beads under this root.
+
+**Storage:** Task beads are created via `bd create --json` and linked to the root via `bd dep add --type relates_to`. Sequential task ordering uses `bd dep add` (default `blocks` type).
 
 ## Scope Check
 
@@ -42,25 +43,28 @@ This structure informs the task decomposition. Each task should produce self-con
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
-## Plan Document Header
+## Plan Structure in Beads
 
-**Every plan MUST start with this header:**
+The root epic bead (created by brainstorming) already contains the spec. Plan tasks are created as child beads:
 
-```markdown
-# [Feature Name] Implementation Plan
-
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** [One sentence describing what this builds]
-
-**Architecture:** [2-3 sentences about approach]
-
-**Tech Stack:** [Key technologies/libraries]
-
----
+For each task, create a bead and link it:
+```bash
+echo '<task markdown>' | bd create "Task N: <name>" -p 1 --stdin --json
+bd dep add <new-task-id> <root-bead-id> --type relates_to
 ```
 
+For sequential dependencies between tasks:
+```bash
+bd dep add <task-2-id> <task-1-id>
+```
+
+Parse JSON output from `bd create --json` to extract the new bead ID.
+
+Note: The exact mechanism for hierarchical IDs (`bd-a3f8.1`) vs flat IDs needs to be determined via `bd create --help`. The dependency graph works regardless of ID scheme.
+
 ## Task Structure
+
+The task content below is what gets piped into `bd create --stdin`. The markdown formatting is preserved in the bead body for readability in beads-ui.
 
 ````markdown
 ### Task N: [Component Name]
@@ -121,32 +125,34 @@ Every step must contain the actual content an engineer needs. These are **plan f
 
 ## Self-Review
 
-After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.
+After creating all task beads, review the plan against the spec. This is a checklist you run yourself — not a subagent dispatch.
 
-**1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
+**1. Spec coverage:** Read the root spec bead via `bd show <root-id> --json` and verify each requirement has a corresponding task bead. List any gaps.
 
-**2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
+**2. Placeholder scan:** Read each task bead via `bd show <task-id> --json` and check for red flags — any of the patterns from the "No Placeholders" section above. Fix them by updating the bead.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task bead.
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After all task beads are created and linked, offer execution choice:
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**
+**"Plan complete — <N> task beads created under `<root-bead-id>`. Two execution options:**
 
-**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
+**1. Inline Execution (recommended)** - Execute tasks in this session using executing-plans, driven by `bd ready`
 
-**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
+**2. Subagent-Driven** - I dispatch a fresh subagent per task, review between tasks
 
 **Which approach?"**
+
+Pass the root bead ID to the chosen execution skill.
+
+**If Inline Execution chosen:**
+- **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
+- Execution driven by `bd ready --parent <root-id> --json`
 
 **If Subagent-Driven chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
-
-**If Inline Execution chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
-- Batch execution with checkpoints for review
