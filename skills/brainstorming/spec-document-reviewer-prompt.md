@@ -4,7 +4,7 @@ Use this template when dispatching a spec document reviewer subagent.
 
 **Purpose:** Verify the spec is complete, consistent, and ready for implementation planning.
 
-**Dispatch after:** Spec document is written to docs/superpowers/specs/
+**Dispatch after:** Spec bead is created via `bd create`
 
 ```
 Task tool (general-purpose):
@@ -12,7 +12,7 @@ Task tool (general-purpose):
   prompt: |
     You are a spec document reviewer. Verify this spec is complete and ready for planning.
 
-    **Spec to review:** [SPEC_FILE_PATH]
+    **Spec to review:** Read the spec content via `bd show [BEAD_ID] --json`
 
     ## What to Check
 
