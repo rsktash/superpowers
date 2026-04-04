@@ -29,6 +29,16 @@ The original Superpowers stores specs and plans as markdown files in `docs/super
 | finishing-a-development-branch | Closes root epic bead, enforces bead ID in commits and PRs |
 | using-superpowers | Bootstrap mentions beads storage model |
 
+## Important: Uninstall Original Superpowers First
+
+This plugin replaces the original Superpowers. Having both installed causes duplicate skills with unpredictable behavior. Uninstall the original before installing this one:
+
+```bash
+/plugin uninstall superpowers
+```
+
+If both are installed, a warning will appear at the start of every session.
+
 ## Requirements
 
 - [Beads CLI](https://github.com/gastownhall/beads) (`bd`) must be installed

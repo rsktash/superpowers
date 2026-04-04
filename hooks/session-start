@@ -14,6 +14,18 @@ if [ -d "$legacy_skills_dir" ]; then
     warning_message="\n\n<important-reminder>IN YOUR FIRST REPLY AFTER SEEING THIS MESSAGE YOU MUST TELL THE USER:⚠️ **WARNING:** Superpowers now uses Claude Code's skills system. Custom skills in ~/.config/superpowers/skills will not be read. Move custom skills to ~/.claude/skills instead. To make this message go away, remove ~/.config/superpowers/skills</important-reminder>"
 fi
 
+# Check if the original superpowers plugin is also installed (causes skill conflicts)
+conflict_message=""
+for dir in "${HOME}/.claude/plugins/"*/superpowers "${HOME}/.claude/plugins/cache/"*/superpowers/*; do
+    if [ -d "$dir" ] && [ -f "$dir/.claude-plugin/plugin.json" ]; then
+        plugin_name=$(grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' "$dir/.claude-plugin/plugin.json" | head -1 | sed 's/.*"name"[[:space:]]*:[[:space:]]*"//' | sed 's/"//')
+        if [ "$plugin_name" = "superpowers" ]; then
+            conflict_message="\n\n<important-reminder>IN YOUR FIRST REPLY AFTER SEEING THIS MESSAGE YOU MUST TELL THE USER:⚠️ **CONFLICT:** Both \`superpowers\` and \`superpowers-beads\` are installed. This causes duplicate skills with unpredictable behavior. Please uninstall the original: \`/plugin uninstall superpowers\`</important-reminder>"
+            break
+        fi
+    fi
+done
+
 # Read using-superpowers content
 using_superpowers_content=$(cat "${PLUGIN_ROOT}/skills/using-superpowers/SKILL.md" 2>&1 || echo "Error reading using-superpowers skill")
 
@@ -32,7 +44,8 @@ escape_for_json() {
 
 using_superpowers_escaped=$(escape_for_json "$using_superpowers_content")
 warning_escaped=$(escape_for_json "$warning_message")
-session_context="<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\n**Below is the full content of your 'superpowers:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**\n\n${using_superpowers_escaped}\n\n${warning_escaped}\n</EXTREMELY_IMPORTANT>"
+conflict_escaped=$(escape_for_json "$conflict_message")
+session_context="<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\n**Below is the full content of your 'superpowers-beads:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**\n\n${using_superpowers_escaped}\n\n${warning_escaped}\n${conflict_escaped}\n</EXTREMELY_IMPORTANT>"
 
 # Output context injection as JSON.
 # Cursor hooks expect additional_context (snake_case).
