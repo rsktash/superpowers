@@ -28,50 +28,54 @@ done
 
 # --- Beads dependency resolution ---
 # Priority: global install → vendor/bin/ → auto-install via scripts/install-deps.sh
+# bd and bdui are resolved independently — missing bdui does not block bd.
 VENDOR_BIN="${PLUGIN_ROOT}/vendor/bin"
 
-resolve_bd() {
+# Check where a binary is available (global, vendor, or missing)
+check_bd() {
   if command -v bd >/dev/null 2>&1; then
     echo "global"
-    return 0
   elif [ -x "${VENDOR_BIN}/bd" ]; then
     echo "vendor"
-    return 0
   else
-    # Attempt auto-install (silent, non-blocking)
-    if [ -x "${PLUGIN_ROOT}/scripts/install-deps.sh" ]; then
-      "${PLUGIN_ROOT}/scripts/install-deps.sh" >/dev/null 2>&1 || true
-      if [ -x "${VENDOR_BIN}/bd" ]; then
-        echo "vendor"
-        return 0
-      fi
-    fi
     echo "missing"
-    return 1
   fi
 }
 
-resolve_bdui() {
+check_bdui() {
   if command -v bdui >/dev/null 2>&1; then
     echo "global"
-    return 0
-  elif [ -x "${VENDOR_BIN}/bdui" ] || [ -L "${VENDOR_BIN}/bdui" ]; then
+  elif [ -L "${VENDOR_BIN}/bdui" ] && [ -e "${VENDOR_BIN}/bdui" ] && [ -x "${VENDOR_BIN}/bdui" ]; then
     echo "vendor"
-    return 0
   else
     echo "missing"
-    return 1
   fi
 }
 
-bd_source=$(resolve_bd || true)
-bdui_source=$(resolve_bdui || true)
+# First pass — check what's already available
+bd_source=$(check_bd)
+bdui_source=$(check_bdui)
+
+# If either is missing, run the installer once, then re-check both
+if [ "$bd_source" = "missing" ] || [ "$bdui_source" = "missing" ]; then
+  if [ -x "${PLUGIN_ROOT}/scripts/install-deps.sh" ]; then
+    "${PLUGIN_ROOT}/scripts/install-deps.sh" >/dev/null 2>&1 || true
+  fi
+  # Re-check both after install (picks up vendor installs AND npm global fallback)
+  bd_source=$(check_bd)
+  bdui_source=$(check_bdui)
+fi
 
 # Inject vendor/bin into PATH via CLAUDE_ENV_FILE if needed
 if [ "$bd_source" = "vendor" ] || [ "$bdui_source" = "vendor" ]; then
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
     echo "export PATH=\"${VENDOR_BIN}:\$PATH\"" >> "$CLAUDE_ENV_FILE"
   fi
+fi
+
+# Auto-configure bd permissions in the project's .claude/settings.json
+if [ -x "${PLUGIN_ROOT}/scripts/setup-permissions.sh" ]; then
+  "${PLUGIN_ROOT}/scripts/setup-permissions.sh" "$(pwd)" >/dev/null 2>&1 || true
 fi
 
 # Build status messages

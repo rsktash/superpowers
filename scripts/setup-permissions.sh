@@ -14,11 +14,7 @@ if [ ! -d "$SETTINGS_DIR" ]; then
   exit 0
 fi
 
-# Check if bd permissions already configured
-if [ -f "$SETTINGS_FILE" ] && grep -q '"Bash(bd show \*)' "$SETTINGS_FILE" 2>/dev/null; then
-  echo "bd permissions already configured in ${SETTINGS_FILE}"
-  exit 0
-fi
+# No early exit — always do a full merge/dedup pass to handle partial configs
 
 # Permissions to add — all non-destructive bd commands
 BD_PERMISSIONS=(
@@ -84,25 +80,42 @@ fi
 
 # Merge permissions into existing settings using node (available if npm is)
 if command -v node >/dev/null 2>&1; then
-  node -e "
+  if node -e "
     const fs = require('fs');
     const settingsFile = '${SETTINGS_FILE}';
     const newPerms = ${perm_json};
 
-    let settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+    let settings;
+    try {
+      settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+    } catch (e) {
+      console.error('ERROR: Failed to parse ' + settingsFile + ': ' + e.message);
+      process.exit(1);
+    }
+
     if (!settings.permissions) settings.permissions = {};
     if (!settings.permissions.allow) settings.permissions.allow = [];
 
     const existing = new Set(settings.permissions.allow);
+    let added = 0;
     for (const p of newPerms) {
       if (!existing.has(p)) {
         settings.permissions.allow.push(p);
+        added++;
       }
     }
 
-    fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2) + '\n');
-  "
-  echo "Added bd permissions to ${SETTINGS_FILE}"
+    if (added > 0) {
+      fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2) + '\n');
+      console.log('Added ' + added + ' bd permissions to ' + settingsFile);
+    } else {
+      console.log('bd permissions already configured in ' + settingsFile);
+    }
+  "; then
+    true  # node succeeded
+  else
+    echo "WARN: Failed to merge permissions into ${SETTINGS_FILE}" >&2
+  fi
 else
   echo "WARN: node not available, cannot merge permissions into ${SETTINGS_FILE}" >&2
 fi

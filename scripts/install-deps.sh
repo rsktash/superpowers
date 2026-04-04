@@ -73,8 +73,12 @@ install_bd() {
     rm -rf "$tmpdir"
     echo "WARN: GitHub download failed, trying npm fallback..." >&2
     if command -v npm >/dev/null 2>&1; then
-      npm install -g "@beads/bd@${BD_VERSION}" 2>&1
-      echo "Installed bd v${BD_VERSION} via npm (global)"
+      if npm install -g "@beads/bd@${BD_VERSION}" 2>&1; then
+        echo "Installed bd v${BD_VERSION} via npm (global)"
+      else
+        echo "ERROR: npm install -g @beads/bd failed" >&2
+        return 1
+      fi
     else
       echo "ERROR: npm not available for fallback" >&2
       return 1
@@ -131,7 +135,7 @@ PKGJSON
 
 # Check if bdui is already installed at correct version
 bdui_needs_install=true
-if [ -L "${BIN_DIR}/bdui" ] && [ -x "${BIN_DIR}/bdui" ]; then
+if [ -L "${BIN_DIR}/bdui" ] && [ -e "${BIN_DIR}/bdui" ] && [ -x "${BIN_DIR}/bdui" ]; then
   installed_bdui=$("${BIN_DIR}/bdui" --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "")
   if [ "$installed_bdui" = "$BDUI_VERSION" ]; then
     echo "beads-ui v${BDUI_VERSION} already installed in vendor/bin/"
