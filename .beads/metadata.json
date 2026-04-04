@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "superpowers",
+  "project_id": "84684c26-9050-45e6-959d-5fcc43b8c6ee"
+}
