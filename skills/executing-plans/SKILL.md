@@ -14,7 +14,7 @@ Load task beads from beads, review critically, execute all tasks, report when co
 <HARD-GATE>
 ## Step 0: Verify beads (MUST complete before ANY other action)
 
-Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → offer to install: `npm install -g @beads/bd` and STOP. Do NOT proceed. Do NOT launch parallel work.
+Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → tell your human partner: "Beads (`bd`) is not available. It should have been auto-installed by the session-start hook. Try restarting Claude Code, or run `$CLAUDE_PLUGIN_ROOT/scripts/install-deps.sh` manually." STOP. Do NOT proceed. Do NOT launch parallel work.
 
 If beads is available but no `.beads/` directory exists → ask user: "Run `bd init` to set up beads in this project?" and WAIT.
 
