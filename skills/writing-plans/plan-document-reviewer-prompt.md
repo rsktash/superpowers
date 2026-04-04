@@ -4,7 +4,7 @@ Use this template when dispatching a plan document reviewer subagent.
 
 **Purpose:** Verify the plan is complete, matches the spec, and has proper task decomposition.
 
-**Dispatch after:** The complete plan is written.
+**Dispatch after:** All task beads are created and linked under the root epic.
 
 ```
 Task tool (general-purpose):
@@ -12,8 +12,8 @@ Task tool (general-purpose):
   prompt: |
     You are a plan document reviewer. Verify this plan is complete and ready for implementation.
 
-    **Plan to review:** [PLAN_FILE_PATH]
-    **Spec for reference:** [SPEC_FILE_PATH]
+    **Plan to review:** List task beads via `bd ready --parent [ROOT_BEAD_ID] --json` and read each via `bd show <id> --json`
+    **Spec for reference:** Read spec via `bd show [ROOT_BEAD_ID] --json`
 
     ## What to Check
 
