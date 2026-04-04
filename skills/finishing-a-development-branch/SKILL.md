@@ -13,6 +13,18 @@ Guide completion of development work by presenting clear options and handling ch
 
 **Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
 
+## Beads Requirement
+
+Before starting, verify beads is available:
+
+```bash
+which bd && bd --version
+```
+
+**If `bd` is not found:** Stop. Tell your human partner: "This plugin requires beads (`bd`) to be installed. See https://github.com/gastownhall/beads for installation instructions."
+
+**If no beads database is detected** (no `.beads/` directory and no `BEADS_DIR` environment variable): Ask your human partner: "Beads is installed but not initialized in this project. Run `bd init` to set up?" Wait for confirmation before running `bd init`.
+
 ## The Process
 
 ### Step 1: Verify Tests
@@ -95,6 +107,10 @@ git merge <feature-branch>
 # If tests pass
 git branch -d <feature-branch>
 
+# Verify all task beads are closed before closing epic
+bd show <root-bead-id> --json
+# Check that all child beads have status "closed". If any are open/in_progress, stop and report.
+
 # Close the root epic bead
 bd close <root-bead-id> --reason "All tasks complete, merged to <base-branch>"
 ```
@@ -118,6 +134,10 @@ gh pr create --title "<title> (<bead-id>)" --body "$(cat <<'EOF'
 - [ ] <verification steps>
 EOF
 )"
+
+# Verify all task beads are closed before closing epic
+bd show <root-bead-id> --json
+# Check that all child beads have status "closed". If any are open/in_progress, stop and report.
 
 # Close the root epic bead
 bd close <root-bead-id> --reason "All tasks complete, PR created"

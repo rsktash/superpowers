@@ -15,9 +15,21 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
+## Beads Requirement
+
+Before starting, verify beads is available:
+
+```bash
+which bd && bd --version
+```
+
+**If `bd` is not found:** Stop. Tell your human partner: "This plugin requires beads (`bd`) to be installed. See https://github.com/gastownhall/beads for installation instructions."
+
+**If no beads database is detected** (no `.beads/` directory and no `BEADS_DIR` environment variable): Ask your human partner: "Beads is installed but not initialized in this project. Run `bd init` to set up?" Wait for confirmation before running `bd init`.
+
 **Input:** Receives a root bead ID from the brainstorming skill. All tasks are created as beads under this root.
 
-**Storage:** Task beads are created via `bd create --json` and linked to the root via `bd dep add --type relates_to`. Sequential task ordering uses `bd dep add` (default `blocks` type).
+**Storage:** Task beads are created via `bd create --json` and linked to the root via `bd dep add --type related`. Sequential task ordering uses `bd dep add` (default `blocks` type).
 
 ## Scope Check
 
@@ -50,7 +62,7 @@ The root epic bead (created by brainstorming) already contains the spec. Plan ta
 For each task, create a bead and link it:
 ```bash
 echo '<task markdown>' | bd create "Task N: <name>" -p 1 --stdin --json
-bd dep add <new-task-id> <root-bead-id> --type relates_to
+bd dep add <new-task-id> <root-bead-id> --type related
 ```
 
 For sequential dependencies between tasks:
@@ -103,7 +115,7 @@ Expected: PASS
 
 ```bash
 git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
+git commit -m "feat: add specific feature (<bead-id>)"
 ```
 ````
 

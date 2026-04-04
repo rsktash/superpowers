@@ -11,6 +11,18 @@ Execute plan by dispatching fresh subagent per task, with two-stage review after
 
 **Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
 
+## Beads Requirement
+
+Before starting, verify beads is available:
+
+```bash
+which bd && bd --version
+```
+
+**If `bd` is not found:** Stop. Tell your human partner: "This plugin requires beads (`bd`) to be installed. See https://github.com/gastownhall/beads for installation instructions."
+
+**If no beads database is detected** (no `.beads/` directory and no `BEADS_DIR` environment variable): Ask your human partner: "Beads is installed but not initialized in this project. Run `bd init` to set up?" Wait for confirmation before running `bd init`.
+
 ## When to Use
 
 ```dot
@@ -130,7 +142,7 @@ You: I'm using Subagent-Driven Development to execute this plan.
 
 [Receive root bead ID from writing-plans]
 [Read spec: bd show <root-id> --json]
-[List tasks: bd ready --parent <root-id> --json]
+[List all child tasks: bd show <root-id> --json]
 [Read each task: bd show <task-id> --json for all 5 tasks]
 [Create TodoWrite with all tasks]
 

@@ -12,7 +12,7 @@ Task tool (general-purpose):
   prompt: |
     You are a plan document reviewer. Verify this plan is complete and ready for implementation.
 
-    **Plan to review:** List task beads via `bd ready --parent [ROOT_BEAD_ID] --json` and read each via `bd show <id> --json`
+    **Plan to review:** List all child task beads via `bd show [ROOT_BEAD_ID] --json` and read each via `bd show <id> --json`
     **Spec for reference:** Read spec via `bd show [ROOT_BEAD_ID] --json`
 
     ## What to Check

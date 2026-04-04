@@ -11,7 +11,7 @@ Load task beads from beads, review critically, execute all tasks, report when co
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use superpowers:subagent-driven-development instead of this skill.
+**Note:** If your human partner prefers subagent-driven execution, use superpowers:subagent-driven-development instead of this skill.
 
 ## Beads Requirement
 
@@ -30,9 +30,8 @@ which bd && bd --version
 ### Step 1: Load and Review Tasks
 
 1. Receive the root bead ID from writing-plans
-2. Read the spec: `bd show <root-id> --json`
-3. List all task beads: `bd ready --parent <root-id> --json`
-4. Read each task to understand the full plan: `bd show <task-id> --json`
+2. Read the spec and list all child beads: `bd show <root-id> --json` (includes children regardless of status)
+3. Read each task to understand the full plan: `bd show <task-id> --json`
 5. Review critically — identify any questions or concerns about the tasks
 6. If concerns: Raise them with your human partner before starting
 7. If no concerns: Proceed to execution
@@ -56,9 +55,9 @@ Progress is visible in beads-ui in real time. Step-level progress persisted via 
 If starting a new session to continue work on an existing feature:
 
 1. Find the root bead ID: glob `docs/beads/*-bd-*.md` — the bead ID is in the filename
-2. `bd ready --parent <root-id> --json` — see what tasks remain
-3. Check for in-progress tasks: if a task shows `in_progress`, read its comments to see which steps completed
-4. Resume from the next uncompleted step
+2. `bd show <root-id> --json` — list all child beads and their statuses (open, in_progress, closed)
+3. Check for in-progress tasks: read their comments via `bd show <task-id> --json` to see which steps completed
+4. Resume in-progress tasks from the next uncompleted step, then continue with `bd ready --parent <root-id> --json` for remaining unblocked tasks
 
 ### Step 3: Complete Development
 
