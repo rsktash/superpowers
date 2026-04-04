@@ -35,7 +35,19 @@ Cannot proceed with merge/PR until tests pass.
 
 Stop. Don't proceed to Step 2.
 
-**If tests pass:** Continue to Step 2.
+**If tests pass:** Continue to Step 1.5.
+
+### Step 1.5: Identify Root Bead
+
+If a root bead ID was passed from the execution skill, use it. Otherwise, find it:
+
+```bash
+ls docs/beads/*-bd-*.md
+```
+
+Extract the bead ID from the filename (e.g., `2026-04-04-001-bd-a3f8-widget-caching-layer.md` → `bd-a3f8`).
+
+**All commit messages must include the bead ID:** `feat: <feature name> (<bead-id>)`
 
 ### Step 2: Determine Base Branch
 
@@ -82,6 +94,9 @@ git merge <feature-branch>
 
 # If tests pass
 git branch -d <feature-branch>
+
+# Close the root epic bead
+bd close <root-bead-id> --reason "All tasks complete, merged to <base-branch>"
 ```
 
 Then: Cleanup worktree (Step 5)
@@ -92,15 +107,20 @@ Then: Cleanup worktree (Step 5)
 # Push branch
 git push -u origin <feature-branch>
 
-# Create PR
-gh pr create --title "<title>" --body "$(cat <<'EOF'
+# Create PR with bead ID
+gh pr create --title "<title> (<bead-id>)" --body "$(cat <<'EOF'
 ## Summary
 <2-3 bullets of what changed>
+
+**Beads:** `<bead-id>` — run `bd show <bead-id>` for full spec
 
 ## Test Plan
 - [ ] <verification steps>
 EOF
 )"
+
+# Close the root epic bead
+bd close <root-bead-id> --reason "All tasks complete, PR created"
 ```
 
 Then: Cleanup worktree (Step 5)
