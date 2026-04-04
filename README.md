@@ -1,190 +1,87 @@
-# Superpowers
+# Superpowers-Beads
 
-Superpowers is a complete software development workflow for your coding agents, built on top of a set of composable "skills" and some initial instructions that make sure your agent uses them.
+A fork of [Superpowers](https://github.com/obra/superpowers) that replaces markdown-based spec/plan storage with [Beads](https://github.com/gastownhall/beads) as the single source of truth.
 
-## How it works
+## What's Different
 
-It starts from the moment you fire up your coding agent. As soon as it sees that you're building something, it *doesn't* just jump into trying to write code. Instead, it steps back and asks you what you're really trying to do. 
+The original Superpowers stores specs and plans as markdown files in `docs/superpowers/specs/` and `docs/superpowers/plans/`. This fork replaces that with Beads — a distributed graph issue tracker built for AI agents.
 
-Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
+### Key changes
 
-After you've signed off on the design, your agent puts together an implementation plan that's clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project context, and an aversion to testing to follow. It emphasizes true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. 
+- **Specs are beads.** The brainstorming skill creates a root epic bead (`bd create -t epic`) instead of writing a markdown file. The full spec lives in the bead body.
+- **Plans are bead trees.** The writing-plans skill creates child beads for each task, linked with dependency graphs (`bd dep add`). No plan markdown file.
+- **Execution is bead-driven.** The executing-plans skill uses `bd ready --parent` / `bd update --claim` / `bd close --reason` instead of parsing checkboxes in a file.
+- **Progress is live.** Track everything in [beads-ui](https://github.com/mantoni/beads-ui) in real time.
+- **Git stays searchable.** A lightweight summary file is committed to `docs/beads/` for each feature, and all commit messages include bead IDs.
 
-Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It's not uncommon for Claude to be able to work autonomously for a couple hours at a time without deviating from the plan you put together.
+### What's unchanged
 
-There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has Superpowers.
+9 skills are identical to the original Superpowers: TDD, systematic-debugging, git-worktrees, finishing-a-development-branch, writing-skills, requesting-code-review, receiving-code-review, verification-before-completion, dispatching-parallel-agents.
 
+### Skills modified
 
-## Sponsorship
+| Skill | What changed |
+|-------|-------------|
+| brainstorming | Stores specs as epic beads, writes summary file to `docs/beads/` |
+| writing-plans | Creates task beads with `bd dep add` dependencies instead of markdown plan |
+| executing-plans | Drives work via `bd ready` / `bd update --claim` / `bd close --reason` loop |
+| subagent-driven-development | Same dispatch model, beads for persistent tracking |
+| finishing-a-development-branch | Closes root epic bead, enforces bead ID in commits and PRs |
+| using-superpowers | Bootstrap mentions beads storage model |
 
-If Superpowers has helped you do stuff that makes money and you are so inclined, I'd greatly appreciate it if you'd consider [sponsoring my opensource work](https://github.com/sponsors/obra).
+## Requirements
 
-Thanks! 
-
-- Jesse
-
+- [Beads CLI](https://github.com/gastownhall/beads) (`bd`) must be installed
+- Initialize beads in your project: `bd init`
+- Optional: [beads-ui](https://github.com/mantoni/beads-ui) for a web dashboard
 
 ## Installation
 
-**Note:** Installation differs by platform. Claude Code or Cursor have built-in plugin marketplaces. Codex and OpenCode require manual setup.
-
-### Claude Code Official Marketplace
-
-Superpowers is available via the [official Claude plugin marketplace](https://claude.com/plugins/superpowers)
-
-Install the plugin from Claude marketplace:
+### Claude Code
 
 ```bash
-/plugin install superpowers@claude-plugins-official
+/plugin install superpowers-beads
 ```
 
-### Claude Code (via Plugin Marketplace)
-
-In Claude Code, register the marketplace first:
+### From source
 
 ```bash
-/plugin marketplace add obra/superpowers-marketplace
+git clone https://github.com/rsktash/superpowers.git
+cd superpowers
+# Follow Claude Code plugin installation docs
 ```
 
-Then install the plugin from this marketplace:
+## The Workflow
 
-```bash
-/plugin install superpowers@superpowers-marketplace
-```
+1. **brainstorming** — Refines ideas, creates spec as an epic bead, commits summary to `docs/beads/`
+2. **writing-plans** — Decomposes spec into task beads with dependency ordering
+3. **executing-plans** (recommended) — Executes tasks via `bd ready` loop with step-level progress comments
+4. **finishing-a-development-branch** — Verifies all tasks closed, closes epic, merges/PRs with bead ID
 
-### Cursor (via Plugin Marketplace)
-
-In Cursor Agent chat, install from marketplace:
-
-```text
-/add-plugin superpowers
-```
-
-or search for "superpowers" in the plugin marketplace.
-
-### Codex
-
-Tell Codex:
+### Summary file naming
 
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md
+docs/beads/{date}-{incr}-{bd-id}-{short-title}.md
 ```
 
-**Detailed docs:** [docs/README.codex.md](docs/README.codex.md)
+Example: `docs/beads/2026-04-04-001-bd-a3f8-widget-caching-layer.md`
 
-### OpenCode
+### Interruption recovery
 
-Tell OpenCode:
+If a session is interrupted, the next session recovers by:
+1. Finding the root bead ID from `docs/beads/*-bd-*.md`
+2. Querying `bd show <root-id> --json` for all task statuses
+3. Reading step-progress comments on in-progress tasks
+4. Resuming from where it left off
 
-```
-Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.opencode/INSTALL.md
-```
+## Credits
 
-**Detailed docs:** [docs/README.opencode.md](docs/README.opencode.md)
+This is a fork of [Superpowers](https://github.com/obra/superpowers) by [Jesse Vincent](https://blog.fsck.com). The original project and community:
 
-### GitHub Copilot CLI
-
-```bash
-copilot plugin marketplace add obra/superpowers-marketplace
-copilot plugin install superpowers@superpowers-marketplace
-```
-
-### Gemini CLI
-
-```bash
-gemini extensions install https://github.com/obra/superpowers
-```
-
-To update:
-
-```bash
-gemini extensions update superpowers
-```
-
-### Verify Installation
-
-Start a new session in your chosen platform and ask for something that should trigger a skill (for example, "help me plan this feature" or "let's debug this issue"). The agent should automatically invoke the relevant superpowers skill.
-
-## The Basic Workflow
-
-1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves design document.
-
-2. **using-git-worktrees** - Activates after design approval. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
-
-3. **writing-plans** - Activates with approved design. Breaks work into bite-sized tasks (2-5 minutes each). Every task has exact file paths, complete code, verification steps.
-
-4. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints.
-
-5. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
-
-6. **requesting-code-review** - Activates between tasks. Reviews against plan, reports issues by severity. Critical issues block progress.
-
-7. **finishing-a-development-branch** - Activates when tasks complete. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
-
-**The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions.
-
-## What's Inside
-
-### Skills Library
-
-**Testing**
-- **test-driven-development** - RED-GREEN-REFACTOR cycle (includes testing anti-patterns reference)
-
-**Debugging**
-- **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
-- **verification-before-completion** - Ensure it's actually fixed
-
-**Collaboration** 
-- **brainstorming** - Socratic design refinement
-- **writing-plans** - Detailed implementation plans
-- **executing-plans** - Batch execution with checkpoints
-- **dispatching-parallel-agents** - Concurrent subagent workflows
-- **requesting-code-review** - Pre-review checklist
-- **receiving-code-review** - Responding to feedback
-- **using-git-worktrees** - Parallel development branches
-- **finishing-a-development-branch** - Merge/PR decision workflow
-- **subagent-driven-development** - Fast iteration with two-stage review (spec compliance, then code quality)
-
-**Meta**
-- **writing-skills** - Create new skills following best practices (includes testing methodology)
-- **using-superpowers** - Introduction to the skills system
-
-## Philosophy
-
-- **Test-Driven Development** - Write tests first, always
-- **Systematic over ad-hoc** - Process over guessing
-- **Complexity reduction** - Simplicity as primary goal
-- **Evidence over claims** - Verify before declaring success
-
-Read more: [Superpowers for Claude Code](https://blog.fsck.com/2025/10/09/superpowers/)
-
-## Contributing
-
-Skills live directly in this repository. To contribute:
-
-1. Fork the repository
-2. Create a branch for your skill
-3. Follow the `writing-skills` skill for creating and testing new skills
-4. Submit a PR
-
-See `skills/writing-skills/SKILL.md` for the complete guide.
-
-## Updating
-
-Skills update automatically when you update the plugin:
-
-```bash
-/plugin update superpowers
-```
+- **Original repo**: https://github.com/obra/superpowers
+- **Discord**: [Join](https://discord.gg/Jd8Vphy9jq) the Superpowers community
+- **Blog post**: [Superpowers for Claude Code](https://blog.fsck.com/2025/10/09/superpowers/)
 
 ## License
 
-MIT License - see LICENSE file for details
-
-## Community
-
-Superpowers is built by [Jesse Vincent](https://blog.fsck.com) and the rest of the folks at [Prime Radiant](https://primeradiant.com).
-
-- **Discord**: [Join us](https://discord.gg/Jd8Vphy9jq) for community support, questions, and sharing what you're building with Superpowers
-- **Issues**: https://github.com/obra/superpowers/issues
-- **Release announcements**: [Sign up](https://primeradiant.com/superpowers/) to get notified about new versions
+MIT License — see LICENSE file for details.
