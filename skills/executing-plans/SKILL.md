@@ -7,31 +7,63 @@ description: Use when you have a written implementation plan to execute in a sep
 
 ## Overview
 
-Load plan, review critically, execute all tasks, report when complete.
+Load task beads from beads, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
 **Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use superpowers:subagent-driven-development instead of this skill.
 
+## Beads Requirement
+
+Before starting, verify beads is available:
+
+```bash
+which bd && bd --version
+```
+
+**If `bd` is not found:** Stop. Tell your human partner: "This plugin requires beads (`bd`) to be installed. See https://github.com/gastownhall/beads for installation instructions."
+
+**If no beads database is detected** (no `.beads/` directory and no `BEADS_DIR` environment variable): Ask your human partner: "Beads is installed but not initialized in this project. Run `bd init` to set up?" Wait for confirmation before running `bd init`.
+
 ## The Process
 
-### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+### Step 1: Load and Review Tasks
+
+1. Receive the root bead ID from writing-plans
+2. Read the spec: `bd show <root-id> --json`
+3. List all task beads: `bd ready --parent <root-id> --json`
+4. Read each task to understand the full plan: `bd show <task-id> --json`
+5. Review critically — identify any questions or concerns about the tasks
+6. If concerns: Raise them with your human partner before starting
+7. If no concerns: Proceed to execution
 
 ### Step 2: Execute Tasks
 
-For each task:
-1. Mark as in_progress
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. Mark as completed
+Loop until `bd ready --parent <root-id> --json` returns no tasks:
+
+1. `bd ready --parent <root-id> --json` — get next unblocked task
+2. `bd show <task-id> --json` — read task content (steps, code, verification commands)
+3. `bd update <task-id> --claim` — mark in_progress (atomic assignment)
+4. Execute each step from the task body
+5. After each step completes, post progress: `bd comments add <task-id> "Step N complete"`
+6. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
+7. Loop back to step 1
+
+Progress is visible in beads-ui in real time. Step-level progress persisted via comments enables recovery if execution is interrupted.
+
+### Resuming After Interruption
+
+If starting a new session to continue work on an existing feature:
+
+1. Find the root bead ID: glob `docs/beads/*-bd-*.md` — the bead ID is in the filename
+2. `bd ready --parent <root-id> --json` — see what tasks remain
+3. Check for in-progress tasks: if a task shows `in_progress`, read its comments to see which steps completed
+4. Resume from the next uncompleted step
 
 ### Step 3: Complete Development
 
 After all tasks complete and verified:
+- Pass the root bead ID to finishing-a-development-branch so it can close the epic and include the bead ID in commits.
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
@@ -40,7 +72,7 @@ After all tasks complete and verified:
 
 **STOP executing immediately when:**
 - Hit a blocker (missing dependency, test fails, instruction unclear)
-- Plan has critical gaps preventing starting
+- Task bead has critical gaps preventing starting
 - You don't understand an instruction
 - Verification fails repeatedly
 
@@ -49,16 +81,16 @@ After all tasks complete and verified:
 ## When to Revisit Earlier Steps
 
 **Return to Review (Step 1) when:**
-- Partner updates the plan based on your feedback
+- Partner updates the task beads based on your feedback
 - Fundamental approach needs rethinking
 
 **Don't force through blockers** - stop and ask.
 
 ## Remember
-- Review plan critically first
-- Follow plan steps exactly
+- Review tasks critically first
+- Follow task steps exactly
 - Don't skip verifications
-- Reference skills when plan says to
+- Reference skills when task says to
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
 
@@ -66,5 +98,5 @@ After all tasks complete and verified:
 
 **Required workflow skills:**
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers:writing-plans** - Creates the plan this skill executes
+- **superpowers:writing-plans** - Creates the task beads this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
