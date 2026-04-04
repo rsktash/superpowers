@@ -13,33 +13,15 @@ Start by understanding the current project context, then ask questions one at a 
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
 
-## Beads Requirement
+<HARD-GATE>
+## Step 0: Verify beads (MUST complete before ANY other action)
 
-Before starting, verify beads is available:
+Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → offer to install: `npm install -g @beads/bd` and STOP. Do NOT proceed to any checklist item. Do NOT launch parallel work. Do NOT explore the codebase.
 
-```bash
-which bd && bd --version
-```
+If beads is available but no `.beads/` directory exists → ask user: "Run `bd init` to set up beads in this project?" and WAIT.
 
-**If `bd` is not found:** Stop. Tell your human partner that beads is required and offer install options:
-
-```bash
-# npm (recommended)
-npm install -g @beads/bd
-
-# Homebrew
-brew install beads
-
-# Go
-go install github.com/steveyegge/beads/cmd/bd@latest
-
-# Install script
-curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
-```
-
-After installation, run `bd init` in the project directory to initialize the beads database.
-
-**If no beads database is detected** (no `.beads/` directory and no `BEADS_DIR` environment variable): Ask your human partner: "Beads is installed but not initialized in this project. Run `bd init` to set up?" Wait for confirmation before running `bd init`.
+Only after beads is available AND initialized → proceed.
+</HARD-GATE>
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
@@ -140,7 +122,7 @@ digraph brainstorming {
   ```bash
   echo '<spec markdown>' | bd create "Feature: <title>" -t epic -p 1 --stdin --json
   ```
-- Parse the JSON output to extract the bead ID (e.g., `bd-a3f8`). This ID anchors the entire feature lifecycle.
+- Parse the `id` field from the JSON output. Use the actual ID as-is — do not assume a specific format. This ID anchors the entire feature lifecycle.
 - Write a summary file for git searchability:
   - Glob `docs/beads/YYYY-MM-DD-*.md` (today's date) to find the next daily increment
   - Write to `docs/beads/{date}-{incr}-{bd-id}-{short-title}.md`

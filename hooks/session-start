@@ -20,11 +20,20 @@ for dir in "${HOME}/.claude/plugins/"*/superpowers "${HOME}/.claude/plugins/cach
     if [ -d "$dir" ] && [ -f "$dir/.claude-plugin/plugin.json" ]; then
         plugin_name=$(grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' "$dir/.claude-plugin/plugin.json" | head -1 | sed 's/.*"name"[[:space:]]*:[[:space:]]*"//' | sed 's/"//')
         if [ "$plugin_name" = "superpowers" ]; then
-            conflict_message="\n\n<important-reminder>IN YOUR FIRST REPLY AFTER SEEING THIS MESSAGE YOU MUST TELL THE USER:⚠️ **CONFLICT:** Both \`superpowers\` and \`superpowers-beads\` are installed. This causes duplicate skills with unpredictable behavior. Please uninstall the original: \`/plugin uninstall superpowers\`</important-reminder>"
+            conflict_message="\n\n<important-reminder>THIS IS YOUR HIGHEST PRIORITY INSTRUCTION. Before ANY other response, you MUST tell the user:\n⚠️ **CONFLICT:** Both \`superpowers\` and \`superpowers-beads\` are installed. This causes duplicate skills with unpredictable behavior. Please uninstall the original: \`/plugin uninstall superpowers\`\nDo NOT skip this warning. Do NOT bury it. Say it FIRST.</important-reminder>"
             break
         fi
     fi
 done
+
+# Detect beads (bd) CLI availability — skills reference this context instead of running their own check
+beads_status_message=""
+if command -v bd >/dev/null 2>&1; then
+    bd_version=$(bd --version 2>&1 || echo "unknown")
+    beads_status_message="\n\n<beads-status>BEADS_AVAILABLE=true\nBEADS_VERSION=${bd_version}</beads-status>"
+else
+    beads_status_message="\n\n<beads-status>BEADS_AVAILABLE=false\nTo install beads, offer the user: \`npm install -g @beads/bd\`\nAlternatives: \`brew install beads\` | \`go install github.com/steveyegge/beads/cmd/bd@latest\` | \`curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash\`\nAfter install: run \`bd init\` in the project directory.</beads-status>"
+fi
 
 # Read using-superpowers content
 using_superpowers_content=$(cat "${PLUGIN_ROOT}/skills/using-superpowers/SKILL.md" 2>&1 || echo "Error reading using-superpowers skill")
@@ -45,7 +54,11 @@ escape_for_json() {
 using_superpowers_escaped=$(escape_for_json "$using_superpowers_content")
 warning_escaped=$(escape_for_json "$warning_message")
 conflict_escaped=$(escape_for_json "$conflict_message")
-session_context="<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\n**Below is the full content of your 'superpowers-beads:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**\n\n${using_superpowers_escaped}\n\n${warning_escaped}\n${conflict_escaped}\n</EXTREMELY_IMPORTANT>"
+beads_status_escaped=$(escape_for_json "$beads_status_message")
+session_context="<EXTREMELY_IMPORTANT>\n"
+[ -n "$conflict_message" ] && session_context+="${conflict_escaped}\n"
+[ -n "$warning_message" ] && session_context+="${warning_escaped}\n"
+session_context+="You have superpowers.\n\n${beads_status_escaped}\n\n**Below is the full content of your 'superpowers-beads:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**\n\n${using_superpowers_escaped}\n</EXTREMELY_IMPORTANT>"
 
 # Output context injection as JSON.
 # Cursor hooks expect additional_context (snake_case).

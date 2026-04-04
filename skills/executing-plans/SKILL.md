@@ -11,35 +11,15 @@ Load task beads from beads, review critically, execute all tasks, report when co
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-**Note:** If your human partner prefers subagent-driven execution, use superpowers:subagent-driven-development instead of this skill.
+<HARD-GATE>
+## Step 0: Verify beads (MUST complete before ANY other action)
 
-## Beads Requirement
+Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → offer to install: `npm install -g @beads/bd` and STOP. Do NOT proceed. Do NOT launch parallel work.
 
-Before starting, verify beads is available:
+If beads is available but no `.beads/` directory exists → ask user: "Run `bd init` to set up beads in this project?" and WAIT.
 
-```bash
-which bd && bd --version
-```
-
-**If `bd` is not found:** Stop. Tell your human partner that beads is required and offer install options:
-
-```bash
-# npm (recommended)
-npm install -g @beads/bd
-
-# Homebrew
-brew install beads
-
-# Go
-go install github.com/steveyegge/beads/cmd/bd@latest
-
-# Install script
-curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
-```
-
-After installation, run `bd init` in the project directory to initialize the beads database.
-
-**If no beads database is detected** (no `.beads/` directory and no `BEADS_DIR` environment variable): Ask your human partner: "Beads is installed but not initialized in this project. Run `bd init` to set up?" Wait for confirmation before running `bd init`.
+Only after beads is available AND initialized → proceed.
+</HARD-GATE>
 
 ## The Process
 
