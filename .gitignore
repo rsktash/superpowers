@@ -10,3 +10,9 @@ triage/
 .dolt/
 *.db
 .beads-credential-key
+
+# Vendor binaries and dependencies (installed by scripts/install-deps.sh)
+vendor/bin/
+vendor/node_modules/
+vendor/package.json
+vendor/package-lock.json
