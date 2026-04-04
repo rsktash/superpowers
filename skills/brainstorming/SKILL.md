@@ -13,6 +13,18 @@ Start by understanding the current project context, then ask questions one at a 
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
 
+## Beads Requirement
+
+Before starting, verify beads is available:
+
+```bash
+which bd && bd --version
+```
+
+**If `bd` is not found:** Stop. Tell your human partner: "This plugin requires beads (`bd`) to be installed. See https://github.com/gastownhall/beads for installation instructions."
+
+**If no beads database is detected** (no `.beads/` directory and no `BEADS_DIR` environment variable): Ask your human partner: "Beads is installed but not initialized in this project. Run `bd init` to set up?" Wait for confirmation before running `bd init`.
+
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
 Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
@@ -26,7 +38,7 @@ You MUST create a task for each of these items and complete them in order:
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+6. **Create spec bead** — store spec in beads via `bd create` and write summary file to `docs/beads/`
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews written spec** — ask user to review the spec file before proceeding
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
@@ -106,15 +118,27 @@ digraph brainstorming {
 
 ## After the Design
 
-**Documentation:**
+**Storage:**
 
-- Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-  - (User preferences for spec location override this default)
+- Create a root epic bead with the validated design:
+  ```bash
+  echo '<spec markdown>' | bd create "Feature: <title>" -t epic -p 1 --stdin --json
+  ```
+- Parse the JSON output to extract the bead ID (e.g., `bd-a3f8`). This ID anchors the entire feature lifecycle.
+- Write a summary file for git searchability:
+  - Glob `docs/beads/YYYY-MM-DD-*.md` (today's date) to find the next daily increment
+  - Write to `docs/beads/{date}-{incr}-{bd-id}-{short-title}.md`
+    - `{date}`: today in `YYYY-MM-DD` format
+    - `{incr}`: three-digit zero-padded counter (`001`, `002`, `003`)
+    - `{bd-id}`: the root bead ID
+    - `{short-title}`: slugified feature name
+  - Contents: one-paragraph summary, key design decisions, acceptance criteria
+  - This file is an **immutable snapshot** — written once, never updated. The bead is the source of truth.
+- Commit the summary file to git
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document to git
 
 **Spec Self-Review:**
-After writing the spec document, look at it with fresh eyes:
+After creating the spec bead, read it back via `bd show <bead-id> --json` and look at it with fresh eyes:
 
 1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
@@ -124,15 +148,16 @@ After writing the spec document, look at it with fresh eyes:
 Fix any issues inline. No need to re-review — just fix and move on.
 
 **User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+After the spec review loop passes, ask the user to review the spec before proceeding:
 
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+> "Spec stored in beads as `<bead-id>` and summary committed to `<summary-file-path>`. Run `bd show <bead-id>` to review the full spec. Let me know if you want to make any changes before we start writing the implementation plan."
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+Wait for the user's response. If they request changes, update the bead and re-run the spec review loop. Only proceed once the user approves.
 
 **Implementation:**
 
 - Invoke the writing-plans skill to create a detailed implementation plan
+- Pass the root bead ID to writing-plans (not a file path)
 - Do NOT invoke any other skill. writing-plans is the next step.
 
 ## Key Principles
