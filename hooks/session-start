@@ -26,13 +26,69 @@ for dir in "${HOME}/.claude/plugins/"*/superpowers "${HOME}/.claude/plugins/cach
     fi
 done
 
-# Detect beads (bd) CLI availability — skills reference this context instead of running their own check
+# --- Beads dependency resolution ---
+# Priority: global install → vendor/bin/ → auto-install via scripts/install-deps.sh
+VENDOR_BIN="${PLUGIN_ROOT}/vendor/bin"
+
+resolve_bd() {
+  if command -v bd >/dev/null 2>&1; then
+    echo "global"
+    return 0
+  elif [ -x "${VENDOR_BIN}/bd" ]; then
+    echo "vendor"
+    return 0
+  else
+    # Attempt auto-install (silent, non-blocking)
+    if [ -x "${PLUGIN_ROOT}/scripts/install-deps.sh" ]; then
+      "${PLUGIN_ROOT}/scripts/install-deps.sh" >/dev/null 2>&1 || true
+      if [ -x "${VENDOR_BIN}/bd" ]; then
+        echo "vendor"
+        return 0
+      fi
+    fi
+    echo "missing"
+    return 1
+  fi
+}
+
+resolve_bdui() {
+  if command -v bdui >/dev/null 2>&1; then
+    echo "global"
+    return 0
+  elif [ -x "${VENDOR_BIN}/bdui" ] || [ -L "${VENDOR_BIN}/bdui" ]; then
+    echo "vendor"
+    return 0
+  else
+    echo "missing"
+    return 1
+  fi
+}
+
+bd_source=$(resolve_bd || true)
+bdui_source=$(resolve_bdui || true)
+
+# Inject vendor/bin into PATH via CLAUDE_ENV_FILE if needed
+if [ "$bd_source" = "vendor" ] || [ "$bdui_source" = "vendor" ]; then
+  if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+    echo "export PATH=\"${VENDOR_BIN}:\$PATH\"" >> "$CLAUDE_ENV_FILE"
+  fi
+fi
+
+# Build status messages
 beads_status_message=""
-if command -v bd >/dev/null 2>&1; then
-    bd_version=$(bd --version 2>&1 || echo "unknown")
-    beads_status_message="\n\n<beads-status>BEADS_AVAILABLE=true\nBEADS_VERSION=${bd_version}</beads-status>"
+if [ "$bd_source" != "missing" ]; then
+  bd_bin=$( [ "$bd_source" = "vendor" ] && echo "${VENDOR_BIN}/bd" || echo "$(command -v bd)" )
+  bd_version=$($bd_bin --version 2>&1 || echo "unknown")
+  beads_status_message="\n\n<beads-status>BEADS_AVAILABLE=true\nBEADS_VERSION=${bd_version}\nBEADS_SOURCE=${bd_source}</beads-status>"
 else
-    beads_status_message="\n\n<beads-status>BEADS_AVAILABLE=false\nTo install beads, offer the user: \`npm install -g @beads/bd\`\nAlternatives: \`brew install beads\` | \`go install github.com/steveyegge/beads/cmd/bd@latest\` | \`curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash\`\nAfter install: run \`bd init\` in the project directory.</beads-status>"
+  beads_status_message="\n\n<beads-status>BEADS_AVAILABLE=false\nAuto-install failed. Manual install: \`npm install -g @beads/bd\` or \`brew install beads\`\nAfter install: run \`bd init\` in the project directory.</beads-status>"
+fi
+
+# Add bdui status
+if [ "$bdui_source" != "missing" ]; then
+  beads_status_message="${beads_status_message}\n<beads-ui-status>BDUI_AVAILABLE=true\nBDUI_SOURCE=${bdui_source}</beads-ui-status>"
+else
+  beads_status_message="${beads_status_message}\n<beads-ui-status>BDUI_AVAILABLE=false</beads-ui-status>"
 fi
 
 # Read using-superpowers content
