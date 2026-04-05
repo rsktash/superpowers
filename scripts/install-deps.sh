@@ -102,7 +102,7 @@ if [ "$bd_needs_install" = true ]; then
   fi
 fi
 
-# --- Install beads-ui (embedded fork) ---
+# --- Install beads-ui (embedded) ---
 
 BEADSUI_DIR="${PLUGIN_ROOT}/vendor/beads-ui"
 
@@ -112,45 +112,34 @@ install_bdui() {
     return 1
   fi
 
-  # Install node_modules if missing
-  if [ ! -d "${BEADSUI_DIR}/node_modules" ]; then
-    echo "Installing beads-ui dependencies..."
-    if ! (cd "$BEADSUI_DIR" && npm install --no-audit --no-fund 2>&1); then
-      echo "ERROR: npm install failed for beads-ui" >&2
-      return 1
-    fi
+  echo "Installing beads-ui dependencies..."
+  if ! (cd "$BEADSUI_DIR" && npm install --no-audit --no-fund 2>&1); then
+    echo "ERROR: npm install failed for beads-ui" >&2
+    return 1
   fi
 
-  # Build client if dist/ is missing or source is newer than dist
-  local needs_build=false
-  if [ ! -d "${BEADSUI_DIR}/dist" ]; then
-    needs_build=true
-  elif [ -n "$(find "${BEADSUI_DIR}/client/src" -newer "${BEADSUI_DIR}/dist/index.html" -type f 2>/dev/null | head -1)" ]; then
-    needs_build=true
+  echo "Building beads-ui client..."
+  if ! (cd "$BEADSUI_DIR" && npx vite build --config client/vite.config.ts 2>&1); then
+    echo "ERROR: vite build failed for beads-ui" >&2
+    return 1
   fi
 
-  if [ "$needs_build" = true ]; then
-    echo "Building beads-ui client..."
-    if ! (cd "$BEADSUI_DIR" && npx vite build --config client/vite.config.ts 2>&1); then
-      echo "ERROR: vite build failed for beads-ui" >&2
-      return 1
-    fi
+  # Add bdui script to the project's package.json
+  local project_dir="${PROJECT_DIR:-$(pwd)}"
+  if [ -f "${project_dir}/package.json" ] && command -v npm >/dev/null 2>&1; then
+    (cd "$project_dir" && npm pkg set scripts.bdui="node ${BEADSUI_DIR}/bin/bdui" 2>&1) || true
   fi
 
-  echo "beads-ui embedded fork ready at ${BEADSUI_DIR}"
+  echo "beads-ui ready at ${BEADSUI_DIR}"
 }
 
-# Check if beads-ui is already built
-bdui_needs_install=true
-if [ -x "${BEADSUI_DIR}/bin/bdui" ] && [ -d "${BEADSUI_DIR}/node_modules" ] && [ -d "${BEADSUI_DIR}/dist" ]; then
-  echo "beads-ui already built in vendor/beads-ui/"
-  bdui_needs_install=false
-fi
-
-if [ "$bdui_needs_install" = true ]; then
+# Always install if node_modules or dist are missing
+if [ ! -d "${BEADSUI_DIR}/node_modules" ] || [ ! -d "${BEADSUI_DIR}/dist" ]; then
   if ! install_bdui; then
-    echo "WARN: Failed to build beads-ui" >&2
+    echo "WARN: Failed to install beads-ui" >&2
   fi
+else
+  echo "beads-ui already installed in vendor/beads-ui/"
 fi
 
 exit 0

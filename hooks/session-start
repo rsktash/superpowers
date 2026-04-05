@@ -45,10 +45,6 @@ check_bd() {
 check_bdui() {
   if command -v bdui >/dev/null 2>&1; then
     echo "global"
-  elif [ -x "${PLUGIN_ROOT}/vendor/beads-ui/bin/bdui" ]; then
-    echo "vendor"
-  elif [ -L "${VENDOR_BIN}/bdui" ] && [ -e "${VENDOR_BIN}/bdui" ] && [ -x "${VENDOR_BIN}/bdui" ]; then
-    echo "vendor"
   else
     echo "missing"
   fi
@@ -61,7 +57,7 @@ bdui_source=$(check_bdui)
 # If either is missing, run the installer once, then re-check both
 if [ "$bd_source" = "missing" ] || [ "$bdui_source" = "missing" ]; then
   if [ -x "${PLUGIN_ROOT}/scripts/install-deps.sh" ]; then
-    "${PLUGIN_ROOT}/scripts/install-deps.sh" >/dev/null 2>&1 || true
+    PROJECT_DIR="$(pwd)" "${PLUGIN_ROOT}/scripts/install-deps.sh" >/dev/null 2>&1 || true
   fi
   # Re-check both after install (picks up vendor installs AND npm global fallback)
   bd_source=$(check_bd)
