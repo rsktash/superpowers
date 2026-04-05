@@ -104,9 +104,13 @@ function MetadataSidebar({
               <a
                 key={dep.id}
                 href={`#/detail/${dep.id}`}
-                className="block text-xs text-blue-600 hover:underline"
+                className="flex items-center gap-2 text-xs hover:bg-stone-100 rounded px-1 py-1 -mx-1 transition-colors"
               >
-                <StatusBadge status={dep.status} /> {dep.id}
+                <StatusBadge status={dep.status} />
+                <span className="font-mono text-stone-400 shrink-0">{dep.id}</span>
+                {dep.title && (
+                  <span className="text-stone-700 truncate">{dep.title}</span>
+                )}
               </a>
             ))}
           </div>
@@ -122,9 +126,13 @@ function MetadataSidebar({
               <a
                 key={dep.id}
                 href={`#/detail/${dep.id}`}
-                className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                className="flex items-center gap-2 text-xs hover:bg-stone-100 rounded px-1 py-1 -mx-1 transition-colors"
               >
-                <StatusBadge status={dep.status} /> {dep.id}
+                <StatusBadge status={dep.status} />
+                <span className="font-mono text-stone-400 shrink-0">{dep.id}</span>
+                {dep.title && (
+                  <span className="text-stone-700 truncate">{dep.title}</span>
+                )}
               </a>
             ))}
           </div>
