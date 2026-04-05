@@ -94,28 +94,31 @@ function MetadataSidebar({
           </a>
         </div>
       )}
-      {issue.dependencies && issue.dependencies.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-            Dependencies
-          </h3>
-          <div className="space-y-1">
-            {issue.dependencies.map((dep) => (
-              <a
-                key={dep.id}
-                href={`#/detail/${dep.id}`}
-                className="flex items-center gap-2 text-xs hover:bg-stone-100 rounded px-1 py-1 -mx-1 transition-colors"
-              >
-                <StatusBadge status={dep.status} />
-                <span className="font-mono text-stone-400 shrink-0">{dep.id}</span>
-                {dep.title && (
-                  <span className="text-stone-700 truncate">{dep.title}</span>
-                )}
-              </a>
-            ))}
+      {(() => {
+        // Filter to only "blocks" deps where this issue depends on another (not parent-child, which is shown as Children)
+        const blocksDeps = (issue.dependencies || []).filter(
+          (dep: any) => dep.type === "blocks" && dep.issue_id === issue.id
+        );
+        if (blocksDeps.length === 0) return null;
+        return (
+          <div>
+            <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+              Blocked By
+            </h3>
+            <div className="space-y-1">
+              {blocksDeps.map((dep: any) => (
+                <a
+                  key={dep.depends_on_id}
+                  href={`#/detail/${dep.depends_on_id}`}
+                  className="block text-xs font-mono text-blue-600 hover:underline px-1 py-0.5"
+                >
+                  {dep.depends_on_id}
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
       {issue.dependents && issue.dependents.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
