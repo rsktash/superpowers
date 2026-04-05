@@ -126,12 +126,14 @@ function MetadataSidebar({
               <a
                 key={dep.id}
                 href={`#/detail/${dep.id}`}
-                className="flex items-center gap-2 text-xs hover:bg-stone-100 rounded px-1 py-1 -mx-1 transition-colors"
+                className="block text-xs hover:bg-stone-100 rounded px-1 py-1.5 -mx-1 transition-colors"
               >
-                <StatusBadge status={dep.status} />
-                <span className="font-mono text-stone-400 shrink-0">{dep.id}</span>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <StatusBadge status={dep.status} />
+                  <span className="font-mono text-stone-400">{dep.id}</span>
+                </div>
                 {dep.title && (
-                  <span className="text-stone-700 truncate">{dep.title}</span>
+                  <p className="text-stone-700 text-xs leading-snug pl-0.5 line-clamp-2">{dep.title}</p>
                 )}
               </a>
             ))}
