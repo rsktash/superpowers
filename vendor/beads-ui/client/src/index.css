@@ -81,3 +81,30 @@
   }
   */
 }
+
+/* IssueCard styles — base and hover kept in CSS to avoid inline specificity conflicts */
+.issue-card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
+  transition: box-shadow 100ms ease, background 100ms ease;
+}
+
+.issue-card:hover {
+  box-shadow: var(--shadow-medium);
+  background: var(--bg-elevated);
+}
+
+.issue-card--dimmed {
+  opacity: 0.6;
+}
+
+.issue-card__handle {
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+.issue-card:hover .issue-card__handle {
+  opacity: 0.6;
+}
