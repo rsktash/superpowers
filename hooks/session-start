@@ -45,6 +45,8 @@ check_bd() {
 check_bdui() {
   if command -v bdui >/dev/null 2>&1; then
     echo "global"
+  elif [ -x "${PLUGIN_ROOT}/vendor/beads-ui/bin/bdui" ]; then
+    echo "vendor"
   elif [ -L "${VENDOR_BIN}/bdui" ] && [ -e "${VENDOR_BIN}/bdui" ] && [ -x "${VENDOR_BIN}/bdui" ]; then
     echo "vendor"
   else
@@ -66,10 +68,10 @@ if [ "$bd_source" = "missing" ] || [ "$bdui_source" = "missing" ]; then
   bdui_source=$(check_bdui)
 fi
 
-# Inject vendor/bin into PATH via CLAUDE_ENV_FILE if needed
+# Inject vendor paths into PATH via CLAUDE_ENV_FILE if needed
 if [ "$bd_source" = "vendor" ] || [ "$bdui_source" = "vendor" ]; then
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-    echo "export PATH=\"${VENDOR_BIN}:\$PATH\"" >> "$CLAUDE_ENV_FILE"
+    echo "export PATH=\"${PLUGIN_ROOT}/vendor/beads-ui/bin:${VENDOR_BIN}:\$PATH\"" >> "$CLAUDE_ENV_FILE"
   fi
 fi
 

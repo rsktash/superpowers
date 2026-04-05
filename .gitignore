@@ -16,3 +16,7 @@ vendor/bin/
 vendor/node_modules/
 vendor/package.json
 vendor/package-lock.json
+
+# beads-ui embedded fork — build artifacts
+vendor/beads-ui/node_modules/
+vendor/beads-ui/dist/

@@ -102,50 +102,47 @@ if [ "$bd_needs_install" = true ]; then
   fi
 fi
 
-# --- Install beads-ui ---
+# --- Install beads-ui (embedded fork) ---
+
+BEADSUI_DIR="${PLUGIN_ROOT}/vendor/beads-ui"
 
 install_bdui() {
-  echo "Installing beads-ui v${BDUI_VERSION}..."
-
-  # Create a minimal package.json in vendor/ for npm install
-  cat > "${VENDOR_DIR}/package.json" <<PKGJSON
-{
-  "name": "superpowers-beads-vendor",
-  "private": true,
-  "dependencies": {
-    "beads-ui": "${BDUI_VERSION}"
-  }
-}
-PKGJSON
-
-  if ! (cd "$VENDOR_DIR" && npm install --no-fund --no-audit 2>&1); then
-    echo "ERROR: npm install failed for beads-ui" >&2
+  if [ ! -d "$BEADSUI_DIR" ]; then
+    echo "WARN: vendor/beads-ui/ not found — skipping" >&2
     return 1
   fi
 
-  # Symlink bdui to vendor/bin/
-  if [ -f "${VENDOR_DIR}/node_modules/.bin/bdui" ]; then
-    ln -sf "../node_modules/.bin/bdui" "${BIN_DIR}/bdui"
-    echo "Installed beads-ui v${BDUI_VERSION}, symlinked to ${BIN_DIR}/bdui"
-  else
-    echo "ERROR: bdui binary not found after npm install" >&2
-    return 1
+  # Install node_modules if missing
+  if [ ! -d "${BEADSUI_DIR}/node_modules" ]; then
+    echo "Installing beads-ui dependencies..."
+    if ! (cd "$BEADSUI_DIR" && npm install --no-audit --no-fund 2>&1); then
+      echo "ERROR: npm install failed for beads-ui" >&2
+      return 1
+    fi
   fi
+
+  # Build client if dist/ is missing
+  if [ ! -d "${BEADSUI_DIR}/dist" ]; then
+    echo "Building beads-ui client..."
+    if ! (cd "$BEADSUI_DIR" && npx vite build --config client/vite.config.ts 2>&1); then
+      echo "ERROR: vite build failed for beads-ui" >&2
+      return 1
+    fi
+  fi
+
+  echo "beads-ui embedded fork ready at ${BEADSUI_DIR}"
 }
 
-# Check if bdui is already installed at correct version
+# Check if beads-ui is already built
 bdui_needs_install=true
-if [ -L "${BIN_DIR}/bdui" ] && [ -e "${BIN_DIR}/bdui" ] && [ -x "${BIN_DIR}/bdui" ]; then
-  installed_bdui=$("${BIN_DIR}/bdui" --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "")
-  if [ "$installed_bdui" = "$BDUI_VERSION" ]; then
-    echo "beads-ui v${BDUI_VERSION} already installed in vendor/bin/"
-    bdui_needs_install=false
-  fi
+if [ -x "${BEADSUI_DIR}/bin/bdui" ] && [ -d "${BEADSUI_DIR}/node_modules" ] && [ -d "${BEADSUI_DIR}/dist" ]; then
+  echo "beads-ui already built in vendor/beads-ui/"
+  bdui_needs_install=false
 fi
 
 if [ "$bdui_needs_install" = true ]; then
   if ! install_bdui; then
-    echo "WARN: Failed to install beads-ui to vendor/bin/" >&2
+    echo "WARN: Failed to build beads-ui" >&2
   fi
 fi
 
