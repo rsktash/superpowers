@@ -3,10 +3,12 @@ import { Layout } from "./components/Layout";
 import { Board } from "./views/Board";
 import { List } from "./views/List";
 import { Detail } from "./views/Detail";
+import { SearchDialog } from "./components/SearchDialog";
 
 export function App() {
   return (
     <WsProvider>
+      <SearchDialog />
       <Layout>
         {(route) => {
           if (route.startsWith("#/detail/")) {
