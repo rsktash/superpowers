@@ -36,6 +36,7 @@ Only after beads is available AND initialized → proceed.
 - **`bd show <id> --json`** works on any bead regardless of status. This is the reliable way to inspect any bead.
 - **`bd close`** on the last open child may **auto-close the parent epic**. This is expected behavior.
 - **`bd update` body from stdin:** use `bd update <id> --stdin`, NOT `--body --stdin`. The `--body` flag does not exist — it gets parsed as an argument and silently corrupts the description.
+- **`bd create` body from file:** use `bd create --body-file <path>` or `--stdin`. Write to `.beads/.scratch/` first so the Edit tool shows diffs for user review.
 
 ## Scope Check
 
@@ -65,9 +66,14 @@ This structure informs the task decomposition. Each task should produce self-con
 
 The root epic bead (created by brainstorming) already contains the spec. Plan tasks are created as child beads:
 
-For each task, create a bead as a child of the root epic:
+For each task, write the body to a scratch file, then create the bead:
 ```bash
-echo '<task markdown>' | bd create "Task N: <name>" -p 1 --parent <root-bead-id> --stdin --json
+# Write task body to scratch file (Edit tool shows diff for user review)
+# → .beads/.scratch/task-N.md
+# Create bead from file:
+bd create "Task N: <name>" -p 1 --parent <root-bead-id> --body-file .beads/.scratch/task-N.md --json
+# Clean up:
+rm .beads/.scratch/task-N.md
 ```
 
 This produces hierarchical IDs (e.g., `superpowers-a3f8.1`, `.2`, `.3`).
