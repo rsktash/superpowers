@@ -1,35 +1,146 @@
+import { useMemo, useState, useRef, useEffect } from "react";
 import { useSubscription } from "../hooks/use-subscription";
 import { IssueCard } from "../components/IssueCard";
-import type { Issue } from "../lib/types";
+import type { SubscriptionType } from "../lib/types";
+
+const COLUMN_PAGE_SIZE = 20;
+
+const STATUS_COLORS: Record<string, string> = {
+  open: "var(--status-open)",
+  in_progress: "var(--status-in-progress)",
+  blocked: "var(--status-blocked)",
+  closed: "var(--status-closed)",
+};
 
 function Column({
   title,
-  issues,
-  color,
+  subscriptionType,
+  statusKey,
   onCardClick,
+  isClosed = false,
 }: {
   title: string;
-  issues: Issue[];
-  color: string;
+  subscriptionType: SubscriptionType;
+  statusKey: string;
   onCardClick: (id: string) => void;
+  isClosed?: boolean;
 }) {
+  const [limit, setLimit] = useState(COLUMN_PAGE_SIZE);
+  const params = useMemo(() => ({ limit, offset: 0 }), [limit]);
+  const { issues, loading, total } = useSubscription(subscriptionType, params);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [hasOverflow, setHasOverflow] = useState(false);
+
+  const hasMore = total > issues.length;
+  const remaining = total - issues.length;
+  const dotColor = STATUS_COLORS[statusKey] ?? "var(--text-muted)";
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const check = () => setHasOverflow(el.scrollHeight > el.clientHeight);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [issues.length]);
+
   return (
-    <div className="flex-1 min-w-[280px] max-w-[360px]">
-      <div className="flex items-center gap-2 mb-3 px-1">
-        <div className={`w-2 h-2 rounded-full ${color}`} />
-        <h2 className="text-sm font-semibold text-stone-700">{title}</h2>
-        <span className="text-xs text-stone-400 ml-auto">{issues.length}</span>
+    <div
+      className="flex-1 min-w-[280px] max-w-[360px] flex flex-col"
+    >
+      {/* Column header */}
+      <div
+        className="flex items-center gap-2 px-1 pb-3 sticky top-0 z-10"
+        style={{
+          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          marginBottom: "var(--space-3)",
+          background: "var(--bg-base)",
+        }}
+      >
+        <div
+          className="rounded-full shrink-0"
+          style={{
+            width: "8px",
+            height: "8px",
+            backgroundColor: dotColor,
+          }}
+        />
+        <h2
+          className="text-sm font-semibold"
+          style={{ color: "var(--text-primary)" }}
+        >
+          {title}
+        </h2>
+        <span
+          className="text-xs px-1.5 py-0.5 rounded-full ml-auto"
+          style={{
+            backgroundColor: "rgba(0,0,0,0.05)",
+            color: "var(--text-muted)",
+            fontSize: "11px",
+          }}
+        >
+          {loading ? "\u2026" : isClosed && total > issues.length ? `${issues.length} / ${total}` : total}
+        </span>
       </div>
-      <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-120px)] pr-1">
+
+      {/* Card list */}
+      <div
+        ref={scrollRef}
+        className="space-y-2 overflow-y-auto flex-1 pr-1 relative"
+        style={{
+          maxHeight: "calc(100vh - 160px)",
+          maskImage: hasOverflow
+            ? "linear-gradient(to bottom, transparent 0px, black 8px, black calc(100% - 8px), transparent 100%)"
+            : undefined,
+          WebkitMaskImage: hasOverflow
+            ? "linear-gradient(to bottom, transparent 0px, black 8px, black calc(100% - 8px), transparent 100%)"
+            : undefined,
+        }}
+      >
+        {loading && issues.length === 0 && (
+          <div className="py-8 text-center">
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Loading\u2026
+            </p>
+          </div>
+        )}
+
+        {!loading && issues.length === 0 && (
+          <div
+            className="py-8 text-center rounded-lg"
+            style={{
+              border: "2px dashed var(--text-muted)",
+              opacity: 0.4,
+              borderRadius: "var(--radius-md)",
+            }}
+          >
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              No items
+            </p>
+          </div>
+        )}
+
         {issues.map((issue) => (
           <IssueCard
             key={issue.id}
             issue={issue}
             onClick={() => onCardClick(issue.id)}
+            dimmed={isClosed}
           />
         ))}
-        {issues.length === 0 && (
-          <p className="text-xs text-stone-400 text-center py-8">No issues</p>
+
+        {hasMore && (
+          <button
+            onClick={() => setLimit((l) => l + COLUMN_PAGE_SIZE)}
+            className="w-full text-xs py-2 hover:underline"
+            style={{
+              color: "var(--text-secondary)",
+              transition: "color 100ms ease",
+            }}
+          >
+            Show {remaining} more\u2026
+          </button>
         )}
       </div>
     </div>
@@ -37,48 +148,43 @@ function Column({
 }
 
 export function Board() {
-  const { issues: readyIssues, loading: l1 } = useSubscription("ready-issues");
-  const { issues: inProgressIssues, loading: l2 } = useSubscription("in-progress-issues");
-  const { issues: blockedIssues, loading: l3 } = useSubscription("blocked-issues");
-  const { issues: closedIssues, loading: l4 } = useSubscription("closed-issues");
-
-  const loading = l1 || l2 || l3 || l4;
-
   const navigateToDetail = (id: string) => {
     window.location.hash = `#/detail/${id}`;
   };
 
-  if (loading) {
-    return <div className="p-6 text-stone-400">Loading board...</div>;
-  }
-
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold text-stone-800 mb-6">Board</h1>
+    <div className="p-6" style={{ background: "var(--bg-base)" }}>
+      <h1
+        className="text-xl font-bold mb-6"
+        style={{ color: "var(--text-primary)" }}
+      >
+        Board
+      </h1>
       <div className="flex gap-4 overflow-x-auto">
         <Column
           title="Open"
-          issues={readyIssues}
-          color="bg-blue-500"
+          subscriptionType="ready-issues"
+          statusKey="open"
           onCardClick={navigateToDetail}
         />
         <Column
           title="In Progress"
-          issues={inProgressIssues}
-          color="bg-amber-500"
+          subscriptionType="in-progress-issues"
+          statusKey="in_progress"
           onCardClick={navigateToDetail}
         />
         <Column
           title="Blocked"
-          issues={blockedIssues}
-          color="bg-red-500"
+          subscriptionType="blocked-issues"
+          statusKey="blocked"
           onCardClick={navigateToDetail}
         />
         <Column
           title="Closed"
-          issues={closedIssues.slice(0, 50)}
-          color="bg-green-500"
+          subscriptionType="closed-issues"
+          statusKey="closed"
           onCardClick={navigateToDetail}
+          isClosed
         />
       </div>
     </div>
