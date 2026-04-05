@@ -27,7 +27,7 @@ Only after beads is available AND initialized → proceed.
 
 **Input:** Receives a root bead ID from the brainstorming skill. All tasks are created as beads under this root.
 
-**Storage:** Task beads are created via `bd create --json` and linked to the root via `bd dep add --type related`. Sequential task ordering uses `bd dep add` (default `blocks` type).
+**Storage:** Task beads are created via `bd create --parent <root-id> --json`, which gives them hierarchical IDs (e.g., `bd-a3f8.1`). Sequential task ordering uses `bd dep add` (default `blocks` type).
 
 ## Scope Check
 
@@ -57,11 +57,12 @@ This structure informs the task decomposition. Each task should produce self-con
 
 The root epic bead (created by brainstorming) already contains the spec. Plan tasks are created as child beads:
 
-For each task, create a bead and link it:
+For each task, create a bead as a child of the root epic:
 ```bash
-echo '<task markdown>' | bd create "Task N: <name>" -p 1 --stdin --json
-bd dep add <new-task-id> <root-bead-id> --type related
+echo '<task markdown>' | bd create "Task N: <name>" -p 1 --parent <root-bead-id> --stdin --json
 ```
+
+This produces hierarchical IDs (e.g., `superpowers-a3f8.1`, `.2`, `.3`).
 
 For sequential dependencies between tasks:
 ```bash
@@ -70,7 +71,7 @@ bd dep add <task-2-id> <task-1-id>
 
 Parse JSON output from `bd create --json` to extract the new bead ID.
 
-Note: The exact mechanism for hierarchical IDs (`bd-a3f8.1`) vs flat IDs needs to be determined via `bd create --help`. The dependency graph works regardless of ID scheme.
+**Important:** Use `--parent` to create the parent-child relationship. Do NOT use `bd dep add --type related` — that creates a dependency link but not a parent-child relationship, which breaks `bd children`, `bd epic status`, and the epics view in beads-ui.
 
 ## Task Structure
 
