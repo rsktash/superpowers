@@ -1,12 +1,14 @@
 import { WsProvider } from "./lib/ws-context";
 import { Layout } from "./components/Layout";
 import { Board } from "./views/Board";
+import { List } from "./views/List";
 
 export function App() {
   return (
     <WsProvider>
       <Layout>
         {(route) => {
+          if (route.startsWith("#/list")) return <List />;
           if (
             route.startsWith("#/board") ||
             route === "" ||
