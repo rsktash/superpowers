@@ -1,0 +1,240 @@
+import { useState } from "react";
+import { useSubscription } from "../hooks/use-subscription";
+import { useMutation } from "../hooks/use-mutation";
+import { StatusBadge } from "../components/StatusBadge";
+import { TypeBadge } from "../components/TypeBadge";
+import { SectionEditor } from "../components/SectionEditor";
+import type { Issue } from "../lib/types";
+
+function MetadataSidebar({
+  issue,
+  onUpdate,
+}: {
+  issue: Issue;
+  onUpdate: ReturnType<typeof useMutation>;
+}) {
+  return (
+    <aside className="w-72 shrink-0 border-l border-stone-200 p-4 space-y-4 bg-stone-50 overflow-y-auto">
+      <div>
+        <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+          Status
+        </h3>
+        <select
+          value={issue.status}
+          onChange={(e) =>
+            onUpdate.updateStatus(
+              issue.id,
+              e.target.value as "open" | "in_progress" | "closed",
+            )
+          }
+          className="w-full px-2 py-1 text-sm border border-stone-300 rounded bg-white"
+        >
+          <option value="open">Open</option>
+          <option value="in_progress">In Progress</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+          Priority
+        </h3>
+        <select
+          value={issue.priority}
+          onChange={(e) =>
+            onUpdate.updatePriority(issue.id, Number(e.target.value))
+          }
+          className="w-full px-2 py-1 text-sm border border-stone-300 rounded bg-white"
+        >
+          {[0, 1, 2, 3, 4].map((p) => (
+            <option key={p} value={p}>
+              P{p}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+          Type
+        </h3>
+        <TypeBadge type={issue.issue_type} />
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+          Assignee
+        </h3>
+        <p className="text-sm text-stone-700">
+          {issue.assignee || "Unassigned"}
+        </p>
+      </div>
+      {issue.labels && issue.labels.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+            Labels
+          </h3>
+          <div className="flex flex-wrap gap-1">
+            {issue.labels.map((l) => (
+              <span key={l} className="px-2 py-0.5 text-xs bg-stone-200 rounded">
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {issue.dependencies && issue.dependencies.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+            Dependencies
+          </h3>
+          <div className="space-y-1">
+            {issue.dependencies.map((dep) => (
+              <a
+                key={dep.id}
+                href={`#/detail/${dep.id}`}
+                className="block text-xs text-blue-600 hover:underline"
+              >
+                <StatusBadge status={dep.status} /> {dep.id}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+      {issue.dependents && issue.dependents.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+            Children / Dependents
+          </h3>
+          <div className="space-y-1">
+            {issue.dependents.map((dep) => (
+              <a
+                key={dep.id}
+                href={`#/detail/${dep.id}`}
+                className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+              >
+                <StatusBadge status={dep.status} /> {dep.id}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </aside>
+  );
+}
+
+function CommentsSection({ issueId }: { issueId: string }) {
+  const mutations = useMutation();
+  const [newComment, setNewComment] = useState("");
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    await mutations.addComment(issueId, newComment.trim());
+    setNewComment("");
+  };
+
+  return (
+    <div>
+      <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+        Comments
+      </h3>
+      <div className="flex gap-2">
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Add a comment... (Ctrl+Enter to submit)"
+          rows={3}
+          className="flex-1 p-2 text-sm border border-stone-300 rounded bg-white resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey))
+              handleAddComment();
+          }}
+        />
+      </div>
+      <button
+        onClick={handleAddComment}
+        className="mt-2 px-3 py-1 text-sm bg-stone-200 hover:bg-stone-300 rounded"
+      >
+        Add Comment
+      </button>
+    </div>
+  );
+}
+
+export function Detail({ issueId }: { issueId: string }) {
+  const { issues, loading } = useSubscription("issue-detail", { id: issueId });
+  const mutations = useMutation();
+  const issue = issues[0];
+
+  if (loading) return <div className="p-6 text-stone-400">Loading...</div>;
+  if (!issue)
+    return <div className="p-6 text-stone-400">Issue not found</div>;
+
+  return (
+    <div className="flex h-full">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Breadcrumbs */}
+        <div className="flex items-center gap-2 text-sm text-stone-400">
+          <a href="#/list" className="hover:text-stone-600">
+            List
+          </a>
+          <span>/</span>
+          <span className="font-mono">{issue.id}</span>
+        </div>
+
+        {/* Title */}
+        <h1 className="text-2xl font-bold text-stone-900">{issue.title}</h1>
+
+        {/* Description */}
+        <SectionEditor
+          label="Description"
+          value={issue.description || ""}
+          onSave={(v) =>
+            mutations.editText({
+              id: issue.id,
+              field: "description",
+              value: v,
+            })
+          }
+        />
+
+        {/* Acceptance Criteria */}
+        <SectionEditor
+          label="Acceptance Criteria"
+          value={issue.acceptance || ""}
+          placeholder="Add acceptance criteria..."
+          onSave={(v) =>
+            mutations.editText({
+              id: issue.id,
+              field: "acceptance",
+              value: v,
+            })
+          }
+        />
+
+        {/* Notes */}
+        <SectionEditor
+          label="Notes"
+          value={issue.notes || ""}
+          placeholder="Add notes..."
+          onSave={(v) =>
+            mutations.editText({ id: issue.id, field: "notes", value: v })
+          }
+        />
+
+        {/* Design */}
+        <SectionEditor
+          label="Design"
+          value={issue.design || ""}
+          placeholder="Add design notes..."
+          onSave={(v) =>
+            mutations.editText({ id: issue.id, field: "design", value: v })
+          }
+        />
+
+        {/* Comments */}
+        <CommentsSection issueId={issue.id} />
+      </div>
+
+      {/* Metadata sidebar */}
+      <MetadataSidebar issue={issue} onUpdate={mutations} />
+    </div>
+  );
+}

@@ -2,12 +2,17 @@ import { WsProvider } from "./lib/ws-context";
 import { Layout } from "./components/Layout";
 import { Board } from "./views/Board";
 import { List } from "./views/List";
+import { Detail } from "./views/Detail";
 
 export function App() {
   return (
     <WsProvider>
       <Layout>
         {(route) => {
+          if (route.startsWith("#/detail/")) {
+            const id = route.replace("#/detail/", "");
+            return <Detail key={id} issueId={id} />;
+          }
           if (route.startsWith("#/list")) return <List />;
           if (
             route.startsWith("#/board") ||
