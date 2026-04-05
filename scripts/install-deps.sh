@@ -102,44 +102,29 @@ if [ "$bd_needs_install" = true ]; then
   fi
 fi
 
-# --- Install beads-ui (embedded) ---
-
-BEADSUI_DIR="${PLUGIN_ROOT}/vendor/beads-ui"
+# --- Install beads-ui ---
 
 install_bdui() {
-  if [ ! -d "$BEADSUI_DIR" ]; then
-    echo "WARN: vendor/beads-ui/ not found — skipping" >&2
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "ERROR: npm not available" >&2
     return 1
   fi
 
-  echo "Installing beads-ui dependencies..."
-  if ! (cd "$BEADSUI_DIR" && npm install --no-audit --no-fund 2>&1); then
-    echo "ERROR: npm install failed for beads-ui" >&2
+  echo "Installing @rsktash/beads-ui@${BDUI_VERSION} globally..."
+  if npm install -g "@rsktash/beads-ui@${BDUI_VERSION}" 2>&1; then
+    echo "Installed @rsktash/beads-ui@${BDUI_VERSION} via npm -g"
+  else
+    echo "ERROR: npm install -g @rsktash/beads-ui failed" >&2
     return 1
   fi
-
-  echo "Building beads-ui client..."
-  if ! (cd "$BEADSUI_DIR" && npx vite build --config client/vite.config.ts 2>&1); then
-    echo "ERROR: vite build failed for beads-ui" >&2
-    return 1
-  fi
-
-  # Add bdui script to the project's package.json
-  local project_dir="${PROJECT_DIR:-$(pwd)}"
-  if [ -f "${project_dir}/package.json" ] && command -v npm >/dev/null 2>&1; then
-    (cd "$project_dir" && npm pkg set scripts.bdui="node ${BEADSUI_DIR}/bin/bdui" 2>&1) || true
-  fi
-
-  echo "beads-ui ready at ${BEADSUI_DIR}"
 }
 
-# Always install if node_modules or dist are missing
-if [ ! -d "${BEADSUI_DIR}/node_modules" ] || [ ! -d "${BEADSUI_DIR}/dist" ]; then
+if ! command -v bd-ui >/dev/null 2>&1; then
   if ! install_bdui; then
     echo "WARN: Failed to install beads-ui" >&2
   fi
 else
-  echo "beads-ui already installed in vendor/beads-ui/"
+  echo "beads-ui already installed globally"
 fi
 
 exit 0

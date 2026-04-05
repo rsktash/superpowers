@@ -43,7 +43,7 @@ check_bd() {
 }
 
 check_bdui() {
-  if command -v bdui >/dev/null 2>&1; then
+  if command -v bd-ui >/dev/null 2>&1; then
     echo "global"
   else
     echo "missing"
@@ -57,7 +57,7 @@ bdui_source=$(check_bdui)
 # If either is missing, run the installer once, then re-check both
 if [ "$bd_source" = "missing" ] || [ "$bdui_source" = "missing" ]; then
   if [ -x "${PLUGIN_ROOT}/scripts/install-deps.sh" ]; then
-    PROJECT_DIR="$(pwd)" "${PLUGIN_ROOT}/scripts/install-deps.sh" >/dev/null 2>&1 || true
+    "${PLUGIN_ROOT}/scripts/install-deps.sh" >/dev/null 2>&1 || true
   fi
   # Re-check both after install (picks up vendor installs AND npm global fallback)
   bd_source=$(check_bd)
@@ -65,9 +65,16 @@ if [ "$bd_source" = "missing" ] || [ "$bdui_source" = "missing" ]; then
 fi
 
 # Inject vendor paths into PATH via CLAUDE_ENV_FILE if needed
-if [ "$bd_source" = "vendor" ] || [ "$bdui_source" = "vendor" ]; then
+if [ "$bd_source" = "vendor" ]; then
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-    echo "export PATH=\"${PLUGIN_ROOT}/vendor/beads-ui/bin:${VENDOR_BIN}:\$PATH\"" >> "$CLAUDE_ENV_FILE"
+    echo "export PATH=\"${VENDOR_BIN}:\$PATH\"" >> "$CLAUDE_ENV_FILE"
+  fi
+fi
+
+# Add bd-ui script to the project's package.json
+if [ "$bdui_source" != "missing" ]; then
+  if [ -f "$(pwd)/package.json" ] && command -v npm >/dev/null 2>&1; then
+    (cd "$(pwd)" && npm pkg set scripts.bd-ui="PORT=3333 bd-ui" 2>/dev/null) || true
   fi
 fi
 
