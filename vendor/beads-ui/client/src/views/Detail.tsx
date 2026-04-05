@@ -80,6 +80,20 @@ function MetadataSidebar({
           </div>
         </div>
       )}
+      {/* Parent epic link */}
+      {(issue.parent_id || (issue as any).parent) && (
+        <div>
+          <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
+            Parent
+          </h3>
+          <a
+            href={`#/detail/${issue.parent_id || (issue as any).parent}`}
+            className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+          >
+            <span className="font-mono">{issue.parent_id || (issue as any).parent}</span>
+          </a>
+        </div>
+      )}
       {issue.dependencies && issue.dependencies.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
@@ -228,6 +242,38 @@ export function Detail({ issueId }: { issueId: string }) {
             mutations.editText({ id: issue.id, field: "design", value: v })
           }
         />
+
+        {/* Children (epics only) */}
+        {issue.issue_type === "epic" && issue.dependents && issue.dependents.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+              Children ({issue.closed_children ?? 0} / {issue.total_children ?? issue.dependents.length})
+            </h3>
+            <div className="space-y-1">
+              {issue.dependents.map((child) => (
+                <a
+                  key={child.id}
+                  href={`#/detail/${child.id}`}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-stone-100 transition-colors"
+                  style={{ opacity: child.status === "closed" ? 0.6 : 1 }}
+                >
+                  <div
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{
+                      backgroundColor:
+                        child.status === "open" ? "var(--status-open)" :
+                        child.status === "in_progress" ? "var(--status-in-progress)" :
+                        child.status === "blocked" ? "var(--status-blocked)" :
+                        "var(--status-closed)",
+                    }}
+                  />
+                  <span className="text-xs font-mono text-stone-400">{child.id}</span>
+                  <span className="text-sm text-stone-700 truncate">{child.title}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Comments */}
         <CommentsSection issueId={issue.id} />
