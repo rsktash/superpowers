@@ -27,6 +27,7 @@ Only after beads is available AND initialized → proceed.
 - **`bd show <id> --json`** works on any bead regardless of status. Always use this to inspect beads.
 - **`bd close`** on the last open child may **auto-close the parent epic**. Check via `bd show` — the epic may already be closed.
 - **`bd epic status`** shows **open epics only**. Closed epics do not appear.
+- **`bd update` body from stdin:** use `bd update <id> --stdin`, NOT `--body --stdin`. The `--body` flag does not exist.
 
 ## When to Use
 

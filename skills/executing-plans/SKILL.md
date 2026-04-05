@@ -31,6 +31,7 @@ These defaults cause subtle bugs if you assume otherwise:
 - **`bd show <id> --json`** works on any bead regardless of status (open, closed, etc.). This is the reliable way to inspect any bead.
 - **`bd close`** on the last open child of an epic may **auto-close the parent epic**. Do not assume the epic is still open after closing all children.
 - **`bd create --parent`** assigns sequential hierarchical IDs (e.g., `.1`, `.2`, `.3`). Create child beads **sequentially**, not in parallel — parallel creates can fail due to ID conflicts.
+- **`bd update` body from stdin:** use `bd update <id> --stdin`, NOT `--body --stdin`. The `--body` flag does not exist — it gets parsed as an argument and silently corrupts the description.
 
 ## The Process
 

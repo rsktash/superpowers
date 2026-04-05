@@ -31,6 +31,7 @@ Only after beads is available AND initialized → proceed.
 - **`bd list`** shows **open issues only** by default. Use `--all` to include closed.
 - **`bd epic status`** shows **open epics only**. A closed epic will not appear.
 - **`bd close`** on the last open child may **auto-close the parent epic**. Check via `bd show` — the epic may already be closed.
+- **`bd update` body from stdin:** use `bd update <id> --stdin`, NOT `--body --stdin`. The `--body` flag does not exist.
 
 ### Step 1: Verify Tests
 
