@@ -14,11 +14,14 @@ export function SearchDialog() {
   // Cmd+K to open, Escape to close
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+      // Don't steal Cmd+K from textareas (e.g. SectionEditor)
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (e.key === "k" && (e.metaKey || e.ctrlKey) && tag !== "TEXTAREA") {
         e.preventDefault();
         setOpen(true);
       }
       if (e.key === "Escape" && open) {
+        e.preventDefault();
         setOpen(false);
         setQuery("");
         setSelectedIndex(0);

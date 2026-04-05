@@ -121,8 +121,15 @@ install_bdui() {
     fi
   fi
 
-  # Build client if dist/ is missing
+  # Build client if dist/ is missing or source is newer than dist
+  local needs_build=false
   if [ ! -d "${BEADSUI_DIR}/dist" ]; then
+    needs_build=true
+  elif [ -n "$(find "${BEADSUI_DIR}/client/src" -newer "${BEADSUI_DIR}/dist/index.html" -type f 2>/dev/null | head -1)" ]; then
+    needs_build=true
+  fi
+
+  if [ "$needs_build" = true ]; then
     echo "Building beads-ui client..."
     if ! (cd "$BEADSUI_DIR" && npx vite build --config client/vite.config.ts 2>&1); then
       echo "ERROR: vite build failed for beads-ui" >&2

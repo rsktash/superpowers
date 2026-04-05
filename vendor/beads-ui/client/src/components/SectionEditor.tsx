@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Markdown } from "./Markdown";
 
 interface SectionEditorProps {
@@ -41,10 +41,9 @@ export function SectionEditor({
     setTab("edit");
   }, [value]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    if (!editing) return;
-    const handler = (e: KeyboardEvent) => {
+  // Keyboard shortcuts scoped to the editor container (not window)
+  const handleEditorKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
       if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         handleSave();
@@ -53,10 +52,9 @@ export function SectionEditor({
         e.preventDefault();
         handleCancel();
       }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [editing, handleSave, handleCancel]);
+    },
+    [handleSave, handleCancel],
+  );
 
   if (!editing) {
     return (
@@ -97,7 +95,10 @@ export function SectionEditor({
   }
 
   return (
-    <div className="border border-blue-300 rounded-lg p-3 bg-blue-50/30">
+    <div
+      className="border border-blue-300 rounded-lg p-3 bg-blue-50/30"
+      onKeyDown={handleEditorKeyDown}
+    >
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
           {label}

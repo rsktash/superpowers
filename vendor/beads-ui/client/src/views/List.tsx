@@ -7,15 +7,11 @@ import { PriorityBadge } from "../components/PriorityBadge";
 import { TypeBadge } from "../components/TypeBadge";
 import type { Issue } from "../lib/types";
 
-type GroupBy = "flat" | "status" | "type";
-
 function FilterBar({
   statusFilter,
   setStatusFilter,
   typeFilter,
   setTypeFilter,
-  groupBy,
-  setGroupBy,
   searchQuery,
   setSearchQuery,
 }: {
@@ -23,8 +19,6 @@ function FilterBar({
   setStatusFilter: (v: string) => void;
   typeFilter: string;
   setTypeFilter: (v: string) => void;
-  groupBy: GroupBy;
-  setGroupBy: (v: GroupBy) => void;
   searchQuery: string;
   setSearchQuery: (v: string) => void;
 }) {
@@ -59,15 +53,6 @@ function FilterBar({
         <option value="task">Task</option>
         <option value="bug">Bug</option>
         <option value="chore">Chore</option>
-      </select>
-      <select
-        value={groupBy}
-        onChange={(e) => setGroupBy(e.target.value as GroupBy)}
-        className="px-2 py-1.5 text-sm border border-stone-300 rounded bg-white"
-      >
-        <option value="flat">No grouping</option>
-        <option value="status">Group by status</option>
-        <option value="type">Group by type</option>
       </select>
     </div>
   );
@@ -107,7 +92,6 @@ export function List() {
   const { issues: allIssues, loading } = useSubscription("all-issues");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [groupBy, setGroupBy] = useState<GroupBy>("flat");
   const { query, setQuery, results: searchResults } = useSearch(allIssues);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const listRef = useRef<VirtualList>(null);
@@ -182,8 +166,6 @@ export function List() {
         setStatusFilter={setStatusFilter}
         typeFilter={typeFilter}
         setTypeFilter={setTypeFilter}
-        groupBy={groupBy}
-        setGroupBy={setGroupBy}
         searchQuery={query}
         setSearchQuery={setQuery}
       />

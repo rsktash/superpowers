@@ -19,7 +19,7 @@ describe('list adapters for subscription types', () => {
 
   test('mapSubscriptionToBdArgs returns args for epics', () => {
     const args = mapSubscriptionToBdArgs({ type: 'epics' });
-    expect(args).toEqual(['epic', 'status', '--json']);
+    expect(args).toEqual(['list', '--json', '--tree=false', '--type=epic', '--all']);
   });
 
   test('mapSubscriptionToBdArgs returns args for blocked-issues', () => {
@@ -106,36 +106,26 @@ describe('list adapters for subscription types', () => {
     }
   });
 
-  test('filters tombstoned epics', async () => {
+  test('epics subscription returns flat issue list', async () => {
+    // bd list --type=epic --all returns flat issue objects (no nested .epic key)
     /** @type {import('vitest').Mock} */ (runBdJson).mockResolvedValue({
       code: 0,
       stdoutJson: [
         {
-          epic: {
-            id: 'E-1',
-            status: 'open',
-            issue_type: 'epic',
-            created_at: '2024-01-01T00:00:00.000Z',
-            updated_at: '2024-01-01T00:00:00.000Z',
-            closed_at: null
-          },
-          total_children: 1,
-          closed_children: 0,
-          eligible_for_close: false
+          id: 'E-1',
+          status: 'open',
+          issue_type: 'epic',
+          created_at: '2024-01-01T00:00:00.000Z',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          closed_at: null
         },
         {
-          epic: {
-            id: 'E-2',
-            status: 'tombstone',
-            issue_type: 'epic',
-            created_at: '2024-01-01T00:00:00.000Z',
-            updated_at: '2024-01-01T00:00:00.000Z',
-            closed_at: null,
-            deleted_at: '2024-02-01T00:00:00.000Z'
-          },
-          total_children: 0,
-          closed_children: 0,
-          eligible_for_close: false
+          id: 'E-2',
+          status: 'closed',
+          issue_type: 'epic',
+          created_at: '2024-01-01T00:00:00.000Z',
+          updated_at: '2024-02-01T00:00:00.000Z',
+          closed_at: '2024-02-01T00:00:00.000Z'
         }
       ]
     });
@@ -144,11 +134,9 @@ describe('list adapters for subscription types', () => {
 
     expect(res.ok).toBe(true);
     if (res.ok) {
-      expect(res.items).toHaveLength(1);
-      expect(res.items[0]).toMatchObject({
-        id: 'E-1',
-        status: 'open'
-      });
+      expect(res.items).toHaveLength(2);
+      expect(res.items[0]).toMatchObject({ id: 'E-1', status: 'open' });
+      expect(res.items[1]).toMatchObject({ id: 'E-2', status: 'closed' });
     }
   });
 

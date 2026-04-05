@@ -24,8 +24,10 @@ export class WsClient {
     string,
     { resolve: (v: unknown) => void; reject: (e: Error) => void }
   >();
+  private sendQueue: string[] = [];
   private pushHandlers = new Set<PushHandler>();
   private connectionHandlers = new Set<ConnectionHandler>();
+  private activeSubscriptions = new Map<string, SubscriptionSpec>();
   private reconnectDelay = 500;
   private url: string;
   private disposed = false;
@@ -40,6 +42,15 @@ export class WsClient {
     this.ws = new WebSocket(this.url);
     this.ws.onopen = () => {
       this.reconnectDelay = 500;
+      // Flush queued messages
+      for (const msg of this.sendQueue) {
+        this.ws?.send(msg);
+      }
+      this.sendQueue = [];
+      // Resubscribe all active subscriptions
+      for (const [, spec] of this.activeSubscriptions) {
+        this.rawSend("subscribe-list", spec);
+      }
       for (const h of this.connectionHandlers) h(true);
     };
     this.ws.onclose = () => {
@@ -59,13 +70,13 @@ export class WsClient {
       p.reject(new Error("disposed"));
     }
     this.pending.clear();
+    this.sendQueue = [];
   }
 
   private scheduleReconnect(): void {
     if (this.disposed) return;
     setTimeout(() => this.connect(), this.reconnectDelay);
     this.reconnectDelay = Math.min(this.reconnectDelay * 2, 10000);
-    // Reject all pending requests
     for (const [id, p] of this.pending) {
       p.reject(new Error("disconnected"));
       this.pending.delete(id);
@@ -73,7 +84,6 @@ export class WsClient {
   }
 
   private handleMessage(msg: ReplyEnvelope): void {
-    // Push events: server sends {id, ok, type, payload} where type is snapshot/upsert/delete
     if (
       msg.type === "snapshot" ||
       msg.type === "upsert" ||
@@ -83,7 +93,6 @@ export class WsClient {
       for (const handler of this.pushHandlers) handler(event);
       return;
     }
-    // Reply to a pending request
     const pending = this.pending.get(msg.id);
     if (pending) {
       this.pending.delete(msg.id);
@@ -92,40 +101,53 @@ export class WsClient {
     }
   }
 
+  /** Send without promise tracking (used for resubscribe on reconnect) */
+  private rawSend(type: string, payload?: unknown): void {
+    const id = nextId();
+    const envelope: RequestEnvelope = { id, type, payload };
+    const msg = JSON.stringify(envelope);
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(msg);
+    } else {
+      this.sendQueue.push(msg);
+    }
+  }
+
   private send<T = unknown>(type: string, payload?: unknown): Promise<T> {
     return new Promise((resolve, reject) => {
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        reject(new Error("not connected"));
-        return;
-      }
       const id = nextId();
       this.pending.set(id, {
         resolve: resolve as (v: unknown) => void,
         reject,
       });
       const envelope: RequestEnvelope = { id, type, payload };
-      this.ws.send(JSON.stringify(envelope));
+      const msg = JSON.stringify(envelope);
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.send(msg);
+      } else {
+        this.sendQueue.push(msg);
+      }
     });
   }
 
-  // Connection state
   onConnection(handler: ConnectionHandler): () => void {
     this.connectionHandlers.add(handler);
     return () => this.connectionHandlers.delete(handler);
   }
 
-  // Push events
   onPush(handler: PushHandler): () => void {
     this.pushHandlers.add(handler);
     return () => this.pushHandlers.delete(handler);
   }
 
-  // Subscriptions
+  // Subscriptions — tracked for auto-resubscribe on reconnect
   subscribe(spec: SubscriptionSpec): Promise<{ id: string; key: string }> {
+    this.activeSubscriptions.set(spec.id, spec);
     return this.send("subscribe-list", spec);
   }
 
   unsubscribe(id: string): Promise<void> {
+    this.activeSubscriptions.delete(id);
     return this.send("unsubscribe-list", { id });
   }
 
@@ -178,7 +200,6 @@ export class WsClient {
     return this.send("dep-remove", { a, b });
   }
 
-  // Workspace management
   listWorkspaces(): Promise<unknown> {
     return this.send("list-workspaces");
   }
