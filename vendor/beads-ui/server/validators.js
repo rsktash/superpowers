@@ -16,6 +16,7 @@ const SUBSCRIPTION_TYPES = new Set([
   'ready-issues',
   'in-progress-issues',
   'closed-issues',
+  'search-issues',
   'issue-detail'
 ]);
 
@@ -82,7 +83,18 @@ export function validateSubscribeListPayload(payload) {
       };
     }
     params = { id };
+  } else if (type === 'search-issues') {
+    /** @type {Record<string, string|number|boolean>} */
+    const cleaned = {};
+    if (params && typeof params.q === 'string') cleaned.q = params.q;
+    if (params && typeof params.status === 'string') cleaned.status = params.status;
+    if (params && typeof params.type === 'string') cleaned.type = params.type;
+    if (params && typeof params.limit === 'number') cleaned.limit = params.limit;
+    if (params && typeof params.offset === 'number') cleaned.offset = params.offset;
+    params = Object.keys(cleaned).length > 0 ? cleaned : undefined;
   } else if (type === 'closed-issues') {
+    /** @type {Record<string, string|number|boolean>} */
+    const cleaned = {};
     if (params && 'since' in params) {
       const since = params.since;
       const n = typeof since === 'number' ? since : Number.NaN;
@@ -93,20 +105,19 @@ export function validateSubscribeListPayload(payload) {
           message: 'params.since must be a non-negative number (epoch ms)'
         };
       }
-      params = { since: n };
-    } else {
-      params = undefined;
+      cleaned.since = n;
     }
+    // Allow pagination params
+    if (params && typeof params.limit === 'number') cleaned.limit = params.limit;
+    if (params && typeof params.offset === 'number') cleaned.offset = params.offset;
+    params = Object.keys(cleaned).length > 0 ? cleaned : undefined;
   } else {
-    // Other types do not accept params
-    if (params && Object.keys(params).length > 0) {
-      return {
-        ok: false,
-        code: 'bad_request',
-        message: `type ${type} does not accept params`
-      };
-    }
-    params = undefined;
+    // Allow pagination params (limit, offset) for all list types
+    /** @type {Record<string, string|number|boolean>} */
+    const cleaned = {};
+    if (params && typeof params.limit === 'number') cleaned.limit = params.limit;
+    if (params && typeof params.offset === 'number') cleaned.offset = params.offset;
+    params = Object.keys(cleaned).length > 0 ? cleaned : undefined;
   }
 
   return { ok: true, id, spec: { type, params } };

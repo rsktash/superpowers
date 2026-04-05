@@ -14,7 +14,7 @@ describe('list adapters for subscription types', () => {
 
   test('mapSubscriptionToBdArgs returns args for all-issues', () => {
     const args = mapSubscriptionToBdArgs({ type: 'all-issues' });
-    expect(args).toEqual(['list', '--json', '--tree=false']);
+    expect(args).toEqual(['list', '--json', '--tree=false', '--all']);
   });
 
   test('mapSubscriptionToBdArgs returns args for epics', () => {
@@ -102,6 +102,47 @@ describe('list adapters for subscription types', () => {
         id: '3',
         updated_at: 0,
         closed_at: null
+      });
+    }
+  });
+
+  test('issue-detail via bd fallback hydrates parent context', async () => {
+    /** @type {import('vitest').Mock} */ (runBdJson)
+      .mockResolvedValueOnce({
+        code: 0,
+        stdoutJson: {
+          id: 'UI-1',
+          title: 'Child issue',
+          parent: 'EP-1',
+          created_at: '2024-01-01T00:00:00.000Z',
+          updated_at: '2024-01-01T00:00:01.000Z'
+        }
+      })
+      .mockResolvedValueOnce({
+        code: 0,
+        stdoutJson: {
+          id: 'EP-1',
+          title: 'Parent epic',
+          status: 'in_progress',
+          issue_type: 'epic'
+        }
+      });
+
+    const res = await fetchListForSubscription({
+      type: 'issue-detail',
+      params: { id: 'UI-1' }
+    });
+
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0]).toMatchObject({
+        id: 'UI-1',
+        parent: 'EP-1',
+        parent_id: 'EP-1',
+        parent_title: 'Parent epic',
+        parent_status: 'in_progress',
+        parent_type: 'epic'
       });
     }
   });

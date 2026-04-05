@@ -11,6 +11,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["'DM Sans'", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
+      },
       colors: {
         status: {
           open: "var(--status-open)",
@@ -29,11 +33,16 @@ export default {
           base: "var(--bg-base)",
           card: "var(--bg-surface)",
           elevated: "var(--bg-elevated)",
+          hover: "var(--bg-hover)",
         },
         ink: {
           primary: "var(--text-primary)",
           secondary: "var(--text-secondary)",
-          muted: "var(--text-muted)",
+          tertiary: "var(--text-tertiary)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          soft: "var(--accent-soft)",
         },
         type: {
           task: "var(--type-task)",
@@ -44,9 +53,14 @@ export default {
         },
       },
       boxShadow: {
-        subtle: "var(--shadow-subtle)",
-        medium: "var(--shadow-medium)",
-        strong: "var(--shadow-strong)",
+        sm: "var(--shadow-sm)",
+        card: "var(--shadow-card)",
+        md: "var(--shadow-md)",
+      },
+      borderRadius: {
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
       },
     },
   },

@@ -24,6 +24,9 @@ export interface Issue {
   dependents?: Array<{ id: string; title: string; status: string }>;
   comments?: Comment[];
   parent_id?: string;
+  parent_title?: string;
+  parent_status?: string;
+  parent_type?: string;
 }
 
 export interface Comment {
@@ -43,6 +46,7 @@ export type SubscriptionType =
   | "ready-issues"
   | "in-progress-issues"
   | "closed-issues"
+  | "search-issues"
   | "issue-detail";
 
 export interface SubscriptionSpec {
@@ -72,6 +76,7 @@ export interface SnapshotPayload {
   id: string;
   revision: number;
   issues: Issue[];
+  total?: number;
 }
 
 export interface UpsertPayload {

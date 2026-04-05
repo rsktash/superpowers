@@ -261,6 +261,66 @@ export async function queryIssuesByStatus(status, pagination) {
 }
 
 /**
+ * Search issues with optional FULLTEXT query and status/type filters.
+ *
+ * When `query` is non-empty, uses Dolt FULLTEXT MATCH...AGAINST for
+ * relevance-ranked results. Falls back to LIKE on id for exact ID matches.
+ * Status and type filters narrow results server-side.
+ *
+ * @param {string} query - Search terms (empty string = no text filter)
+ * @param {Pagination & { status?: string, type?: string }} [options]
+ * @returns {Promise<PaginatedResult | QueryError>}
+ */
+export async function querySearchIssues(query, options) {
+  const pool = getPool();
+  if (!pool) return { ok: false, error: { code: 'no_pool', message: 'Dolt pool not available' } };
+  try {
+    const conditions = [];
+    const params = [];
+
+    // FULLTEXT search on title + description
+    if (query.length > 0) {
+      // Use MATCH...AGAINST for natural language search, plus LIKE on id for exact ID matches
+      conditions.push('(MATCH(i.title, i.description) AGAINST (?) OR i.id LIKE ?)');
+      params.push(query, `%${query}%`);
+    }
+
+    // Status filter
+    if (options?.status && options.status !== 'all') {
+      conditions.push('i.status = ?');
+      params.push(options.status);
+    }
+
+    // Type filter
+    if (options?.type && options.type !== 'all') {
+      conditions.push('i.issue_type = ?');
+      params.push(options.type);
+    }
+
+    const where = conditions.length > 0 ? conditions.join(' AND ') : '1=1';
+
+    const [countRows] = await pool.query(
+      `SELECT COUNT(*) AS total FROM issues i WHERE ${where}`, params
+    );
+    const total = /** @type {any[]} */ (countRows)[0]?.total || 0;
+
+    const { limitClause } = buildPagination(options);
+    const [rows] = await pool.query(
+      `SELECT ${LIST_COLS_ALIASED}, pc.depends_on_id AS parent
+       FROM issues i
+       LEFT JOIN dependencies pc ON pc.issue_id = i.id AND pc.type = 'parent-child'
+       WHERE ${where}
+       ORDER BY i.updated_at DESC${limitClause}`,
+      params
+    );
+    return { ok: true, items: /** @type {any[]} */ (rows).map(normalizeRow), total };
+  } catch (err) {
+    log('querySearchIssues error: %o', err);
+    return { ok: false, error: { code: 'db_error', message: String(/** @type {any} */ (err).message) } };
+  }
+}
+
+/**
  * Fetch a single issue with dependencies, labels and parent info
  * (for 'issue-detail' subscription and post-mutation show).
  *
@@ -288,12 +348,24 @@ export async function queryIssueDetail(id) {
     );
     issue.dependencies = /** @type {any[]} */ (depRows).map(normalizeRow);
 
-    // Derive parent from parent-child dependency
+    // Derive parent from parent-child dependency (with context)
     const parentDep = /** @type {any[]} */ (depRows).find(
       (d) => d.issue_id === id && d.type === 'parent-child'
     );
     if (parentDep) {
+      issue.parent_id = parentDep.depends_on_id;
       issue.parent = parentDep.depends_on_id;
+      // Fetch parent title/status for sidebar context
+      const [parentRows] = await pool.query(
+        `SELECT id, title, status, issue_type FROM issues WHERE id = ?`,
+        [parentDep.depends_on_id]
+      );
+      const parentIssues = /** @type {any[]} */ (parentRows);
+      if (parentIssues.length > 0) {
+        issue.parent_title = parentIssues[0].title;
+        issue.parent_status = parentIssues[0].status;
+        issue.parent_type = parentIssues[0].issue_type;
+      }
     }
 
     // Derive dependency/dependent counts

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Markdown } from "./Markdown";
 
 interface SectionEditorProps {
@@ -41,7 +41,6 @@ export function SectionEditor({
     setTab("edit");
   }, [value]);
 
-  // Keyboard shortcuts scoped to the editor container (not window)
   const handleEditorKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
@@ -58,14 +57,27 @@ export function SectionEditor({
 
   if (!editing) {
     return (
-      <div className="group">
-        <div className="flex items-center justify-between mb-1">
-          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+      <div
+        className="group rounded-lg p-4"
+        style={{
+          background: "var(--bg-elevated)",
+          border: "1px solid var(--border-subtle)",
+          boxShadow: "var(--shadow-card)",
+        }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <h3
+            className="font-semibold uppercase tracking-wider"
+            style={{ fontSize: "11px", color: "var(--text-tertiary)" }}
+          >
             {label}
           </h3>
           <button
             onClick={() => setEditing(true)}
-            className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-stone-600 transition-opacity"
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ color: "var(--text-tertiary)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-tertiary)"; }}
             title={`Edit ${label}`}
           >
             <svg
@@ -86,7 +98,7 @@ export function SectionEditor({
         {value ? (
           <Markdown content={value} />
         ) : (
-          <p className="text-sm text-stone-400 italic">
+          <p className="text-sm italic" style={{ color: "var(--text-tertiary)" }}>
             {placeholder || `Add ${label.toLowerCase()}...`}
           </p>
         )}
@@ -96,23 +108,43 @@ export function SectionEditor({
 
   return (
     <div
-      className="border border-blue-300 rounded-lg p-3 bg-blue-50/30"
+      className="rounded-lg p-4"
+      style={{
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--accent)",
+        boxShadow: "var(--shadow-card)",
+      }}
       onKeyDown={handleEditorKeyDown}
     >
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+        <h3
+          className="font-semibold uppercase tracking-wider"
+          style={{ fontSize: "11px", color: "var(--text-tertiary)" }}
+        >
           {label}
         </h3>
-        <div className="flex border border-stone-300 rounded overflow-hidden text-xs">
+        <div
+          className="flex overflow-hidden text-xs rounded-md"
+          style={{ border: "1px solid var(--border-default)" }}
+        >
           <button
             onClick={() => setTab("edit")}
-            className={`px-2 py-1 ${tab === "edit" ? "bg-stone-200 font-medium" : "bg-white"}`}
+            className="px-2.5 py-1 font-medium"
+            style={{
+              background: tab === "edit" ? "var(--bg-hover)" : "var(--bg-elevated)",
+              color: tab === "edit" ? "var(--text-primary)" : "var(--text-secondary)",
+            }}
           >
             Edit
           </button>
           <button
             onClick={() => setTab("preview")}
-            className={`px-2 py-1 ${tab === "preview" ? "bg-stone-200 font-medium" : "bg-white"}`}
+            className="px-2.5 py-1 font-medium"
+            style={{
+              background: tab === "preview" ? "var(--bg-hover)" : "var(--bg-elevated)",
+              color: tab === "preview" ? "var(--text-primary)" : "var(--text-secondary)",
+              borderLeft: "1px solid var(--border-default)",
+            }}
           >
             Preview
           </button>
@@ -123,28 +155,54 @@ export function SectionEditor({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={10}
-          className="w-full p-2 text-sm font-mono border border-stone-300 rounded bg-white resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 text-sm font-mono rounded-md resize-y outline-none"
+          style={{
+            border: "1px solid var(--border-default)",
+            background: "var(--bg-base)",
+            color: "var(--text-primary)",
+          }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border-default)"; }}
           autoFocus
         />
       ) : (
-        <div className="p-2 bg-white border border-stone-300 rounded min-h-[160px]">
+        <div
+          className="p-3 rounded-md min-h-[160px]"
+          style={{
+            border: "1px solid var(--border-default)",
+            background: "var(--bg-base)",
+          }}
+        >
           <Markdown content={draft} />
         </div>
       )}
-      <div className="flex items-center justify-end gap-2 mt-2">
-        <span className="text-xs text-stone-400 mr-auto">
+      <div className="flex items-center justify-end gap-2 mt-3">
+        <span className="text-xs mr-auto" style={{ color: "var(--text-tertiary)" }}>
           Cmd+S to save, Esc to cancel
         </span>
         <button
           onClick={handleCancel}
-          className="px-3 py-1 text-sm text-stone-600 hover:bg-stone-200 rounded"
+          className="px-3 py-1.5 text-sm rounded-md transition-colors"
+          style={{
+            color: "var(--text-secondary)",
+            border: "1px solid var(--border-default)",
+            background: "var(--bg-elevated)",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--bg-hover)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-elevated)"; }}
         >
           Cancel
         </button>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          className="px-3 py-1.5 text-sm rounded-md font-medium disabled:opacity-50 transition-colors"
+          style={{
+            background: "var(--accent)",
+            color: "white",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
         >
           {saving ? "Saving..." : "Save"}
         </button>

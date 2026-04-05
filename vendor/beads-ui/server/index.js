@@ -3,6 +3,7 @@ import { createApp } from './app.js';
 import { printServerUrl } from './cli/daemon.js';
 import { getConfig } from './config.js';
 import { resolveWorkspaceDatabase } from './db.js';
+import { startDoltServer, stopDoltServer } from './dolt-pool.js';
 import { debug, enableAllDebug } from './logging.js';
 import { registerWorkspace, watchRegistry } from './registry-watcher.js';
 import { watchDb } from './watcher.js';
@@ -37,6 +38,16 @@ if (workspace_database.source !== 'home-default' && workspace_database.exists) {
   });
 }
 
+// Start Dolt SQL server BEFORE accepting connections.
+// The SQL server holds an exclusive lock on the embedded DB, so bd CLI
+// can't run as fallback while it's up. We must wait for the pool.
+const doltPool = await startDoltServer(config.root_dir);
+if (doltPool) {
+  log('Dolt SQL server started — fast query mode enabled (sub-ms queries)');
+} else {
+  log('Dolt SQL server not available — using bd CLI fallback (~600ms/query)');
+}
+
 // Watch the active beads DB and schedule subscription refresh for active lists
 const db_watcher = watchDb(config.root_dir, () => {
   // Schedule subscription list refresh run for active subscriptions
@@ -65,6 +76,16 @@ watchRegistry(
   },
   { debounce_ms: 500 }
 );
+
+// Graceful shutdown: stop Dolt server
+process.on('SIGTERM', async () => {
+  await stopDoltServer();
+  process.exit(0);
+});
+process.on('SIGINT', async () => {
+  await stopDoltServer();
+  process.exit(0);
+});
 
 server.listen(config.port, config.host, () => {
   printServerUrl();

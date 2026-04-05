@@ -8,13 +8,76 @@ import { WebSocketServer } from 'ws';
 import { isRequest, makeError, makeOk } from '../app/protocol.js';
 import { getGitUserName, runBd, runBdJson } from './bd.js';
 import { resolveWorkspaceDatabase } from './db.js';
-import { fetchListForSubscription } from './list-adapters.js';
+import {
+  addComment,
+  addDependency,
+  addLabel,
+  deleteIssue,
+  isDoltPoolReady,
+  queryComments,
+  queryIssueDetail,
+  removeDependency,
+  removeLabel,
+  updateIssueField
+} from './dolt-queries.js';
+import {
+  enrichIssueDetailParentContext,
+  fetchListForSubscription
+} from './list-adapters.js';
 import { debug } from './logging.js';
 import { getAvailableWorkspaces } from './registry-watcher.js';
 import { keyOf, registry } from './subscriptions.js';
 import { validateSubscribeListPayload } from './validators.js';
 
 const log = debug('ws');
+
+/**
+ * Run a mutation via SQL (with detail refetch) or bd CLI fallback, send the
+ * result to the client, and trigger a subscription refresh.
+ *
+ * Covers the common pattern: mutate → fetch updated issue → respond → refresh.
+ *
+ * @param {WebSocket} ws
+ * @param {any} req
+ * @param {string} detailId - Issue ID to fetch after mutation
+ * @param {() => Promise<{ ok: boolean, error?: { code: string, message: string } }>} sqlMutateFn
+ * @param {string[]} bdArgs - Arguments for the bd CLI fallback
+ */
+async function mutateAndRespond(ws, req, detailId, sqlMutateFn, bdArgs) {
+  if (isDoltPoolReady()) {
+    const upd = await sqlMutateFn();
+    if (!upd.ok) {
+      ws.send(JSON.stringify(makeError(req, upd.error.code, upd.error.message)));
+      return;
+    }
+    const detail = await queryIssueDetail(detailId);
+    if (!detail.ok) {
+      ws.send(JSON.stringify(makeError(req, detail.error.code, detail.error.message)));
+      return;
+    }
+    ws.send(JSON.stringify(makeOk(req, detail.item)));
+  } else {
+    const res = await runBd(bdArgs);
+    if (res.code !== 0) {
+      ws.send(JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed')));
+      return;
+    }
+    const shown = await runBdJson(['show', detailId, '--json']);
+    if (shown.code !== 0) {
+      ws.send(JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed')));
+      return;
+    }
+    const detail =
+      shown.stdoutJson && typeof shown.stdoutJson === 'object' && !Array.isArray(shown.stdoutJson)
+        ? await enrichIssueDetailParentContext(
+          /** @type {Record<string, unknown>} */ (shown.stdoutJson),
+          { cwd: CURRENT_WORKSPACE?.root_dir }
+        )
+        : shown.stdoutJson;
+    ws.send(JSON.stringify(makeOk(req, detail)));
+  }
+  try { triggerMutationRefreshOnce(); } catch { /* ignore */ }
+}
 
 /**
  * Debounced refresh scheduling for active list subscriptions.
@@ -250,14 +313,16 @@ function nextListRevision(ws, key) {
  * @param {string} client_id
  * @param {string} key
  * @param {Array<Record<string, unknown>>} issues
+ * @param {number} [total] - Total count for paginated queries
  */
-function emitSubscriptionSnapshot(ws, client_id, key, issues) {
+function emitSubscriptionSnapshot(ws, client_id, key, issues, total) {
   const revision = nextListRevision(ws, key);
   const payload = {
     type: /** @type {const} */ ('snapshot'),
     id: client_id,
     revision,
-    issues
+    issues,
+    ...(typeof total === 'number' ? { total } : {})
   };
   const msg = JSON.stringify({
     id: `evt-${Date.now()}`,
@@ -669,7 +734,7 @@ export async function handleMessage(ws, data) {
           initial ? initial.items : []
         );
         void registry.applyItems(attached_key, items);
-        emitSubscriptionSnapshot(ws, client_id, attached_key, items);
+        emitSubscriptionSnapshot(ws, client_id, attached_key, items, initial?.total);
       });
     } catch (err) {
       log('subscribe-list snapshot error for %s: %o', attached_key, err);
@@ -748,27 +813,11 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    // Pass empty string to clear assignee when requested
-    const res = await runBd(['update', id, '--assignee', assignee]);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
-    const shown = await runBdJson(['show', id, '--json']);
-    if (shown.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed'))
-      );
-      return;
-    }
-    ws.send(JSON.stringify(makeOk(req, shown.stdoutJson)));
-    try {
-      triggerMutationRefreshOnce();
-    } catch {
-      // ignore
-    }
+    await mutateAndRespond(
+      ws, req, id,
+      () => updateIssueField(id, 'assignee', assignee || null),
+      ['update', id, '--assignee', assignee]
+    );
     return;
   }
 
@@ -794,27 +843,11 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    const res = await runBd(['update', id, '--status', status]);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
-    const shown = await runBdJson(['show', id, '--json']);
-    if (shown.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed'))
-      );
-      return;
-    }
-    ws.send(JSON.stringify(makeOk(req, shown.stdoutJson)));
-    // After mutation, refresh active subscriptions once (watcher or timeout)
-    try {
-      triggerMutationRefreshOnce();
-    } catch {
-      // ignore
-    }
+    await mutateAndRespond(
+      ws, req, id,
+      () => updateIssueField(id, 'status', status),
+      ['update', id, '--status', status]
+    );
     return;
   }
 
@@ -840,26 +873,11 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    const res = await runBd(['update', id, '--priority', String(priority)]);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
-    const shown = await runBdJson(['show', id, '--json']);
-    if (shown.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed'))
-      );
-      return;
-    }
-    ws.send(JSON.stringify(makeOk(req, shown.stdoutJson)));
-    try {
-      triggerMutationRefreshOnce();
-    } catch {
-      // ignore
-    }
+    await mutateAndRespond(
+      ws, req, id,
+      () => updateIssueField(id, 'priority', priority),
+      ['update', id, '--priority', String(priority)]
+    );
     return;
   }
 
@@ -888,42 +906,26 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    // Map UI fields to bd CLI flags
-    // title       → --title
-    // description → --description
-    // acceptance  → --acceptance-criteria
-    // notes       → --notes
-    // design      → --design
-    const flag =
-      field === 'title'
-        ? '--title'
-        : field === 'description'
-          ? '--description'
-          : field === 'acceptance'
-            ? '--acceptance-criteria'
-            : field === 'notes'
-              ? '--notes'
-              : '--design';
-    const res = await runBd(['update', id, flag, value]);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
-    const shown = await runBdJson(['show', id, '--json']);
-    if (shown.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed'))
-      );
-      return;
-    }
-    ws.send(JSON.stringify(makeOk(req, shown.stdoutJson)));
-    try {
-      triggerMutationRefreshOnce();
-    } catch {
-      // ignore
-    }
+    const SQL_FIELD_MAP = /** @type {Record<string, string>} */ ({
+      title: 'title',
+      description: 'description',
+      acceptance: 'acceptance_criteria',
+      notes: 'notes',
+      design: 'design'
+    });
+    const BD_FLAG_MAP = /** @type {Record<string, string>} */ ({
+      title: '--title',
+      description: '--description',
+      acceptance: '--acceptance-criteria',
+      notes: '--notes',
+      design: '--design'
+    });
+
+    await mutateAndRespond(
+      ws, req, id,
+      () => updateIssueField(id, SQL_FIELD_MAP[field], value),
+      ['update', id, BD_FLAG_MAP[field], value]
+    );
     return;
   }
 
@@ -1000,27 +1002,12 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    const res = await runBd(['dep', 'add', a, b]);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
     const id = typeof view_id === 'string' && view_id.length > 0 ? view_id : a;
-    const shown = await runBdJson(['show', id, '--json']);
-    if (shown.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed'))
-      );
-      return;
-    }
-    ws.send(JSON.stringify(makeOk(req, shown.stdoutJson)));
-    try {
-      triggerMutationRefreshOnce();
-    } catch {
-      // ignore
-    }
+    await mutateAndRespond(
+      ws, req, id,
+      () => addDependency(a, b),
+      ['dep', 'add', a, b]
+    );
     return;
   }
 
@@ -1044,27 +1031,12 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    const res = await runBd(['dep', 'remove', a, b]);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
     const id = typeof view_id === 'string' && view_id.length > 0 ? view_id : a;
-    const shown = await runBdJson(['show', id, '--json']);
-    if (shown.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed'))
-      );
-      return;
-    }
-    ws.send(JSON.stringify(makeOk(req, shown.stdoutJson)));
-    try {
-      triggerMutationRefreshOnce();
-    } catch {
-      // ignore
-    }
+    await mutateAndRespond(
+      ws, req, id,
+      () => removeDependency(a, b),
+      ['dep', 'remove', a, b]
+    );
     return;
   }
 
@@ -1088,26 +1060,11 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    const res = await runBd(['label', 'add', id, label.trim()]);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
-    const shown = await runBdJson(['show', id, '--json']);
-    if (shown.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed'))
-      );
-      return;
-    }
-    ws.send(JSON.stringify(makeOk(req, shown.stdoutJson)));
-    try {
-      triggerMutationRefreshOnce();
-    } catch {
-      // ignore
-    }
+    await mutateAndRespond(
+      ws, req, id,
+      () => addLabel(id, label.trim()),
+      ['label', 'add', id, label.trim()]
+    );
     return;
   }
 
@@ -1131,26 +1088,11 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    const res = await runBd(['label', 'remove', id, label.trim()]);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
-    const shown = await runBdJson(['show', id, '--json']);
-    if (shown.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', shown.stderr || 'bd failed'))
-      );
-      return;
-    }
-    ws.send(JSON.stringify(makeOk(req, shown.stdoutJson)));
-    try {
-      triggerMutationRefreshOnce();
-    } catch {
-      // ignore
-    }
+    await mutateAndRespond(
+      ws, req, id,
+      () => removeLabel(id, label.trim()),
+      ['label', 'remove', id, label.trim()]
+    );
     return;
   }
 
@@ -1165,14 +1107,21 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    const res = await runBdJson(['comments', id, '--json']);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
+    if (isDoltPoolReady()) {
+      const res = await queryComments(id);
+      if (!res.ok) {
+        ws.send(JSON.stringify(makeError(req, res.error.code, res.error.message)));
+        return;
+      }
+      ws.send(JSON.stringify(makeOk(req, res.items)));
+    } else {
+      const res = await runBdJson(['comments', id, '--json']);
+      if (res.code !== 0) {
+        ws.send(JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed')));
+        return;
+      }
+      ws.send(JSON.stringify(makeOk(req, res.stdoutJson || [])));
     }
-    ws.send(JSON.stringify(makeOk(req, res.stdoutJson || [])));
     return;
   }
 
@@ -1197,32 +1146,39 @@ export async function handleMessage(ws, data) {
       return;
     }
 
-    // Get git user name for author attribution
     const author = await getGitUserName();
-    const args = ['comment', id, text.trim()];
-    if (author) {
-      args.push('--author', author);
-    }
 
-    const res = await runBd(args);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed'))
-      );
-      return;
-    }
+    if (isDoltPoolReady()) {
+      const upd = await addComment(id, text.trim(), author || 'anonymous');
+      if (!upd.ok) {
+        ws.send(JSON.stringify(makeError(req, upd.error.code, upd.error.message)));
+        return;
+      }
+      const res = await queryComments(id);
+      if (!res.ok) {
+        ws.send(JSON.stringify(makeError(req, res.error.code, res.error.message)));
+        return;
+      }
+      ws.send(JSON.stringify(makeOk(req, res.items)));
+    } else {
+      const args = ['comment', id, text.trim()];
+      if (author) {
+        args.push('--author', author);
+      }
 
-    // Return updated comments list
-    const comments = await runBdJson(['comments', id, '--json']);
-    if (comments.code !== 0) {
-      ws.send(
-        JSON.stringify(
-          makeError(req, 'bd_error', comments.stderr || 'bd failed')
-        )
-      );
-      return;
+      const res = await runBd(args);
+      if (res.code !== 0) {
+        ws.send(JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd failed')));
+        return;
+      }
+
+      const comments = await runBdJson(['comments', id, '--json']);
+      if (comments.code !== 0) {
+        ws.send(JSON.stringify(makeError(req, 'bd_error', comments.stderr || 'bd failed')));
+        return;
+      }
+      ws.send(JSON.stringify(makeOk(req, comments.stdoutJson || [])));
     }
-    ws.send(JSON.stringify(makeOk(req, comments.stdoutJson || [])));
     return;
   }
 
@@ -1237,16 +1193,21 @@ export async function handleMessage(ws, data) {
       );
       return;
     }
-    const res = await runBd(['delete', id, '--force']);
-    if (res.code !== 0) {
-      ws.send(
-        JSON.stringify(
-          makeError(req, 'bd_error', res.stderr || 'bd delete failed')
-        )
-      );
-      return;
+    if (isDoltPoolReady()) {
+      const upd = await deleteIssue(id);
+      if (!upd.ok) {
+        ws.send(JSON.stringify(makeError(req, upd.error.code, upd.error.message)));
+        return;
+      }
+      ws.send(JSON.stringify(makeOk(req, { deleted: true, id })));
+    } else {
+      const res = await runBd(['delete', id, '--force']);
+      if (res.code !== 0) {
+        ws.send(JSON.stringify(makeError(req, 'bd_error', res.stderr || 'bd delete failed')));
+        return;
+      }
+      ws.send(JSON.stringify(makeOk(req, { deleted: true, id })));
     }
-    ws.send(JSON.stringify(makeOk(req, { deleted: true, id })));
     try {
       triggerMutationRefreshOnce();
     } catch {

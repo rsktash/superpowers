@@ -33,7 +33,7 @@ function Column({
 
   const hasMore = total > issues.length;
   const remaining = total - issues.length;
-  const dotColor = STATUS_COLORS[statusKey] ?? "var(--text-muted)";
+  const dotColor = STATUS_COLORS[statusKey] ?? "var(--text-tertiary)";
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -46,24 +46,19 @@ function Column({
   }, [issues.length]);
 
   return (
-    <div
-      className="flex-1 min-w-[280px] max-w-[360px] flex flex-col"
-    >
+    <div className="flex-1 min-w-[280px] max-w-[360px] flex flex-col self-start">
       {/* Column header */}
       <div
-        className="flex items-center gap-2 px-1 pb-3 sticky top-0 z-10"
-        style={{
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
-          marginBottom: "var(--space-3)",
-          background: "var(--bg-base)",
-        }}
+        className="flex items-center gap-2.5 px-1 pb-3 mb-3"
+        style={{ borderBottom: "1px solid var(--border-subtle)" }}
       >
         <div
           className="rounded-full shrink-0"
           style={{
-            width: "8px",
-            height: "8px",
+            width: "10px",
+            height: "10px",
             backgroundColor: dotColor,
+            boxShadow: `0 0 0 3px ${dotColor}33`,
           }}
         />
         <h2
@@ -73,10 +68,10 @@ function Column({
           {title}
         </h2>
         <span
-          className="text-xs px-1.5 py-0.5 rounded-full ml-auto"
+          className="text-xs font-medium px-2 py-0.5 rounded-full ml-auto"
           style={{
             backgroundColor: "rgba(0,0,0,0.05)",
-            color: "var(--text-muted)",
+            color: "var(--text-tertiary)",
             fontSize: "11px",
           }}
         >
@@ -100,22 +95,25 @@ function Column({
       >
         {loading && issues.length === 0 && (
           <div className="py-8 text-center">
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Loading\u2026
+            <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+              Loading&hellip;
             </p>
           </div>
         )}
 
         {!loading && issues.length === 0 && (
           <div
-            className="py-8 text-center rounded-lg"
+            className="py-8 text-center"
             style={{
-              border: "2px dashed var(--text-muted)",
-              opacity: 0.4,
+              border: "2px dashed var(--border-default)",
               borderRadius: "var(--radius-md)",
+              minHeight: "100px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
               No items
             </p>
           </div>
@@ -133,13 +131,15 @@ function Column({
         {hasMore && (
           <button
             onClick={() => setLimit((l) => l + COLUMN_PAGE_SIZE)}
-            className="w-full text-xs py-2 hover:underline"
+            className="w-full text-xs py-2"
             style={{
               color: "var(--text-secondary)",
-              transition: "color 100ms ease",
+              transition: "color 120ms ease",
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; }}
           >
-            Show {remaining} more\u2026
+            Show {remaining} more&hellip;
           </button>
         )}
       </div>
@@ -148,19 +148,27 @@ function Column({
 }
 
 export function Board() {
+  const { total: totalIssues } = useSubscription("all-issues", { limit: 1, offset: 0 });
+  const { total: totalEpics } = useSubscription("epics", { limit: 1, offset: 0 });
+
   const navigateToDetail = (id: string) => {
     window.location.hash = `#/detail/${id}`;
   };
 
   return (
     <div className="p-6" style={{ background: "var(--bg-base)" }}>
-      <h1
-        className="text-xl font-bold mb-6"
-        style={{ color: "var(--text-primary)" }}
-      >
-        Board
-      </h1>
-      <div className="flex gap-4 overflow-x-auto">
+      <div className="mb-6">
+        <h1
+          className="text-xl font-bold"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Board
+        </h1>
+        <p className="text-sm mt-0.5" style={{ color: "var(--text-tertiary)" }}>
+          {totalIssues} issues across {totalEpics} epics
+        </p>
+      </div>
+      <div className="flex gap-4 overflow-x-auto items-start">
         <Column
           title="Open"
           subscriptionType="ready-issues"

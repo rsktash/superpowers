@@ -2,9 +2,45 @@ import { useState } from "react";
 import { useSubscription } from "../hooks/use-subscription";
 import { useMutation } from "../hooks/use-mutation";
 import { StatusBadge } from "../components/StatusBadge";
+import { PriorityBadge } from "../components/PriorityBadge";
 import { TypeBadge } from "../components/TypeBadge";
 import { SectionEditor } from "../components/SectionEditor";
 import type { Issue } from "../lib/types";
+
+const AVATAR_COLORS = [
+  "#E57373", "#F06292", "#BA68C8", "#9575CD",
+  "#7986CB", "#64B5F6", "#4FC3F7", "#4DD0E1",
+  "#4DB6AC", "#81C784", "#AED581", "#FFB74D",
+];
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function MetadataCard({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div
+      className="px-3 py-2.5 rounded-md"
+      style={{ border: "1px solid var(--border-subtle)" }}
+    >
+      <h3
+        className="font-semibold uppercase tracking-wider mb-1.5"
+        style={{ fontSize: "11px", color: "var(--text-tertiary)" }}
+      >
+        {label}
+      </h3>
+      {children}
+    </div>
+  );
+}
 
 function MetadataSidebar({
   issue,
@@ -13,12 +49,21 @@ function MetadataSidebar({
   issue: Issue;
   onUpdate: ReturnType<typeof useMutation>;
 }) {
+  const parentId = issue.parent_id || (issue as any).parent;
+  const parentTitle = issue.parent_title || (issue as any).parent_title;
+  const parentStatus = issue.parent_status || (issue as any).parent_status;
+  const ts = new Date(issue.updated_at).toLocaleDateString();
+
   return (
-    <aside className="w-72 shrink-0 border-l border-stone-200 p-4 space-y-4 bg-stone-50 overflow-y-auto">
-      <div>
-        <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-          Status
-        </h3>
+    <aside
+      className="shrink-0 p-4 space-y-3 overflow-y-auto"
+      style={{
+        width: "280px",
+        borderLeft: "1px solid var(--border-subtle)",
+        background: "var(--bg-base)",
+      }}
+    >
+      <MetadataCard label="Status">
         <select
           value={issue.status}
           onChange={(e) =>
@@ -27,121 +72,157 @@ function MetadataSidebar({
               e.target.value as "open" | "in_progress" | "closed",
             )
           }
-          className="w-full px-2 py-1 text-sm border border-stone-300 rounded bg-white"
+          className="w-full px-2 py-1 text-sm rounded-md outline-none"
+          style={{
+            border: "1px solid var(--border-default)",
+            background: "var(--bg-elevated)",
+            color: "var(--text-primary)",
+          }}
         >
           <option value="open">Open</option>
           <option value="in_progress">In Progress</option>
           <option value="closed">Closed</option>
         </select>
-      </div>
-      <div>
-        <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-          Priority
-        </h3>
+      </MetadataCard>
+
+      <MetadataCard label="Priority">
         <select
           value={issue.priority}
           onChange={(e) =>
             onUpdate.updatePriority(issue.id, Number(e.target.value))
           }
-          className="w-full px-2 py-1 text-sm border border-stone-300 rounded bg-white"
+          className="w-full px-2 py-1 text-sm rounded-md outline-none"
+          style={{
+            border: "1px solid var(--border-default)",
+            background: "var(--bg-elevated)",
+            color: "var(--text-primary)",
+          }}
         >
           {[0, 1, 2, 3, 4].map((p) => (
-            <option key={p} value={p}>
-              P{p}
-            </option>
+            <option key={p} value={p}>P{p}</option>
           ))}
         </select>
-      </div>
-      <div>
-        <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-          Type
-        </h3>
+      </MetadataCard>
+
+      <MetadataCard label="Type">
         <TypeBadge type={issue.issue_type} />
-      </div>
-      <div>
-        <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-          Assignee
-        </h3>
-        <p className="text-sm text-stone-700">
-          {issue.assignee || "Unassigned"}
-        </p>
-      </div>
+      </MetadataCard>
+
+      <MetadataCard label="Assignee">
+        {issue.assignee ? (
+          <div className="flex items-center gap-2">
+            <div
+              className="flex items-center justify-center rounded-full text-[10px] font-bold shrink-0"
+              style={{
+                width: "24px",
+                height: "24px",
+                backgroundColor: getAvatarColor(issue.assignee),
+                color: "var(--text-inverse)",
+              }}
+            >
+              {getInitials(issue.assignee)}
+            </div>
+            <span className="text-sm" style={{ color: "var(--text-primary)" }}>{issue.assignee}</span>
+          </div>
+        ) : (
+          <span className="text-sm" style={{ color: "var(--text-tertiary)" }}>Unassigned</span>
+        )}
+      </MetadataCard>
+
+      <MetadataCard label="Updated">
+        <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{ts}</span>
+      </MetadataCard>
+
       {issue.labels && issue.labels.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-            Labels
-          </h3>
+        <MetadataCard label="Labels">
           <div className="flex flex-wrap gap-1">
             {issue.labels.map((l) => (
-              <span key={l} className="px-2 py-0.5 text-xs bg-stone-200 rounded">
+              <span
+                key={l}
+                className="px-2 py-0.5 text-xs rounded"
+                style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}
+              >
                 {l}
               </span>
             ))}
           </div>
-        </div>
+        </MetadataCard>
       )}
-      {/* Parent epic link */}
-      {(issue.parent_id || (issue as any).parent) && (
-        <div>
-          <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-            Parent
-          </h3>
+
+      {/* Parent */}
+      {parentId && (
+        <MetadataCard label="Parent">
           <a
-            href={`#/detail/${issue.parent_id || (issue as any).parent}`}
-            className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+            href={`#/detail/${parentId}`}
+            className="block rounded px-1 py-1 -mx-1 transition-colors"
+            style={{ color: "var(--text-primary)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--bg-hover)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
-            <span className="font-mono">{issue.parent_id || (issue as any).parent}</span>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              {parentStatus && <StatusBadge status={parentStatus} />}
+              <span className="font-mono text-xs" style={{ color: "var(--text-tertiary)" }}>{parentId}</span>
+            </div>
+            {parentTitle && (
+              <p className="text-xs leading-snug pl-0.5 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                {parentTitle}
+              </p>
+            )}
           </a>
-        </div>
+        </MetadataCard>
       )}
+
+      {/* Blocked By */}
       {(() => {
-        // Filter to only "blocks" deps where this issue depends on another (not parent-child, which is shown as Children)
         const blocksDeps = (issue.dependencies || []).filter(
           (dep: any) => dep.type === "blocks" && dep.issue_id === issue.id
         );
         if (blocksDeps.length === 0) return null;
         return (
-          <div>
-            <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-              Blocked By
-            </h3>
+          <MetadataCard label="Blocked By">
             <div className="space-y-1">
               {blocksDeps.map((dep: any) => (
                 <a
                   key={dep.depends_on_id}
                   href={`#/detail/${dep.depends_on_id}`}
-                  className="block text-xs font-mono text-blue-600 hover:underline px-1 py-0.5"
+                  className="block text-xs font-mono px-1 py-0.5 transition-colors"
+                  style={{ color: "var(--accent)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.textDecoration = "underline"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.textDecoration = "none"; }}
                 >
                   {dep.depends_on_id}
                 </a>
               ))}
             </div>
-          </div>
+          </MetadataCard>
         );
       })()}
+
+      {/* Children / Dependents (sidebar) */}
       {issue.dependents && issue.dependents.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-stone-500 uppercase mb-1">
-            Children / Dependents
-          </h3>
+        <MetadataCard label="Children / Dependents">
           <div className="space-y-1">
             {issue.dependents.map((dep) => (
               <a
                 key={dep.id}
                 href={`#/detail/${dep.id}`}
-                className="block text-xs hover:bg-stone-100 rounded px-1 py-1.5 -mx-1 transition-colors"
+                className="block text-xs rounded px-1 py-1.5 -mx-1 transition-colors"
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--bg-hover)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               >
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <StatusBadge status={dep.status} />
-                  <span className="font-mono text-stone-400">{dep.id}</span>
+                  <span className="font-mono" style={{ color: "var(--text-tertiary)" }}>{dep.id}</span>
                 </div>
                 {dep.title && (
-                  <p className="text-stone-700 text-xs leading-snug pl-0.5 line-clamp-2">{dep.title}</p>
+                  <p className="text-xs leading-snug pl-0.5 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                    {dep.title}
+                  </p>
                 )}
               </a>
             ))}
           </div>
-        </div>
+        </MetadataCard>
       )}
     </aside>
   );
@@ -158,8 +239,18 @@ function CommentsSection({ issueId }: { issueId: string }) {
   };
 
   return (
-    <div>
-      <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+    <div
+      className="rounded-lg p-4"
+      style={{
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-subtle)",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <h3
+        className="font-semibold uppercase tracking-wider mb-3"
+        style={{ fontSize: "11px", color: "var(--text-tertiary)" }}
+      >
         Comments
       </h3>
       <div className="flex gap-2">
@@ -168,7 +259,14 @@ function CommentsSection({ issueId }: { issueId: string }) {
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment... (Ctrl+Enter to submit)"
           rows={3}
-          className="flex-1 p-2 text-sm border border-stone-300 rounded bg-white resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 p-2 text-sm rounded-md resize-y outline-none"
+          style={{
+            border: "1px solid var(--border-default)",
+            background: "var(--bg-base)",
+            color: "var(--text-primary)",
+          }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border-default)"; }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey))
               handleAddComment();
@@ -177,7 +275,14 @@ function CommentsSection({ issueId }: { issueId: string }) {
       </div>
       <button
         onClick={handleAddComment}
-        className="mt-2 px-3 py-1 text-sm bg-stone-200 hover:bg-stone-300 rounded"
+        className="mt-2 px-3 py-1.5 text-sm rounded-md font-medium transition-colors"
+        style={{
+          background: "var(--bg-hover)",
+          color: "var(--text-primary)",
+          border: "1px solid var(--border-default)",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-default)"; }}
       >
         Add Comment
       </button>
@@ -190,24 +295,32 @@ export function Detail({ issueId }: { issueId: string }) {
   const mutations = useMutation();
   const issue = issues[0];
 
-  if (loading) return <div className="p-6 text-stone-400">Loading...</div>;
+  if (loading) return <div className="p-6" style={{ color: "var(--text-tertiary)" }}>Loading...</div>;
   if (!issue)
-    return <div className="p-6 text-stone-400">Issue not found</div>;
+    return <div className="p-6" style={{ color: "var(--text-tertiary)" }}>Issue not found</div>;
 
   return (
-    <div className="flex h-full">
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+    <div className="flex h-full" style={{ background: "var(--bg-base)" }}>
+      <div className="flex-1 overflow-y-auto p-6 space-y-5">
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 text-sm text-stone-400">
-          <a href="#/list" className="hover:text-stone-600">
-            List
+        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-tertiary)" }}>
+          <a
+            href="#/list"
+            className="flex items-center gap-1 transition-colors"
+            style={{ color: "var(--text-tertiary)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-tertiary)"; }}
+          >
+            &larr; List
           </a>
           <span>/</span>
           <span className="font-mono">{issue.id}</span>
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-stone-900">{issue.title}</h1>
+        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+          {issue.title}
+        </h1>
 
         {/* Description */}
         <SectionEditor
@@ -258,30 +371,33 @@ export function Detail({ issueId }: { issueId: string }) {
 
         {/* Children (epics only) */}
         {issue.issue_type === "epic" && issue.dependents && issue.dependents.length > 0 && (
-          <div>
-            <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+          <div
+            className="rounded-lg p-4"
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border-subtle)",
+              boxShadow: "var(--shadow-card)",
+            }}
+          >
+            <h3
+              className="font-semibold uppercase tracking-wider mb-3"
+              style={{ fontSize: "11px", color: "var(--text-tertiary)" }}
+            >
               Children ({issue.closed_children ?? 0} / {issue.total_children ?? issue.dependents.length})
             </h3>
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {issue.dependents.map((child) => (
                 <a
                   key={child.id}
                   href={`#/detail/${child.id}`}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-stone-100 transition-colors"
+                  className="flex items-center gap-2.5 px-2 py-2 rounded-md transition-colors"
                   style={{ opacity: child.status === "closed" ? 0.6 : 1 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--bg-hover)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 >
-                  <div
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{
-                      backgroundColor:
-                        child.status === "open" ? "var(--status-open)" :
-                        child.status === "in_progress" ? "var(--status-in-progress)" :
-                        child.status === "blocked" ? "var(--status-blocked)" :
-                        "var(--status-closed)",
-                    }}
-                  />
-                  <span className="text-xs font-mono text-stone-400">{child.id}</span>
-                  <span className="text-sm text-stone-700 truncate">{child.title}</span>
+                  <StatusBadge status={child.status} />
+                  <span className="text-xs font-mono" style={{ color: "var(--text-tertiary)" }}>{child.id}</span>
+                  <span className="text-sm truncate" style={{ color: "var(--text-primary)" }}>{child.title}</span>
                 </a>
               ))}
             </div>

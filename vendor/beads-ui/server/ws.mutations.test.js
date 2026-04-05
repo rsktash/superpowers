@@ -46,6 +46,53 @@ describe('ws mutation handlers', () => {
     expect(obj.payload.status).toBe('in_progress');
   });
 
+  test('update-status bd fallback hydrates parent context in response payload', async () => {
+    const mRun = /** @type {import('vitest').Mock} */ (runBd);
+    const mJson = /** @type {import('vitest').Mock} */ (runBdJson);
+    mRun.mockResolvedValueOnce({ code: 0, stdout: '', stderr: '' });
+    mJson
+      .mockResolvedValueOnce({
+        code: 0,
+        stdoutJson: {
+          id: 'UI-7',
+          status: 'in_progress',
+          parent: 'EP-1',
+          updated_at: '2024-01-01T00:00:00.000Z'
+        }
+      })
+      .mockResolvedValueOnce({
+        code: 0,
+        stdoutJson: {
+          id: 'EP-1',
+          title: 'Parent epic',
+          status: 'open',
+          issue_type: 'epic'
+        }
+      });
+
+    const ws = makeStubSocket();
+    const req = {
+      id: 'r1-parent',
+      type: 'update-status',
+      payload: { id: 'UI-7', status: 'in_progress' }
+    };
+    await handleMessage(
+      /** @type {any} */ (ws),
+      Buffer.from(JSON.stringify(req))
+    );
+
+    const obj = JSON.parse(ws.sent[ws.sent.length - 1]);
+    expect(obj.ok).toBe(true);
+    expect(obj.payload).toMatchObject({
+      id: 'UI-7',
+      parent: 'EP-1',
+      parent_id: 'EP-1',
+      parent_title: 'Parent epic',
+      parent_status: 'open',
+      parent_type: 'epic'
+    });
+  });
+
   test('update-status invalid payload yields bad_request', async () => {
     const ws = makeStubSocket();
     const req = {

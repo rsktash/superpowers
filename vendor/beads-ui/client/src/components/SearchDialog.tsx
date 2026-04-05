@@ -14,7 +14,6 @@ export function SearchDialog() {
   // Cmd+K to open, Escape to close
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Don't steal Cmd+K from textareas (e.g. SectionEditor)
       const tag = (e.target as HTMLElement)?.tagName;
       if (e.key === "k" && (e.metaKey || e.ctrlKey) && tag !== "TEXTAREA") {
         e.preventDefault();
@@ -68,9 +67,15 @@ export function SearchDialog() {
         setQuery("");
       }}
     >
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0" style={{ background: "var(--bg-overlay)" }} />
       <div
-        className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-stone-200"
+        className="relative w-full max-w-lg overflow-hidden"
+        style={{
+          background: "var(--bg-elevated)",
+          borderRadius: "var(--radius-lg)",
+          border: "1px solid var(--border-subtle)",
+          boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <input
@@ -80,11 +85,16 @@ export function SearchDialog() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Search issues..."
-          className="w-full px-4 py-3 text-sm border-b border-stone-200 focus:outline-none"
+          className="w-full px-4 py-3 text-sm outline-none"
+          style={{
+            borderBottom: "1px solid var(--border-subtle)",
+            background: "transparent",
+            color: "var(--text-primary)",
+          }}
         />
         <div className="max-h-80 overflow-y-auto">
           {shown.length === 0 && query && (
-            <div className="px-4 py-6 text-sm text-stone-400 text-center">
+            <div className="px-4 py-6 text-sm text-center" style={{ color: "var(--text-tertiary)" }}>
               No results
             </div>
           )}
@@ -96,21 +106,30 @@ export function SearchDialog() {
                 setOpen(false);
                 setQuery("");
               }}
-              className={`w-full flex items-center gap-3 px-4 py-2 text-sm text-left hover:bg-stone-50 ${
-                i === selectedIndex ? "bg-blue-50" : ""
-              }`}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors"
+              style={{
+                background: i === selectedIndex ? "var(--bg-hover)" : "transparent",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--bg-hover)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = i === selectedIndex ? "var(--bg-hover)" : "transparent"; }}
             >
-              <span className="font-mono text-xs text-stone-400 w-28 shrink-0">
+              <span className="font-mono text-xs w-28 shrink-0" style={{ color: "var(--text-tertiary)" }}>
                 {issue.id}
               </span>
               <StatusBadge status={issue.status} />
-              <span className="flex-1 truncate">{issue.title}</span>
+              <span className="flex-1 truncate" style={{ color: "var(--text-primary)" }}>{issue.title}</span>
               <PriorityBadge priority={issue.priority} />
             </button>
           ))}
         </div>
-        <div className="px-4 py-2 text-xs text-stone-400 border-t border-stone-100">
-          ↑↓ navigate · ↵ open · esc close
+        <div
+          className="px-4 py-2 text-xs"
+          style={{
+            color: "var(--text-tertiary)",
+            borderTop: "1px solid var(--border-subtle)",
+          }}
+        >
+          &uarr;&darr; navigate &middot; &crarr; open &middot; esc close
         </div>
       </div>
     </div>
