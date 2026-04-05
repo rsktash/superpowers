@@ -29,6 +29,13 @@ Only after beads is available AND initialized → proceed.
 
 **Storage:** Task beads are created via `bd create --parent <root-id> --json`, which gives them hierarchical IDs (e.g., `bd-a3f8.1`). Sequential task ordering uses `bd dep add` (default `blocks` type).
 
+## bd Default Behaviors
+
+- **Create child beads sequentially, not in parallel.** `--parent` assigns sequential IDs (`.1`, `.2`, `.3`). Parallel creates cause ID conflicts and failures.
+- **`bd list`** shows **open issues only** by default. Use `--all` to include closed.
+- **`bd show <id> --json`** works on any bead regardless of status. This is the reliable way to inspect any bead.
+- **`bd close`** on the last open child may **auto-close the parent epic**. This is expected behavior.
+
 ## Scope Check
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.

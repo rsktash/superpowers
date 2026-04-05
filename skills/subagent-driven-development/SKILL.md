@@ -21,6 +21,13 @@ If beads is available but no `.beads/` directory exists → ask user: "Run `bd i
 Only after beads is available AND initialized → proceed.
 </HARD-GATE>
 
+## bd Default Behaviors
+
+- **`bd list`** shows **open issues only** by default. Use `--all` to include closed.
+- **`bd show <id> --json`** works on any bead regardless of status. Always use this to inspect beads.
+- **`bd close`** on the last open child may **auto-close the parent epic**. Check via `bd show` — the epic may already be closed.
+- **`bd epic status`** shows **open epics only**. Closed epics do not appear.
+
 ## When to Use
 
 ```dot

@@ -1,6 +1,6 @@
 # Embed beads and beads-ui in superpowers-beads plugin
 
-**Bead:** `superpowers-pfu`
+**Bead:** `superpowers-vzq` (originally `superpowers-pfu`, recreated)
 
 The superpowers-beads plugin currently requires users to install `bd` and `beads-ui` globally. LLMs reading install instructions from skills improvise badly — trying wrong package names and wasting tokens. This spec replaces that with a deterministic install script (`scripts/install-deps.sh`) that runs automatically via the session-start hook, downloads `bd` and `beads-ui` into `vendor/bin/`, and injects them onto PATH via `CLAUDE_ENV_FILE`. Global installs are detected and respected. Versions are pinned in `vendor/versions.json`.
 

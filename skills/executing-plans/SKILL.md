@@ -21,6 +21,17 @@ If beads is available but no `.beads/` directory exists → ask user: "Run `bd i
 Only after beads is available AND initialized → proceed.
 </HARD-GATE>
 
+## bd Default Behaviors
+
+These defaults cause subtle bugs if you assume otherwise:
+
+- **`bd list`** shows **open issues only** by default. Use `--all` to include closed, or `--status=closed` for closed only.
+- **`bd ready`** excludes in_progress, blocked, deferred, and hooked issues. It returns only truly claimable open work. An empty JSON array `[]` means no ready work remains.
+- **`bd epic status`** shows **open epics only**. Closed epics do not appear. Use `bd show <epic-id> --json` to inspect a closed epic.
+- **`bd show <id> --json`** works on any bead regardless of status (open, closed, etc.). This is the reliable way to inspect any bead.
+- **`bd close`** on the last open child of an epic may **auto-close the parent epic**. Do not assume the epic is still open after closing all children.
+- **`bd create --parent`** assigns sequential hierarchical IDs (e.g., `.1`, `.2`, `.3`). Create child beads **sequentially**, not in parallel — parallel creates can fail due to ID conflicts.
+
 ## The Process
 
 ### Step 1: Load and Review Tasks
@@ -34,15 +45,17 @@ Only after beads is available AND initialized → proceed.
 
 ### Step 2: Execute Tasks
 
-Loop until `bd ready --parent <root-id> --json` returns no tasks:
+Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
 
-1. `bd ready --parent <root-id> --json` — get next unblocked task
+1. `bd ready --parent <root-id> --json` — get next unblocked task (returns `[]` when all tasks are done or blocked)
 2. `bd show <task-id> --json` — read task content (steps, code, verification commands)
 3. `bd update <task-id> --claim` — mark in_progress (atomic assignment)
 4. Execute each step from the task body
 5. After each step completes, post progress: `bd comments add <task-id> "Step N complete"`
 6. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
 7. Loop back to step 1
+
+**Note:** Closing the last child task may auto-close the parent epic. This is expected — the epic will still be accessible via `bd show`.
 
 Progress is visible in beads-ui in real time. Step-level progress persisted via comments enables recovery if execution is interrupted.
 

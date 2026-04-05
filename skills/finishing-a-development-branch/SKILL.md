@@ -25,6 +25,13 @@ Only after beads is available AND initialized → proceed.
 
 ## The Process
 
+### bd Default Behaviors
+
+- **`bd show <id> --json`** works on any bead regardless of status. Always use this to inspect beads — not `bd list` or `bd epic status`, which filter by default.
+- **`bd list`** shows **open issues only** by default. Use `--all` to include closed.
+- **`bd epic status`** shows **open epics only**. A closed epic will not appear.
+- **`bd close`** on the last open child may **auto-close the parent epic**. Check via `bd show` — the epic may already be closed.
+
 ### Step 1: Verify Tests
 
 **Before presenting options, verify tests pass:**
@@ -105,11 +112,12 @@ git merge <feature-branch>
 # If tests pass
 git branch -d <feature-branch>
 
-# Verify all task beads are closed before closing epic
+# Check epic status — may have been auto-closed when last child was closed
 bd show <root-bead-id> --json
-# Check that all child beads have status "closed". If any are open/in_progress, stop and report.
+# If status is already "closed" → skip bd close (auto-closed is fine)
+# If status is "open" → verify all children are "closed", then close it:
 
-# Close the root epic bead
+# Close the root epic bead (only if still open)
 bd close <root-bead-id> --reason "All tasks complete, merged to <base-branch>"
 ```
 
@@ -133,11 +141,12 @@ gh pr create --title "<title> (<bead-id>)" --body "$(cat <<'EOF'
 EOF
 )"
 
-# Verify all task beads are closed before closing epic
+# Check epic status — may have been auto-closed when last child was closed
 bd show <root-bead-id> --json
-# Check that all child beads have status "closed". If any are open/in_progress, stop and report.
+# If status is already "closed" → skip bd close (auto-closed is fine)
+# If status is "open" → verify all children are "closed", then close it:
 
-# Close the root epic bead
+# Close the root epic bead (only if still open)
 bd close <root-bead-id> --reason "All tasks complete, PR created"
 ```
 
