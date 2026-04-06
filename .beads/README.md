@@ -23,7 +23,7 @@ bd list
 bd show <issue-id>
 
 # Update issue status
-bd update <issue-id> --claim
+bd update <issue-id> --assignee "$(git config user.name) / <model-name>"
 bd update <issue-id> --status done
 
 # Sync with Dolt remote

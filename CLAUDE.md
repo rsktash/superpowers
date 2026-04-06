@@ -94,7 +94,7 @@ This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full 
 ```bash
 bd ready              # Find available work
 bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
+bd update <id> --assignee "$(git config user.name) / <model-name>"  # Claim work (e.g. "Alex / Claude Opus 4.6")
 bd close <id>         # Complete work
 ```
 
