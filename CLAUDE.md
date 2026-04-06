@@ -104,6 +104,7 @@ bd close <id>         # Complete work
 - Run `bd prime` for detailed command reference and session close protocol
 - Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
 - Reference issues with `#issue-id` in markdown (e.g., `#yuklar-985`) — auto-linked in beads-ui
+- Deep link to sections: `#yuklar-985#section-slug` (e.g., `#yuklar-985#audit-mockup`)
 - Use `attach://path` for file attachments in markdown — resolved at render time
 
 ## Session Completion
