@@ -13,25 +13,9 @@ Guide completion of development work by presenting clear options and handling ch
 
 **Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
 
-<HARD-GATE>
-## Step 0: Verify beads (MUST complete before ANY other action)
-
-Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → tell your human partner: "Beads (`bd`) is not available. It should have been auto-installed by the session-start hook. Try restarting Claude Code, or run `$CLAUDE_PLUGIN_ROOT/scripts/install-deps.sh` manually." STOP. Do NOT proceed. Do NOT launch parallel work.
-
-If beads is available but no `.beads/` directory exists → ask user: "Run `bd init` to set up beads in this project?" and WAIT.
-
-Only after beads is available AND initialized → proceed.
-</HARD-GATE>
+**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
 ## The Process
-
-### bd Default Behaviors
-
-- **`bd show <id> --json`** works on any bead regardless of status. Always use this to inspect beads — not `bd list` or `bd epic status`, which filter by default.
-- **`bd list`** shows **open issues only** by default. Use `--all` to include closed.
-- **`bd epic status`** shows **open epics only**. A closed epic will not appear.
-- **`bd close`** on the last open child may **auto-close the parent epic**. Check via `bd show` — the epic may already be closed.
-- **`bd update` body from stdin:** use `bd update <id> --stdin`, NOT `--body --stdin`. The `--body` flag does not exist.
 
 ### Step 1: Verify Tests
 

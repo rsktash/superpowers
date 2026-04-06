@@ -11,23 +11,7 @@ Execute plan by dispatching fresh subagent per task, with two-stage review after
 
 **Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
 
-<HARD-GATE>
-## Step 0: Verify beads (MUST complete before ANY other action)
-
-Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → tell your human partner: "Beads (`bd`) is not available. It should have been auto-installed by the session-start hook. Try restarting Claude Code, or run `$CLAUDE_PLUGIN_ROOT/scripts/install-deps.sh` manually." STOP. Do NOT proceed. Do NOT launch parallel work.
-
-If beads is available but no `.beads/` directory exists → ask user: "Run `bd init` to set up beads in this project?" and WAIT.
-
-Only after beads is available AND initialized → proceed.
-</HARD-GATE>
-
-## bd Default Behaviors
-
-- **`bd list`** shows **open issues only** by default. Use `--all` to include closed.
-- **`bd show <id> --json`** works on any bead regardless of status. Always use this to inspect beads.
-- **`bd close`** on the last open child may **auto-close the parent epic**. Check via `bd show` — the epic may already be closed.
-- **`bd epic status`** shows **open epics only**. Closed epics do not appear.
-- **`bd update` body from stdin:** use `bd update <id> --stdin`, NOT `--body --stdin`. The `--body` flag does not exist.
+**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
 ## When to Use
 

@@ -15,28 +15,11 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
-<HARD-GATE>
-## Step 0: Verify beads (MUST complete before ANY other action)
-
-Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → tell your human partner: "Beads (`bd`) is not available. It should have been auto-installed by the session-start hook. Try restarting Claude Code, or run `$CLAUDE_PLUGIN_ROOT/scripts/install-deps.sh` manually." STOP. Do NOT proceed. Do NOT launch parallel work.
-
-If beads is available but no `.beads/` directory exists → ask user: "Run `bd init` to set up beads in this project?" and WAIT.
-
-Only after beads is available AND initialized → proceed.
-</HARD-GATE>
-
 **Input:** Receives a root bead ID from the brainstorming skill. All tasks are created as beads under this root.
 
 **Storage:** Task beads are created via `bd create --parent <root-id> --json`, which gives them hierarchical IDs (e.g., `bd-a3f8.1`). Sequential task ordering uses `bd dep add` (default `blocks` type).
 
-## bd Default Behaviors
-
-- **Create child beads sequentially, not in parallel.** `--parent` assigns sequential IDs (`.1`, `.2`, `.3`). Parallel creates cause ID conflicts and failures.
-- **`bd list`** shows **open issues only** by default. Use `--all` to include closed.
-- **`bd show <id> --json`** works on any bead regardless of status. This is the reliable way to inspect any bead.
-- **`bd close`** on the last open child may **auto-close the parent epic**. This is expected behavior.
-- **`bd update` body from stdin:** use `bd update <id> --stdin`, NOT `--body --stdin`. The `--body` flag does not exist — it gets parsed as an argument and silently corrupts the description.
-- **`bd create` body from file:** use `bd create --body-file <path>` or `--stdin`. Write to `.beads/.scratch/` first so the Edit tool shows diffs for user review.
+**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
 ## Scope Check
 
@@ -89,7 +72,7 @@ Parse JSON output from `bd create --json` to extract the new bead ID.
 
 ## Task Structure
 
-The task content below is what gets piped into `bd create --stdin`. The markdown formatting is preserved in the bead body for readability in beads-ui.
+The task content below is what gets written to `.beads/.scratch/task-N.md` and created via `bd create --body-file`. The markdown formatting is preserved in the bead body for readability in beads-ui.
 
 **Markdown conventions for beads-ui:**
 - Reference other issues with `#issue-id` (e.g., `#yuklar-985`) — auto-linked in the UI

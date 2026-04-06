@@ -11,27 +11,7 @@ Load task beads from beads, review critically, execute all tasks, report when co
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-<HARD-GATE>
-## Step 0: Verify beads (MUST complete before ANY other action)
-
-Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → tell your human partner: "Beads (`bd`) is not available. It should have been auto-installed by the session-start hook. Try restarting Claude Code, or run `$CLAUDE_PLUGIN_ROOT/scripts/install-deps.sh` manually." STOP. Do NOT proceed. Do NOT launch parallel work.
-
-If beads is available but no `.beads/` directory exists → ask user: "Run `bd init` to set up beads in this project?" and WAIT.
-
-Only after beads is available AND initialized → proceed.
-</HARD-GATE>
-
-## bd Default Behaviors
-
-These defaults cause subtle bugs if you assume otherwise:
-
-- **`bd list`** shows **open issues only** by default. Use `--all` to include closed, or `--status=closed` for closed only.
-- **`bd ready`** excludes in_progress, blocked, deferred, and hooked issues. It returns only truly claimable open work. An empty JSON array `[]` means no ready work remains.
-- **`bd epic status`** shows **open epics only**. Closed epics do not appear. Use `bd show <epic-id> --json` to inspect a closed epic.
-- **`bd show <id> --json`** works on any bead regardless of status (open, closed, etc.). This is the reliable way to inspect any bead.
-- **`bd close`** on the last open child of an epic may **auto-close the parent epic**. Do not assume the epic is still open after closing all children.
-- **`bd create --parent`** assigns sequential hierarchical IDs (e.g., `.1`, `.2`, `.3`). Create child beads **sequentially**, not in parallel — parallel creates can fail due to ID conflicts.
-- **`bd update` body from stdin:** use `bd update <id> --stdin`, NOT `--body --stdin`. The `--body` flag does not exist — it gets parsed as an argument and silently corrupts the description.
+**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
 ## The Process
 

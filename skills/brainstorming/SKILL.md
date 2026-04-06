@@ -13,15 +13,7 @@ Start by understanding the current project context, then ask questions one at a 
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
 
-<HARD-GATE>
-## Step 0: Verify beads (MUST complete before ANY other action)
-
-Check session context for `<beads-status>`. If `BEADS_AVAILABLE=false` → tell your human partner: "Beads (`bd`) is not available. It should have been auto-installed by the session-start hook. Try restarting Claude Code, or run `$CLAUDE_PLUGIN_ROOT/scripts/install-deps.sh` manually." STOP. Do NOT proceed to any checklist item. Do NOT launch parallel work. Do NOT explore the codebase.
-
-If beads is available but no `.beads/` directory exists → ask user: "Run `bd init` to set up beads in this project?" and WAIT.
-
-Only after beads is available AND initialized → proceed.
-</HARD-GATE>
+**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
