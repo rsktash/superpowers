@@ -91,6 +91,10 @@ Parse JSON output from `bd create --json` to extract the new bead ID.
 
 The task content below is what gets piped into `bd create --stdin`. The markdown formatting is preserved in the bead body for readability in beads-ui.
 
+**Markdown conventions for beads-ui:**
+- Reference other issues with `#issue-id` (e.g., `#yuklar-985`) — auto-linked in the UI
+- Use `attach://path` for file attachments — resolved via `FILE_ATTACHMENT_BASE_URL`
+
 ````markdown
 ### Task N: [Component Name]
 

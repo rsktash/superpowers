@@ -103,6 +103,8 @@ bd close <id>         # Complete work
 - Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
 - Run `bd prime` for detailed command reference and session close protocol
 - Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
+- Reference issues with `#issue-id` in markdown (e.g., `#yuklar-985`) — auto-linked in beads-ui
+- Use `attach://path` for file attachments in markdown — resolved at render time
 
 ## Session Completion
 
