@@ -30,9 +30,12 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
 
 1. `bd ready --parent <root-id> --json` — get next unblocked task (returns `[]` when all tasks are done or blocked)
 2. `bd show <task-id> --json` — read task content (steps, code, verification commands)
-3. `bd update <task-id> --assignee "$(git config user.name) / <model-name>"` — mark in_progress (e.g. "Alex / Claude Opus 4.6")
+3. `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"` — claim and start work (e.g. "Alex / Claude Opus 4.6")
 4. Execute each step from the task body
-5. After each step completes, post progress: `bd comments add <task-id> "Step N complete"`
+5. After each step completes, mark the checkbox done and post progress:
+   - Write the updated description (with `- [ ]` → `- [x]`) to `.beads/.scratch/progress.md`
+   - `bd update <task-id> --body-file .beads/.scratch/progress.md`
+   - `bd comments add <task-id> "Step N complete"`
 6. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
 7. Loop back to step 1
 
