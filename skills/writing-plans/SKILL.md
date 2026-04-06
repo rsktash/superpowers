@@ -93,8 +93,8 @@ The task content below is what gets piped into `bd create --stdin`. The markdown
 
 **Markdown conventions for beads-ui:**
 - Reference other issues with `#issue-id` (e.g., `#yuklar-985`) — auto-linked in the UI
-- Deep link to predefined sections: `/detail/issue-id#description`, `#acceptance-criteria`, `#notes`, `#design`
-- Deep link to content headings: `/detail/issue-id#heading-slug` (e.g., `/detail/yuklar-985#misjudgments`)
+- Deep link to sections using markdown links: `[label](/detail/issue-id#fragment)` where fragment is one of: `description`, `acceptance-criteria`, `notes`, `design`, or any content heading slug
+- Example: `[see route visualization](/detail/yuklar-985#misjudgments)`
 - Use `attach://path` for file attachments — resolved via `FILE_ATTACHMENT_BASE_URL`
 
 ````markdown
