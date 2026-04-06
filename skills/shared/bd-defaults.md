@@ -23,3 +23,7 @@ Do NOT use `notes` field — no `--notes-file` flag exists. Put content in `desc
 Do NOT use inline `--design="..."` or `--description="..."` for content longer than one line. Always use file-based updates.
 
 Do NOT use `--stdin` for piping content. Use `--body-file` instead — it enables Edit tool diffs for review.
+
+## Attachments
+
+Bead content may embed images and files via custom URI schemes. These render in web UIs but `bd show` outputs raw markdown. When a bead references images relevant to your work, resolve them to local files and view them before proceeding.

@@ -105,7 +105,7 @@ bd close <id>         # Complete work
 - Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
 - Reference issues with `#issue-id` in markdown (e.g., `#yuklar-985`) — auto-linked in beads-ui
 - Deep link to issue sections: `#issue-id#section` — sections: `description`, `acceptance-criteria`, `notes`, `design`
-- Use `attach://path` for file attachments in markdown — resolved at render time
+- If the project supports image attachments in bead content, use them for screenshots and mockups
 
 ## Session Completion
 

@@ -78,7 +78,7 @@ The task content below is what gets written to `.beads/.scratch/task-N.md` and c
 - Reference other issues with `#issue-id` (e.g., `#yuklar-985`) — auto-linked in the UI
 - Deep link to sections using markdown links: `[label](/detail/issue-id#fragment)` where fragment is one of: `description`, `acceptance-criteria`, `notes`, `design`, or any content heading slug
 - Example: `[see route visualization](/detail/yuklar-985#misjudgments)`
-- Use `attach://path` for file attachments — resolved via `FILE_ATTACHMENT_BASE_URL`
+- If the spec bead contains image references (mockups, screenshots), carry relevant references into task beads so the executing agent can view them without navigating back to the spec
 
 ````markdown
 ### Task N: [Component Name]

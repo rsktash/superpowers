@@ -129,7 +129,8 @@ digraph brainstorming {
     - `{short-title}`: slugified feature name
   - Contents: one-paragraph summary, key design decisions, acceptance criteria
   - This file is an **immutable snapshot** — written once, never updated. The bead is the source of truth.
-- Commit the summary file to git
+- If mockups were created during brainstorming, export them as image files and embed references in the spec bead so downstream skills can find and view them. Check the project's CLAUDE.md or documentation for attachment storage conventions (directory structure, URI scheme, naming). If no convention exists, store exported images alongside the summary file and use relative paths in the bead content.
+- Commit the summary file and any exported mockups to git
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 
 **Spec Self-Review:**
@@ -166,19 +167,24 @@ Wait for the user's response. If they request changes, update the bead and re-ru
 
 ## Visual Companion
 
-A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
+A visual companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question gets visuals.
 
-**Offering the companion:** When you anticipate that upcoming questions will involve visual content (mockups, layouts, diagrams), offer it once for consent:
-> "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
+**Companion selection:** If the Pencil MCP server is available (pencil tools like `batch_design`, `get_screenshot` are present), use it as the visual companion. Otherwise, fall back to the browser-based companion.
+
+**Offering the companion:** When you anticipate that upcoming questions will involve visual content (mockups, layouts, diagrams), or the user asks for visuals, offer it once for consent:
+
+- **Pencil available:** > "Some of what we're working on might be easier to show visually. I can create mockups and wireframes in Pencil as we go. Want to try it?"
+- **Browser fallback:** > "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
 
 **This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
 
-**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
+**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use visuals or the terminal. The test: **would the user understand this better by seeing it than reading it?**
 
-- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
+- **Use visuals** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
 - **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions
 
-A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
+A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use visuals.
 
 If they agree to the companion, read the detailed guide before proceeding:
-`skills/brainstorming/visual-companion.md`
+- **Pencil:** `skills/brainstorming/visual-companion-pencil.md`
+- **Browser:** `skills/brainstorming/visual-companion.md`
