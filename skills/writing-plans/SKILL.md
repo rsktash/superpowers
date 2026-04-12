@@ -88,6 +88,11 @@ The task content below is what gets written to `.beads/.scratch/task-N.md` and c
 - Modify: `exact/path/to/existing.py:123-145`
 - Test: `tests/exact/path/to/test.py`
 
+**Before you start:**
+- Read: `exact/path/to/existing.py` — understand current interface, callers, and return types
+- Read: `exact/path/to/related_dependency.py` — dependency this task relies on
+- Rules: `.claude/rules/relevant.md` — project rules for the area being changed (if they exist)
+
 - [ ] **Step 1: Write the failing test**
 
 ```python
@@ -130,6 +135,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
+- Tasks that modify existing files without a "Before you start" section
 
 ## Remember
 - Exact file paths always
@@ -144,6 +150,8 @@ After creating all task beads, review the plan against the spec. This is a check
 **1. Spec coverage:** Read the root spec bead via `bd show <root-id> --json` and verify each requirement has a corresponding task bead. List any gaps.
 
 **2. Placeholder scan:** Read each task bead via `bd show <task-id> --json` and check for red flags — any of the patterns from the "No Placeholders" section above. Fix them by updating the bead.
+
+**2b. Attention anchors:** Does every task that modifies existing files have a "Before you start" section listing what to read? Does every task touching a rule-governed area reference the relevant `.claude/rules/` file? If not, add them.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 

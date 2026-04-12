@@ -29,17 +29,23 @@ Task tool (general-purpose):
     ## Your Job
 
     Once you're clear on requirements:
-    1. Implement exactly what the task specifies
-    2. Write tests (following TDD if task says to)
-    3. Verify implementation works
-    4. Commit your work
-    5. Self-review (see below)
-    6. Report back
+    1. Read everything listed in "Before you start" (files, rules, callers) — understand the code you're about to change
+    2. Implement exactly what the task specifies
+    3. Write tests (following TDD if task says to)
+    4. Verify implementation works
+    5. Commit your work
+    6. Self-review (see below)
+    7. Report back
 
     Work from: [directory]
 
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.
+
+    **Edit discipline:** Do not edit a file you haven't read. When a test fails after your
+    edit, read the full error output before touching the file again. If your second edit
+    also fails, stop — report as DONE_WITH_CONCERNS or BLOCKED. Do not attempt a third
+    variation of the same fix.
 
     ## Code Organization
 

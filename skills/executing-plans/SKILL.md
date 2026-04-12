@@ -33,14 +33,17 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
 3. `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"` — claim and start work (e.g. "Alex / Claude Opus 4.6")
 4. If the task body contains image references, resolve them to local files and view them before implementing.
 5. For each step in the task body:
-   a. Execute the step
-   b. Persist progress immediately — do NOT proceed to the next step until this is done:
+   a. If this is the first step: read everything listed in "Before you start" — files, rules, callers. Do not skip this.
+   b. Execute the step
+   c. Persist progress immediately — do NOT proceed to the next step until this is done:
       - Write the updated description (with `- [ ]` → `- [x]`) to `.beads/.scratch/progress.md`
       - `bd update <task-id> --body-file .beads/.scratch/progress.md`
 6. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
 7. Loop back to step 1
 
 **Why persist after every step?** If the session is interrupted mid-task, checkboxes are the only record of which steps completed. The next session uses them to resume from where you left off. Skipping this creates unrecoverable ambiguity.
+
+**When a step fails:** Do not retry the same edit. Read the error output fully, then use superpowers:systematic-debugging to diagnose before touching the file again. The second edit must fix a diagnosed cause, not adjust the previous guess.
 
 **Note:** Closing the last child task may auto-close the parent epic. This is expected — the epic will still be accessible via `bd show`.
 
@@ -89,11 +92,10 @@ Your human partner decides. You do not.
 **Don't force through blockers** - stop and ask.
 
 ## Remember
-- Review tasks critically first
-- Follow task steps exactly
-- Don't skip verifications
-- Reference skills when task says to
-- Stop when blocked, don't guess
+- Read "Before you start" before the first step of every task
+- One well-researched edit beats five speculative ones — if you cannot explain why an edit will work, read more first
+- When a step fails, diagnose before re-editing — use superpowers:systematic-debugging
+- After 2 failed attempts at the same step, stop and ask your human partner
 - Never start implementation on main/master branch without explicit user consent
 
 ## Integration

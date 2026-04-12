@@ -103,6 +103,7 @@ digraph brainstorming {
 **Working in existing codebases:**
 
 - Explore the current structure before proposing changes. Follow existing patterns.
+- Check for project coding rules (CLAUDE.md, .claude/rules/) — designs must respect existing project constraints. Reference relevant rules in the spec so downstream skills inherit them.
 - Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
 - Don't propose unrelated refactoring. Stay focused on what serves the current goal.
 
