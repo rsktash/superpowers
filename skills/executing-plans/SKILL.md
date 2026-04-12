@@ -32,13 +32,15 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
 2. `bd show <task-id> --json` — read task content (steps, code, verification commands)
 3. `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"` — claim and start work (e.g. "Alex / Claude Opus 4.6")
 4. If the task body contains image references, resolve them to local files and view them before implementing.
-5. Execute each step from the task body
-6. After each step completes, mark the checkbox done and post progress:
-   - Write the updated description (with `- [ ]` → `- [x]`) to `.beads/.scratch/progress.md`
-   - `bd update <task-id> --body-file .beads/.scratch/progress.md`
-   - `bd comments add <task-id> "Step N complete"`
-7. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
-8. Loop back to step 1
+5. For each step in the task body:
+   a. Execute the step
+   b. Persist progress immediately — do NOT proceed to the next step until this is done:
+      - Write the updated description (with `- [ ]` → `- [x]`) to `.beads/.scratch/progress.md`
+      - `bd update <task-id> --body-file .beads/.scratch/progress.md`
+6. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
+7. Loop back to step 1
+
+**Why persist after every step?** If the session is interrupted mid-task, checkboxes are the only record of which steps completed. The next session uses them to resume from where you left off. Skipping this creates unrecoverable ambiguity.
 
 **Note:** Closing the last child task may auto-close the parent epic. This is expected — the epic will still be accessible via `bd show`.
 
@@ -61,15 +63,22 @@ After all tasks complete and verified:
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
 
-## When to Stop and Ask for Help
+## When to Stop and Ask Your Human Partner
 
-**STOP executing immediately when:**
-- Hit a blocker (missing dependency, test fails, instruction unclear)
-- Task bead has critical gaps preventing starting
-- You don't understand an instruction
-- Verification fails repeatedly
+**When you encounter work not described in the current task — stop.** Do not skip it. Do not guess.
 
-**Ask for clarification rather than guessing.**
+This includes:
+- A missing dependency, API, or component that must exist for your task to proceed
+- A bug or edge case unrelated to the current task
+- A test that requires functionality not yet implemented
+- An instruction you don't understand
+- A verification that fails repeatedly
+
+Present two options:
+1. Address it now — expand the current session's scope
+2. Create a draft bead and continue — `bd create "<title>" --status=draft --parent <root-id>`
+
+Your human partner decides. You do not.
 
 ## When to Revisit Earlier Steps
 
