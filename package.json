@@ -1,5 +1,5 @@
 {
-  "name": "superpowers",
+  "name": "superpowers-beads",
   "version": "1.2.12",
   "type": "module",
   "main": ".opencode/plugins/superpowers.js",
