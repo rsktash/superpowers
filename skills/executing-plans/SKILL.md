@@ -29,17 +29,21 @@ Load task beads from beads, review critically, execute all tasks, report when co
 Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
 
 1. `bd ready --parent <root-id> --json` — get next unblocked task (returns `[]` when all tasks are done or blocked)
-2. `bd show <task-id> --json` — read task content (steps, code, verification commands)
-3. `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"` — claim and start work (e.g. "Alex / Claude Opus 4.6")
-4. If the task body contains image references, resolve them to local files and view them before implementing.
-5. For each step in the task body:
+2. Read task and set assignee (do NOT use --claim):
+   ```bash
+   bd show <task-id> --json
+   bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
+   ```
+   Example assignee: "Alex / Claude Opus 4.6"
+3. If the task body contains image references, resolve them to local files and view them before implementing.
+4. For each step in the task body:
    a. If this is the first step: read everything listed in "Before you start" — files, rules, callers. Do not skip this.
    b. Execute the step
    c. Persist progress immediately — do NOT proceed to the next step until this is done:
       - Write the updated description (with `- [ ]` → `- [x]`) to `.beads/.scratch/progress.md`
       - `bd update <task-id> --body-file .beads/.scratch/progress.md`
-6. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
-7. Loop back to step 1
+5. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
+6. Loop back to step 1
 
 **Why persist after every step?** If the session is interrupted mid-task, checkboxes are the only record of which steps completed. The next session uses them to resume from where you left off. Skipping this creates unrecoverable ambiguity.
 
