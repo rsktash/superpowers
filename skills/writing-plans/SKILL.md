@@ -172,9 +172,9 @@ After all task beads are created and linked, offer execution choice:
 Pass the root bead ID to the chosen execution skill.
 
 **If Inline Execution chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
+- **REQUIRED SUB-SKILL:** Use superpowers-beads:executing-plans
 - Execution driven by `bd ready --parent <root-id> --json`
 
 **If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
+- **REQUIRED SUB-SKILL:** Use superpowers-beads:subagent-driven-development
 - Fresh subagent per task + two-stage review

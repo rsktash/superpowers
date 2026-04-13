@@ -47,7 +47,7 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
 
 **Why persist after every step?** If the session is interrupted mid-task, checkboxes are the only record of which steps completed. The next session uses them to resume from where you left off. Skipping this creates unrecoverable ambiguity.
 
-**When a step fails:** Do not retry the same edit. Read the error output fully, then use superpowers:systematic-debugging to diagnose before touching the file again. The second edit must fix a diagnosed cause, not adjust the previous guess.
+**When a step fails:** Do not retry the same edit. Read the error output fully, then use superpowers-beads:systematic-debugging to diagnose before touching the file again. The second edit must fix a diagnosed cause, not adjust the previous guess.
 
 **Note:** Closing the last child task may auto-close the parent epic. This is expected — the epic will still be accessible via `bd show`.
 
@@ -67,7 +67,7 @@ If starting a new session to continue work on an existing feature:
 After all tasks complete and verified:
 - Pass the root bead ID to finishing-a-development-branch so it can close the epic and include the bead ID in commits.
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
+- **REQUIRED SUB-SKILL:** Use superpowers-beads:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
 
 ## When to Stop and Ask Your Human Partner
@@ -98,13 +98,13 @@ Your human partner decides. You do not.
 ## Remember
 - Read "Before you start" before the first step of every task
 - One well-researched edit beats five speculative ones — if you cannot explain why an edit will work, read more first
-- When a step fails, diagnose before re-editing — use superpowers:systematic-debugging
+- When a step fails, diagnose before re-editing — use superpowers-beads:systematic-debugging
 - After 2 failed attempts at the same step, stop and ask your human partner
 - Never start implementation on main/master branch without explicit user consent
 
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers:writing-plans** - Creates the task beads this skill executes
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+- **superpowers-beads:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
+- **superpowers-beads:writing-plans** - Creates the task beads this skill executes
+- **superpowers-beads:finishing-a-development-branch** - Complete development after all tasks
