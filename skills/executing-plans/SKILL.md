@@ -35,15 +35,26 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
    bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
    ```
    Example assignee: "Alex / Claude Opus 4.6"
-3. If the task body contains image references, resolve them to local files and view them before implementing.
-4. For each step in the task body:
+3. Extract the **Acceptance Gate** from the task body. These are the machine-verifiable completion criteria (lines starting with `- [ ]` under the "Acceptance Gate" heading). Keep these visible — you will re-read them between steps and verify them before closing.
+4. If the task body contains image references, resolve them to local files and view them before implementing.
+5. For each step in the task body:
    a. If this is the first step: read everything listed in "Before you start" — files, rules, callers. Do not skip this.
-   b. Execute the step
-   c. Persist progress immediately — do NOT proceed to the next step until this is done:
+   b. **Attention refresh:** Before executing, re-read the Acceptance Gate items. This counters attention drift — after 3-4 tool calls, the LLM's focus on initial goals decays. Re-injecting the gate keeps generative attention on the actual completion criteria.
+   c. Execute the step
+   d. Persist progress immediately — do NOT proceed to the next step until this is done:
       - Write the updated description (with `- [ ]` → `- [x]`) to `.beads/.scratch/progress.md`
       - `bd update <task-id> --body-file .beads/.scratch/progress.md`
-5. `bd close <task-id> --reason "Done"` — mark complete, unblocks dependents
-6. Loop back to step 1
+6. **Verify Acceptance Gate** before closing:
+   - Re-read the Acceptance Gate items from the task body
+   - For each item, run the verification command (test, file check, grep for export)
+   - If ALL items pass: `bd close <task-id> --reason "Done — all gate items verified"`
+   - If ANY item fails: Do NOT close. Instead:
+     a. Identify which gate items failed and why
+     b. Fix the failing items (this may mean re-executing steps or writing new code)
+     c. Re-verify ALL gate items (not just the ones that failed — fixes can cause regressions)
+     d. Only close after all items pass
+   - If gate verification fails twice, stop and ask your human partner
+7. Loop back to step 1
 
 **Why persist after every step?** If the session is interrupted mid-task, checkboxes are the only record of which steps completed. The next session uses them to resume from where you left off. Skipping this creates unrecoverable ambiguity.
 
@@ -80,6 +91,7 @@ This includes:
 - A test that requires functionality not yet implemented
 - An instruction you don't understand
 - A verification that fails repeatedly
+- A drift detector violation — you're editing files not listed in the task's Files section, or doing work that another task's drift detectors say is their responsibility
 
 Present two options:
 1. Address it now — expand the current session's scope
@@ -101,6 +113,9 @@ Your human partner decides. You do not.
 - When a step fails, diagnose before re-editing — use superpowers-beads:systematic-debugging
 - After 2 failed attempts at the same step, stop and ask your human partner
 - Never start implementation on main/master branch without explicit user consent
+- Verify the Acceptance Gate before closing ANY task — never close based on "it looks done"
+- Re-read the Acceptance Gate between steps — attention drifts after 3-4 tool calls
+- If a gate item fails, fix and re-verify ALL items, not just the failed one
 
 ## Integration
 
