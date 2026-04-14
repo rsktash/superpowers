@@ -45,6 +45,10 @@ This structure informs the task decomposition. Each task should produce self-con
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
+**The 10-Minute Rule:** Each task should be completable in 10-15 minutes of execution. This is long enough to accomplish meaningful work but short enough to stay within the LLM's effective attention span. If a task takes longer, the executor's attention drifts and quality degrades. If a task is shorter, the overhead of context switching dominates.
+
+**Single Responsibility:** Task titles must not contain "and." A task like "Update types and implement middleware" has two concerns — the executor will lose focus on one. Split it into "Task 1: Update types" and "Task 2: Implement middleware."
+
 ## Plan Structure in Beads
 
 The root epic bead (created by brainstorming) already contains the spec. Plan tasks are created as child beads:
@@ -70,6 +74,32 @@ Parse JSON output from `bd create --json` to extract the new bead ID.
 
 **Important:** Use `--parent` to create the parent-child relationship. Do NOT use `bd dep add --type related` — that creates a dependency link but not a parent-child relationship, which breaks `bd children`, `bd epic status`, and the epics view in beads-ui.
 
+## Attention Map
+
+After creating all task beads, add an Attention Map to the root epic body. This is a topological narrative that tells each executor their primary concern and what is NOT their concern.
+
+Update the epic bead:
+```bash
+# Read current epic body, append Attention Map, write to scratch file
+# → .beads/.scratch/<root-id>-body.md
+bd update <root-id> --body-file .beads/.scratch/<root-id>-body.md
+rm .beads/.scratch/<root-id>-body.md
+```
+
+Format:
+
+```markdown
+## Attention Map
+
+| Task | Primary Concern | Consumes From | NOT Your Concern |
+|------|----------------|---------------|------------------|
+| 1: Types | Define interfaces | — | Do NOT implement logic |
+| 2: Middleware | JWT validation | Task 1 types | Do NOT wire into server |
+| 3: Integration | Route wiring | Task 2 middleware | Do NOT refactor middleware |
+```
+
+Each row must have a specific "NOT Your Concern" — not generic advice, but the specific sibling task that handles what would be tempting to touch. This prevents cross-task scope creep.
+
 ## Task Structure
 
 The task content below is what gets written to `.beads/.scratch/task-N.md` and created via `bd create --body-file`. The markdown formatting is preserved in the bead body for readability in beads-ui.
@@ -83,6 +113,21 @@ The task content below is what gets written to `.beads/.scratch/task-N.md` and c
 ````markdown
 ### Task N: [Component Name]
 
+**Context Anchor:**
+Parent: [epic title] — [one-line purpose of the whole feature]
+This task: [what this task does and WHY it matters to the plan]
+Depends on: [what prior tasks produced that this one consumes, or "—" if first task]
+
+**Acceptance Gate — this task is DONE when ALL pass:**
+- [ ] [observable signal: file exists, export present, test passes]
+- [ ] [observable signal: specific behavior verified]
+- [ ] [constraint: only files listed in Files were modified]
+
+**Drift Detectors:**
+- DO NOT [thing another task handles] — that is Task N's job
+- DO NOT [tempting adjacent improvement]
+- If you find yourself editing files not listed in Files, STOP and re-read this section
+
 **Files:**
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py:123-145`
@@ -93,7 +138,7 @@ The task content below is what gets written to `.beads/.scratch/task-N.md` and c
 - Read: `exact/path/to/related_dependency.py` — dependency this task relies on
 - Rules: `.claude/rules/relevant.md` — project rules for the area being changed (if they exist)
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Write the failing test** → gate: [which acceptance gate item this satisfies]
 
 ```python
 def test_specific_behavior():
@@ -101,19 +146,19 @@ def test_specific_behavior():
     assert result == expected
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run test to verify it fails** → gate: [same item]
 
 Run: `pytest tests/path/test.py::test_name -v`
 Expected: FAIL with "function not defined"
 
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **Step 3: Write minimal implementation** → gate: [same item]
 
 ```python
 def function(input):
     return expected
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Run test to verify it passes** → gate: [same item]
 
 Run: `pytest tests/path/test.py::test_name -v`
 Expected: PASS
@@ -125,6 +170,18 @@ git add tests/path/test.py src/path/file.py
 git commit -m "feat: add specific feature (<bead-id>)"
 ```
 ````
+
+## Writing Directive Tasks
+
+Tasks are prompts, not documentation. When you create a task for a future executor (yourself, a subagent, or a different session), you are performing prompt engineering. Task quality directly determines execution quality.
+
+**Context Anchor:** Explain WHY, not just WHAT. "Implement the middleware" is documentation. "This middleware is the security boundary between public routes and authenticated endpoints — Task 3 wires it in, Task 4 tests it" is a directive. The executor needs to understand the task's role in the plan to make correct judgment calls.
+
+**Acceptance Gate:** Every item must be machine-verifiable. Bad: "works correctly." Good: "test_validate_jwt_expired passes." Bad: "handles errors." Good: "invalid token returns 401 with ErrorResponse body." If you can't write a command that checks it, it's not a gate item.
+
+**Drift Detectors:** You know all sibling tasks. Use that knowledge. If Task 3 handles integration and Task 4 handles error responses, then Task 2's drift detectors should say "DO NOT wire into server — that is Task 3's job" and "DO NOT define error response format — that is Task 4's job." Generic warnings like "stay focused" are useless.
+
+**Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.
 
 ## No Placeholders
 
@@ -152,6 +209,14 @@ After creating all task beads, review the plan against the spec. This is a check
 **2. Placeholder scan:** Read each task bead via `bd show <task-id> --json` and check for red flags — any of the patterns from the "No Placeholders" section above. Fix them by updating the bead.
 
 **2b. Attention anchors:** Does every task that modifies existing files have a "Before you start" section listing what to read? Does every task touching a rule-governed area reference the relevant `.claude/rules/` file? If not, add them.
+
+**2c. Attention quality:** For each task bead, verify:
+- Context Anchor explains WHY this task matters to the plan, not just WHAT it does
+- All Acceptance Gate items are machine-verifiable (can be checked with a command, not a judgment call)
+- Drift Detectors reference specific sibling tasks by name ("that is Task 3's job"), not generic warnings
+- Every step has a `→ gate:` link to an acceptance gate item
+- No acceptance gate item is orphaned (every item has at least one step that satisfies it)
+- Task title does not contain "and" (split into two tasks if it does)
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
