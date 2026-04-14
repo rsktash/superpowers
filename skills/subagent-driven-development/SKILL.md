@@ -125,6 +125,8 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 - `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
 - `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
 
+When dispatching implementer subagents, extract the directive sections (Context Anchor, Acceptance Gate, Drift Detectors) from the task body and place them at the TOP of the prompt (primacy position). Place dynamic context (file contents, codebase state) at the BOTTOM (recency position). This leverages the attention sink phenomenon — LLMs attend most strongly to tokens at the beginning and end of context.
+
 ## Example Workflow
 
 ```

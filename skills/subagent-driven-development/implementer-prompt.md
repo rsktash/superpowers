@@ -8,13 +8,33 @@ Task tool (general-purpose):
   prompt: |
     You are implementing Task N: [task name]
 
+    ## Context Anchor
+
+    [PASTE the Context Anchor section from the task body — parent goal, this task's role, dependencies.
+     If the task body doesn't have a Context Anchor, write one: explain where this task fits
+     in the overall plan and what depends on its output.]
+
+    ## Acceptance Gate
+
+    [PASTE the Acceptance Gate from the task body — the machine-verifiable completion criteria.
+     These are the ONLY criteria for "done." Do not add your own.]
+
+    This task is DONE when ALL gate items pass. Not before.
+
+    ## Drift Detectors
+
+    [PASTE the Drift Detectors from the task body — what NOT to do, which sibling tasks
+     handle adjacent concerns. If editing files not in the Files list, STOP.]
+
     ## Task Description
 
-    [FULL TEXT of task from plan - paste it here, don't make subagent read file]
+    [FULL TEXT of task from plan — paste the complete task body here.
+     The subagent should not need to read any file to understand the task.]
 
-    ## Context
+    ## Codebase Context
 
-    [Scene-setting: where this fits, dependencies, architectural context]
+    [Scene-setting: relevant file contents, existing patterns, dependencies.
+     This is dynamic context — place it AFTER the stable directive sections above.]
 
     ## Before You Begin
 
@@ -81,6 +101,12 @@ Task tool (general-purpose):
 
     Review your work with fresh eyes. Ask yourself:
 
+    **Acceptance Gate Check:**
+    - Re-read each Acceptance Gate item
+    - For each item, verify it passes (run the test, check the file exists, grep for the export)
+    - If ANY gate item does not pass, you are NOT done — fix it before reporting
+    - List which gate items pass and which fail in your report
+
     **Completeness:**
     - Did I fully implement everything in the spec?
     - Did I miss any requirements?
@@ -107,6 +133,7 @@ Task tool (general-purpose):
 
     When done, report:
     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+    - **Gate status:** For each Acceptance Gate item, PASS or FAIL with evidence (test output, file check)
     - What you implemented (or what you attempted, if blocked)
     - What you tested and test results
     - Files changed
