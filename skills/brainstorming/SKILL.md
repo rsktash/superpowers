@@ -91,6 +91,7 @@ digraph brainstorming {
 - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
 - Ask after each section whether it looks right so far
 - Cover: architecture, components, data flow, error handling, testing
+- Identify scope boundaries: which components will become separate implementation tasks? Where are the interfaces between them? What should each task NOT touch? This information feeds into writing-plans' Drift Detectors.
 - Be ready to go back and clarify if something doesn't make sense
 
 **Design for isolation and clarity:**
@@ -141,6 +142,7 @@ After creating the spec bead, read it back via `bd show <bead-id> --json` and lo
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+5. **Scope boundary check:** Does the spec identify which areas will become separate implementation tasks? Are the interfaces between areas explicit? Could writing-plans generate specific Drift Detectors ("DO NOT touch X — that's another task's job") from this spec? If scope boundaries are vague, add them.
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
