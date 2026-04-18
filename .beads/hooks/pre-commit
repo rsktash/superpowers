@@ -23,9 +23,15 @@ if command -v bd >/dev/null 2>&1; then
 fi
 # --- END BEADS INTEGRATION v1.0.0 ---
 
-# Sync marketplace.json version from package.json.
+# Version drift guard. Fails the commit if the files listed in
+# .version-bump.json have diverged — use ./scripts/bump-version.sh X.Y.Z
+# to bump them all in lockstep.
 # Lives outside the beads markers so beads updates do not clobber it.
 _repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
-if [ -n "$_repo_root" ] && [ -x "$_repo_root/scripts/sync-marketplace-version.sh" ]; then
-  "$_repo_root/scripts/sync-marketplace-version.sh" || exit $?
+if [ -n "$_repo_root" ] && [ -x "$_repo_root/scripts/bump-version.sh" ]; then
+  if ! "$_repo_root/scripts/bump-version.sh" --check >/dev/null 2>&1; then
+    echo >&2 "version drift detected — run './scripts/bump-version.sh --check' for details and"
+    echo >&2 "'./scripts/bump-version.sh <new-version>' to realign."
+    exit 1
+  fi
 fi

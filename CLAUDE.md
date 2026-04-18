@@ -131,4 +131,16 @@ bd close <id>         # Complete work
 - NEVER stop before pushing - that leaves work stranded locally
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
+
+## Cutting a Release
+
+This plugin tracks its version in five files (`package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.cursor-plugin/plugin.json`, `gemini-extension.json`). Never edit them by hand — use the dedicated tool:
+
+```bash
+./scripts/bump-version.sh <new-version>   # bump all files in lockstep
+./scripts/bump-version.sh --check         # show current versions, detect drift
+./scripts/bump-version.sh --audit         # check + scan repo for stray version strings
+```
+
+A pre-commit hook runs `--check` and refuses commits if versions drift. If the hook trips, run `--check` to see which file is out of sync and re-bump.
 <!-- END BEADS INTEGRATION -->
