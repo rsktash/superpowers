@@ -62,6 +62,12 @@ Task tool (general-purpose):
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.
 
+    **Log plan-altering findings:** If you deviate from the plan — different approach than
+    the spec, scope change, new assumption, acceptance criteria adjustment — record it with
+    `bd comments add <task-id> "<what changed and why>"` before reporting back. Do NOT log
+    routine observations or every finding; only deviations that change what the plan says.
+    The task body shows the current plan; comments show how we got here.
+
     **Edit discipline:** Do not edit a file you haven't read. When a test fails after your
     edit, read the full error output before touching the file again. If your second edit
     also fails, stop — report as DONE_WITH_CONCERNS or BLOCKED. Do not attempt a third

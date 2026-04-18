@@ -37,14 +37,14 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
    Example assignee: "Alex / Claude Opus 4.6"
 3. Extract the **Acceptance Gate** from the task body. These are the machine-verifiable completion criteria (lines starting with `- [ ]` under the "Acceptance Gate" heading). Keep these visible — you will re-read them between steps and verify them before closing.
 4. If the task body contains image references, resolve them to local files and view them before implementing.
-5. For each step in the task body:
+5. Copy the task body into `.beads/.scratch/progress.md` once, at the start of the task. This is your working copy — you will check boxes here as steps complete, and sync to bd at the end.
+6. For each step in the task body:
    a. If this is the first step: read everything listed in "Before you start" — files, rules, callers. Do not skip this.
    b. **Attention refresh:** Before executing, re-read the Acceptance Gate items. This counters attention drift — after 3-4 tool calls, the LLM's focus on initial goals decays. Re-injecting the gate keeps generative attention on the actual completion criteria.
    c. Execute the step
-   d. Persist progress immediately — do NOT proceed to the next step until this is done:
-      - Write the updated description (with `- [ ]` → `- [x]`) to `.beads/.scratch/progress.md`
-      - `bd update <task-id> --body-file .beads/.scratch/progress.md`
-6. **Verify Acceptance Gate** before closing:
+   d. In `.beads/.scratch/progress.md`, flip the step's `- [ ]` to `- [x]`. Local edit only — do not `bd update` per step.
+7. After all steps complete, sync the final checkbox state to bd once: `bd update <task-id> --body-file .beads/.scratch/progress.md`
+8. **Verify Acceptance Gate** before closing:
    - Re-read the Acceptance Gate items from the task body
    - For each item, run the verification command (test, file check, grep for export)
    - If ALL items pass: `bd close <task-id> --reason "Done — all gate items verified"`
@@ -54,15 +54,17 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
      c. Re-verify ALL gate items (not just the ones that failed — fixes can cause regressions)
      d. Only close after all items pass
    - If gate verification fails twice, stop and ask your human partner
-7. Loop back to step 1
+9. Loop back to step 1
 
-**Why persist after every step?** If the session is interrupted mid-task, checkboxes are the only record of which steps completed. The next session uses them to resume from where you left off. Skipping this creates unrecoverable ambiguity.
+**Why batch the checkbox sync?** Earlier versions required a `bd update` after every step for interruption recovery. In practice LLMs skipped it — the per-step bd roundtrip was expensive enough that it got dropped. Batching (one `bd update` per task) keeps the bookkeeping cheap enough to actually happen. Tradeoff: if a session dies mid-task, the next session re-runs the task rather than resuming mid-step. This is acceptable because task steps are expected to be idempotent and tasks are scoped small.
+
+**When a finding changes the plan:** If execution surfaces something that alters the plan — scope shift, different approach than the spec, new dependency discovered, acceptance criteria adjustment, assumption that turned out wrong — record it via `bd comments add <task-id> "<what changed and why>"` before continuing. Do NOT log routine observations or every finding — only deviations that change what the plan says. **Why:** The task body shows the *current* plan; comments show *how we got here*. Without this, reviewers and future sessions cannot distinguish intentional deviations from drift.
 
 **When a step fails:** Do not retry the same edit. Read the error output fully, then use superpowers-beads:systematic-debugging to diagnose before touching the file again. The second edit must fix a diagnosed cause, not adjust the previous guess.
 
 **Note:** Closing the last child task may auto-close the parent epic. This is expected — the epic will still be accessible via `bd show`.
 
-Progress is visible in beads-ui in real time. Step-level progress persisted via comments enables recovery if execution is interrupted.
+Task-level progress is visible in beads-ui once the task completes and syncs. Plan-altering findings (logged as comments, see below) appear in real time.
 
 ### Resuming After Interruption
 
@@ -70,8 +72,8 @@ If starting a new session to continue work on an existing feature:
 
 1. Find the root bead ID: glob `docs/beads/*-bd-*.md` — the bead ID is in the filename
 2. `bd show <root-id> --json` — list all child beads and their statuses (open, in_progress, closed)
-3. Check for in-progress tasks: read their comments via `bd show <task-id> --json` to see which steps completed
-4. Resume in-progress tasks from the next uncompleted step, then continue with `bd ready --parent <root-id> --json` for remaining unblocked tasks
+3. For any in-progress task, re-run it from the first unchecked step in the task body. Because checkbox sync happens at task end, an interrupted task's body still shows all boxes unchecked — treat the task as not-yet-started and re-execute. Task steps are expected to be idempotent.
+4. Continue with `bd ready --parent <root-id> --json` for remaining unblocked tasks
 
 ### Step 3: Complete Development
 
