@@ -30,6 +30,8 @@ Do NOT use inline `--design="..."` or `--description="..."` for content longer t
 
 Do NOT use `--stdin` for piping content. Use `--body-file` instead — it enables Edit tool diffs for review.
 
+After `bd update --body-file`, verify with `bd show <id> --json | jq -r '.[0].description'`. Run `bd update` and `bd close` as separate Bash calls — don't `&&`-chain them.
+
 ## Attachments
 
 Bead content may embed images and files via custom URI schemes. These render in web UIs but `bd show` outputs raw markdown. When a bead references images relevant to your work, resolve them to local files and view them before proceeding.

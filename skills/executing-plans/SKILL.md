@@ -42,7 +42,7 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
    a. If this is the first step: read everything listed in "Before you start" — files, rules, callers. Do not skip this.
    b. **Attention refresh:** Before executing, re-read the Acceptance Gate items. This counters attention drift — after 3-4 tool calls, the LLM's focus on initial goals decays. Re-injecting the gate keeps generative attention on the actual completion criteria.
    c. Execute the step
-   d. In `.beads/.scratch/progress.md`, flip the step's `- [ ]` to `- [x]`. Local edit only — do not `bd update` per step.
+   d. In `.beads/.scratch/progress.md`, flip the step's `- [ ]` to `- [x]` with the Edit tool. Local edit only — do not `bd update` per step.
 7. After all steps complete, sync the final checkbox state to bd once: `bd update <task-id> --body-file .beads/.scratch/progress.md`
 8. **Verify Acceptance Gate** before closing:
    - Re-read the Acceptance Gate items from the task body
