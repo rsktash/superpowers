@@ -119,6 +119,21 @@ You MUST complete each phase before proceeding to the next.
    - Keep tracing up until you find the source
    - Fix at source, not at symptom
 
+6. **Rule Out Mundane Causes Before Blaming Tools/Frameworks**
+
+   When behavior surprises you, the explanation is almost always mundane — not a tool quirk. Before proposing "the `<tool>` silently drops X" or "the `<runtime>` mis-handles Y," rule out these categories:
+
+   - **Unchecked error signals** — a return value, exit code, or promise rejection you didn't inspect
+   - **Environment drift** — wrong working directory, mismatched env vars, different `<tool>` version than assumed
+   - **File existence and permissions** — the resource isn't where you think, or you can't access it
+   - **Language or shell semantics you forgot** — scoping, short-circuit evaluation, implicit coercion, variable lifetime across iterations
+   - **Stale caches** — build output, module resolution, package index, DNS, HTTP, LSP
+   - **Concurrency and ordering** — races, stale reads, assumptions about who writes first
+
+   Only after these are systematically ruled out can you propose a tool or framework bug. Write up the ruled-out evidence first, then state the remaining hypothesis.
+
+   **Why:** Confident "it's a tool quirk" stories feel plausible and get rubber-stamped, but the real cause is almost always mundane. A fabricated mechanism propagates into skill edits that fix the wrong thing.
+
 ### Phase 2: Pattern Analysis
 
 **Find the pattern before fixing:**

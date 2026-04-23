@@ -1,7 +1,7 @@
 {
   "name": "superpowers-beads",
   "description": "Beads-integrated skills library for Claude Code: specs, plans, and task execution tracked in beads issue tracker",
-  "version": "1.2.18",
+  "version": "1.2.19",
   "author": {
     "name": "Rustam"
   },

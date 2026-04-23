@@ -183,6 +183,55 @@ Tasks are prompts, not documentation. When you create a task for a future execut
 
 **Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.
 
+## Verify Before You Cite
+
+Every file path, function, signature, regex, or line range you name in a task body must be opened and confirmed before it lands. Plans that cite symbols without reading them are fabrications.
+
+Before writing a task step like `Modify <file>:<lines>`, `grep for <pattern>`, or `Call <function>(<args>)` (angle brackets are placeholders for whatever you're citing):
+- Open the file and confirm the path
+- Confirm the signature matches what you're about to cite
+- Confirm the regex matches what the codebase actually uses — the canonical name may differ from how callers reference it (local aliases, re-exports, wrapper functions)
+- Prefer symbol names over line ranges — line numbers rot on the next refactor
+
+**Why:** Reviewers repeatedly catch plans that reference non-existent files, wrong helper signatures, or regexes that miss real call sites. Every uncited reference is a lie the plan tells a future executor.
+
+## Deploy Sequence and Rollout Safety
+
+Tasks that change schema, persisted data, feature activation, or route behavior must state their rollout constraints. Code that lands independently of its preconditions causes production outages — tests pass; the deploy fails.
+
+For each task that introduces such changes, require:
+- **Precondition** — what must already be live before this task's code runs (completed migration, finished backfill, dependency deployed, parent flag enabled)
+- **Activation gate** — what triggers the new behavior (flag flip, route cutover, schema switch) and whether the old path is removed in the same task or left for a follow-up
+- **Intermediate-state safety** — what protects users and data while rollout is partial; if both old and new paths must coexist, state the invariant that keeps them consistent
+- **Rollback condition** — what signal triggers a revert and what reverting costs (data loss, re-run needed, none)
+
+**Why:** Reviewers repeatedly catch activation gates that land before their preconditions finish, producing zero-result queries or hard errors on real traffic.
+
+## Cross-Layer Consistency
+
+When two or more architectural layers must agree on a computed value, token set, or contract, define one source of truth that every layer consumes. If an unavoidable duplication exists, state how drift will be detected.
+
+For each concept that spans layers, the plan must:
+- Identify every layer that derives or consumes the concept
+- Point to the single shared definition, or to the shared helper every layer calls
+- If duplication is unavoidable, specify the drift-detection signal — round-trip test, shared type, runtime assertion
+
+**Why:** Independently implemented "same logic" in separate layers drifts on the next edit and produces silent consistency bugs that unit tests miss, because each layer's tests pass in isolation.
+
+## Semantic Regression Sweep for Representation Changes
+
+When a task changes a public type, representation, or shape (primitive to wrapper, optional to required, scalar to collection, nullable to non-null, etc.), list the operations whose semantics change with the new shape and verify each:
+
+- **Truthiness** — what counts as "empty" under the new shape?
+- **Equality** — reference vs. structural comparison; hash/set membership
+- **Serialization** — JSON, URL, log output, `toString`
+- **Defaulting** — placeholder rendering (`|| fallback`, `?? default`), conditional branches keyed on the old shape
+- **Formatting** — length-based truncation, locale-aware rendering, rounding
+
+Enumerate the call sites the sweep must visit. Code that compiles after the type change is not evidence the behavior survived.
+
+**Why:** Representation changes routinely break truthiness-based placeholder rendering and equality-based dedup logic. Compilation passes; users see broken output.
+
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
@@ -217,6 +266,8 @@ After creating all task beads, review the plan against the spec. This is a check
 - Every step has a `→ gate:` link to an acceptance gate item
 - No acceptance gate item is orphaned (every item has at least one step that satisfies it)
 - Task title does not contain "and" (split into two tasks if it does)
+
+**2d. Citation reality check:** For every file path, function name, signature, or regex cited in any task body, confirm by opening the file that the path exists and the symbol matches what was cited. Citation drift is a fabrication — fix the task body or remove the reference.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 

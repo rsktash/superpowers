@@ -580,6 +580,11 @@ step2 [label="read file"];
 helper1, helper2, step3, pattern4
 **Why bad:** Labels should have semantic meaning
 
+### ❌ Same Instruction in Multiple Formats
+An instruction repeated in several surface forms (e.g. a checklist + a flowchart + a prose section) without each form carrying unique decision-support.
+**Why bad:** Repetition without new information is noise. Readers stop paying attention, and edits drift across formats over time.
+**Exception — deliberate multi-surface reinforcement:** Some skills intentionally pair formats where each catches a *different* failure mode (e.g. a Red Flags list that interrupts self-talk + a Rationalization table that pre-empts excuses). The test: if you removed one format, would a distinct failure mode slip through? If yes, keep both. If no, collapse.
+
 ## STOP: Before Moving to Next Skill
 
 **After writing ANY skill, you MUST STOP and complete the deployment process.**
