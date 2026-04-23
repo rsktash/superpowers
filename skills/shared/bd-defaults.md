@@ -6,6 +6,7 @@ These defaults cause subtle bugs if you assume otherwise:
 - **`bd ready`** excludes in_progress, blocked, deferred, and hooked issues. It returns only truly claimable open work. An empty JSON array `[]` means no ready work remains.
 - **`bd epic status`** shows **open epics only**. Closed epics do not appear. Use `bd show <epic-id> --json` to inspect a closed epic.
 - **`bd show <id> --json`** works on any bead regardless of status (open, closed, etc.). This is the reliable way to inspect any bead.
+- **Default to field extraction, not whole-record dumps.** Bead bodies often run 5-15 KB; pulling the whole record when you need one section eats context. Prefer `bd show <id> --json | jq -r '.[0].<field>'` (`.description`, `.acceptance_criteria`, `.notes`, `.design`, `.children`, etc.). Reserve bare `bd show <id> --json` for the rare case you genuinely need every field. To list children with statuses, use `bd children <id>` (compact tree) instead of slicing the parent's JSON.
 - **`bd close`** on the last open child of an epic may **auto-close the parent epic**. Do not assume the epic is still open after closing all children.
 - **`bd create --parent`** assigns sequential hierarchical IDs (e.g., `.1`, `.2`, `.3`). Create child beads **sequentially**, not in parallel — parallel creates can fail due to ID conflicts.
 

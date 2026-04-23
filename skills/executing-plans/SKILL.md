@@ -71,7 +71,7 @@ Task-level progress is visible in beads-ui once the task completes and syncs. Pl
 If starting a new session to continue work on an existing feature:
 
 1. Find the root bead ID: glob `docs/beads/*-bd-*.md` — the bead ID is in the filename
-2. `bd show <root-id> --json` — list all child beads and their statuses (open, in_progress, closed)
+2. `bd children <root-id>` — list all child beads and their statuses (open, in_progress, closed). Avoids dumping the root bead body for what is just a status check.
 3. For any in-progress task, re-run it from the first unchecked step in the task body. Because checkbox sync happens at task end, an interrupted task's body still shows all boxes unchecked — treat the task as not-yet-started and re-execute. Task steps are expected to be idempotent.
 4. Continue with `bd ready --parent <root-id> --json` for remaining unblocked tasks
 

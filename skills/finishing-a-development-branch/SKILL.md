@@ -98,7 +98,7 @@ git merge <feature-branch>
 git branch -d <feature-branch>
 
 # Check epic status — may have been auto-closed when last child was closed
-bd show <root-bead-id> --json
+bd show <root-bead-id> --json | jq -r '.[0].status'
 # If status is already "closed" → skip bd close (auto-closed is fine)
 # If status is "open" → verify all children are "closed", then close it:
 
@@ -127,7 +127,7 @@ EOF
 )"
 
 # Check epic status — may have been auto-closed when last child was closed
-bd show <root-bead-id> --json
+bd show <root-bead-id> --json | jq -r '.[0].status'
 # If status is already "closed" → skip bd close (auto-closed is fine)
 # If status is "open" → verify all children are "closed", then close it:
 
