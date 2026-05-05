@@ -12,17 +12,17 @@ These defaults cause subtle bugs if you assume otherwise:
 
 ## Content updates — ALWAYS use file-based workflow
 
-All scratch files MUST be created in `.beads/.scratch/` at the project root. Never create temp files anywhere else in the repo.
+All scratch files MUST be created in `.bd/.scratch/` at the project root. Never create temp files anywhere else in the repo.
 
-**Naming:** `.beads/.scratch/<issue-id>-<field>.md` (e.g., `abc-q34-body.md`, `abc-q34-design.md`, `task-1.md`)
+**Naming:** `.bd/.scratch/<issue-id>-<field>.md` (e.g., `abc-q34-body.md`, `abc-q34-design.md`, `task-1.md`)
 
 **Cleanup:** Delete the scratch file immediately after the bd command succeeds.
 
-Write content to `.beads/.scratch/<issue-id>-<field>.md`, use Edit tool for diffs, then:
+Write content to `.bd/.scratch/<issue-id>-<field>.md`, use Edit tool for diffs, then:
 ```bash
-bd create --body-file .beads/.scratch/file.md          # create with description from file
-bd update <id> --body-file .beads/.scratch/file.md     # update description
-bd update <id> --design-file .beads/.scratch/file.md   # update design field
+bd create --body-file .bd/.scratch/file.md          # create with description from file
+bd update <id> --body-file .bd/.scratch/file.md     # update description
+bd update <id> --design-file .bd/.scratch/file.md   # update design field
 ```
 
 Do NOT use `notes` field — no `--notes-file` flag exists. Put content in `description` or `design` instead.

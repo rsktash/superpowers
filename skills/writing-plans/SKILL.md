@@ -56,11 +56,11 @@ The root epic bead (created by brainstorming) already contains the spec. Plan ta
 For each task, write the body to a scratch file, then create the bead:
 ```bash
 # Write task body to scratch file (Edit tool shows diff for user review)
-# → .beads/.scratch/task-N.md
+# → .bd/.scratch/task-N.md
 # Create bead from file:
-bd create "Task N: <name>" -p 1 --parent <root-bead-id> --body-file .beads/.scratch/task-N.md --json
+bd create "Task N: <name>" -p 1 --parent <root-bead-id> --body-file .bd/.scratch/task-N.md --json
 # Clean up:
-rm .beads/.scratch/task-N.md
+rm .bd/.scratch/task-N.md
 ```
 
 This produces hierarchical IDs (e.g., `superpowers-a3f8.1`, `.2`, `.3`).
@@ -81,9 +81,9 @@ After creating all task beads, add an Attention Map to the root epic body. This 
 Update the epic bead:
 ```bash
 # Read current epic body, append Attention Map, write to scratch file
-# → .beads/.scratch/<root-id>-body.md
-bd update <root-id> --body-file .beads/.scratch/<root-id>-body.md
-rm .beads/.scratch/<root-id>-body.md
+# → .bd/.scratch/<root-id>-body.md
+bd update <root-id> --body-file .bd/.scratch/<root-id>-body.md
+rm .bd/.scratch/<root-id>-body.md
 ```
 
 Format:
@@ -102,7 +102,7 @@ Each row must have a specific "NOT Your Concern" — not generic advice, but the
 
 ## Task Structure
 
-The task content below is what gets written to `.beads/.scratch/task-N.md` and created via `bd create --body-file`. The markdown formatting is preserved in the bead body for readability in beads-ui.
+The task content below is what gets written to `.bd/.scratch/task-N.md` and created via `bd create --body-file`. The markdown formatting is preserved in the bead body for readability in beads-ui.
 
 **Markdown conventions for beads-ui:**
 - Reference other issues with `#issue-id` (e.g., `#yuklar-985`) — auto-linked in the UI

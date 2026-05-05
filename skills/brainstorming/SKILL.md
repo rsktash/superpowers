@@ -83,11 +83,11 @@ You MUST create a task for each of these items and complete them in order:
 - Write the spec to a scratch file for review, then create the bead:
   ```bash
   # Write spec to scratch file (Edit tool shows diff for user review)
-  # → .beads/.scratch/new-spec.md
+  # → .bd/.scratch/new-spec.md
   # Create bead from file:
-  bd create "Feature: <title>" -t epic -p 1 --body-file .beads/.scratch/new-spec.md --json
+  bd create "Feature: <title>" -t epic -p 1 --body-file .bd/.scratch/new-spec.md --json
   # Clean up:
-  rm .beads/.scratch/new-spec.md
+  rm .bd/.scratch/new-spec.md
   ```
 - Parse the `id` field from the JSON output. Use the actual ID as-is — do not assume a specific format. This ID anchors the entire feature lifecycle.
 - Write a summary file for git searchability:

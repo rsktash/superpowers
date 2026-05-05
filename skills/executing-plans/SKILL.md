@@ -37,13 +37,13 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
    Example assignee: "Alex / Claude Opus 4.6"
 3. Extract the **Acceptance Gate** from the task body. These are the machine-verifiable completion criteria (lines starting with `- [ ]` under the "Acceptance Gate" heading). Keep these visible — you will re-read them between steps and verify them before closing.
 4. If the task body contains image references, resolve them to local files and view them before implementing.
-5. Copy the task body into `.beads/.scratch/progress.md` once, at the start of the task. This is your working copy — you will check boxes here as steps complete, and sync to bd at the end.
+5. Copy the task body into `.bd/.scratch/progress.md` once, at the start of the task. This is your working copy — you will check boxes here as steps complete, and sync to bd at the end.
 6. For each step in the task body:
    a. If this is the first step: read everything listed in "Before you start" — files, rules, callers. Do not skip this.
    b. **Attention refresh:** Before executing, re-read the Acceptance Gate items. This counters attention drift — after 3-4 tool calls, the LLM's focus on initial goals decays. Re-injecting the gate keeps generative attention on the actual completion criteria.
    c. Execute the step
-   d. In `.beads/.scratch/progress.md`, flip the step's `- [ ]` to `- [x]` with the Edit tool. Local edit only — do not `bd update` per step.
-7. After all steps complete, sync the final checkbox state to bd once: `bd update <task-id> --body-file .beads/.scratch/progress.md`
+   d. In `.bd/.scratch/progress.md`, flip the step's `- [ ]` to `- [x]` with the Edit tool. Local edit only — do not `bd update` per step.
+7. After all steps complete, sync the final checkbox state to bd once: `bd update <task-id> --body-file .bd/.scratch/progress.md`
 8. **Verify Acceptance Gate** before closing:
    - Re-read the Acceptance Gate items from the task body
    - For each item, run the verification command (test, file check, grep for export)
