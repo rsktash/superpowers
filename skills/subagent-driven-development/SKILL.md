@@ -133,14 +133,14 @@ When dispatching implementer subagents, extract the directive sections (Context 
 You: I'm using Subagent-Driven Development to execute this plan.
 
 [Receive root bead ID from writing-plans]
-[Read spec: bd show <root-id> --json]
-[List all child tasks: bd show <root-id> --json]
-[Read each task: bd show <task-id> --json for all 5 tasks]
+[Read spec: bd show <root-id> --full]
+[List all child tasks: bd children <root-id>]
+[Read all task bodies in one call: bd show <task-1-id> <task-2-id> ... --full]
 [Create TodoWrite with all tasks]
 
 Task 1: Hook installation script
 
-[Read task from beads: bd show <task-1-id> --json]
+[Read task from beads: bd show <task-1-id> --full]
 [Dispatch implementation subagent with full task text + context]
 
 Implementer: "Before I begin - should the hook be installed at user or system level?"
@@ -167,7 +167,7 @@ Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
 
 Task 2: Recovery modes
 
-[Read task from beads: bd show <task-2-id> --json]
+[Read task from beads: bd show <task-2-id> --full]
 [Dispatch implementation subagent with full task text + context]
 
 Implementer: [No questions, proceeds]
@@ -225,7 +225,7 @@ Done!
 - Review checkpoints automatic
 
 **Efficiency gains:**
-- No beads query overhead for subagents (controller provides full text from `bd show`)
+- No beads query overhead for subagents (controller provides full text from `bd show <id> --full`)
 - Controller curates exactly what context is needed
 - Subagent gets complete information upfront
 - Questions surfaced before work begins (not after)
@@ -250,7 +250,7 @@ Done!
 - Skip reviews (spec compliance OR code quality)
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
-- Make implementer subagents query beads directly (provide full task text from `bd show` instead — reviewer subagents may query beads for context)
+- Make implementer subagents query beads directly (provide full task text from `bd show <task-id> --full` instead — reviewer subagents may query beads for context)
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance (spec reviewer found issues = not done)

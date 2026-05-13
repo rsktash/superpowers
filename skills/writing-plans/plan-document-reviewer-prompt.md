@@ -12,8 +12,8 @@ Task tool (general-purpose):
   prompt: |
     You are a plan document reviewer. Verify this plan is complete and ready for implementation.
 
-    **Plan to review:** List all child task beads via `bd show [ROOT_BEAD_ID] --json` and read each via `bd show <id> --json`
-    **Spec for reference:** Read spec via `bd show [ROOT_BEAD_ID] --json`
+    **Plan to review:** List all child task beads via `bd children [ROOT_BEAD_ID]` and read each via `bd show <id> --full` (batch with `bd show id1 id2 id3 --full`). The default outlines long descriptions — `--full` forces the body, which is what reviewers need.
+    **Spec for reference:** Read spec via `bd show [ROOT_BEAD_ID] --full`
 
     ## What to Check
 

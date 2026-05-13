@@ -253,9 +253,9 @@ Every step must contain the actual content an engineer needs. These are **plan f
 
 After creating all task beads, review the plan against the spec. This is a checklist you run yourself — not a subagent dispatch.
 
-**1. Spec coverage:** Read the root spec bead via `bd show <root-id> --json` and verify each requirement has a corresponding task bead. List any gaps.
+**1. Spec coverage:** Read the root spec bead via `bd show <root-id> --full` and verify each requirement has a corresponding task bead. List any gaps.
 
-**2. Placeholder scan:** Read each task bead via `bd show <task-id> --json` and check for red flags — any of the patterns from the "No Placeholders" section above. Fix them by updating the bead.
+**2. Placeholder scan:** Read each task bead via `bd show <task-id> --full` (batch with `bd show id1 id2 id3 --full`) and check for red flags — any of the patterns from the "No Placeholders" section above. Fix them by updating the bead.
 
 **2b. Attention anchors:** Does every task that modifies existing files have a "Before you start" section listing what to read? Does every task touching a rule-governed area reference the relevant `.claude/rules/` file? If not, add them.
 

@@ -18,8 +18,8 @@ Load task beads from beads, review critically, execute all tasks, report when co
 ### Step 1: Load and Review Tasks
 
 1. Receive the root bead ID from writing-plans
-2. Read the spec and list all child beads: `bd show <root-id> --json` (includes children regardless of status)
-3. Read each task to understand the full plan: `bd show <task-id> --json`
+2. Read the spec: `bd show <root-id> --full`. List child beads separately: `bd children <root-id>` (don't slice them out of the parent body).
+3. Read each task to understand the full plan: `bd show <task-id> --full` (task bodies carry the Acceptance Gate and Drift Detectors; the default outline would hide them). Batch reads with `bd show id1 id2 id3 --full` when convenient.
 5. Review critically — identify any questions or concerns about the tasks
 6. If concerns: Raise them with your human partner before starting
 7. If no concerns: Proceed to execution
@@ -31,7 +31,7 @@ Loop until `bd ready --parent <root-id> --json` returns an empty array `[]`:
 1. `bd ready --parent <root-id> --json` — get next unblocked task (returns `[]` when all tasks are done or blocked)
 2. Read task and set assignee (do NOT use --claim):
    ```bash
-   bd show <task-id> --json
+   bd show <task-id> --full
    bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
    ```
    Example assignee: "Alex / Claude Opus 4.6"

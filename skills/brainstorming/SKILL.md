@@ -104,7 +104,7 @@ You MUST create a task for each of these items and complete them in order:
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 
 **Spec Self-Review:**
-After creating the spec bead, read it back via `bd show <bead-id> --json` and look at it with fresh eyes:
+After creating the spec bead, read it back via `bd show <bead-id> --full` (specs are usually long enough that the default would only print the outline) and look at it with fresh eyes:
 
 1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
@@ -117,7 +117,7 @@ Fix any issues inline. No need to re-review — just fix and move on.
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the spec before proceeding:
 
-> "Spec stored in beads as `<bead-id>` and summary committed to `<summary-file-path>`. Run `bd show <bead-id>` to review the full spec. Let me know if you want to make any changes before we start writing the implementation plan."
+> "Spec stored in beads as `<bead-id>` and summary committed to `<summary-file-path>`. Run `bd show <bead-id> --full` to review the full spec. Let me know if you want to make any changes before we start writing the implementation plan."
 
 Wait for the user's response. If they request changes, update the bead and re-run the spec review loop. Only proceed once the user approves.
 

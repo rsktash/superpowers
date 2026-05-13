@@ -98,7 +98,7 @@ git merge <feature-branch>
 git branch -d <feature-branch>
 
 # Check epic status — may have been auto-closed when last child was closed
-bd show <root-bead-id> --json | jq -r '.[0].status'
+bd get <root-bead-id> status
 # If status is already "closed" → skip bd close (auto-closed is fine)
 # If status is "open" → verify all children are "closed", then close it:
 
@@ -119,7 +119,7 @@ gh pr create --title "<title> (<bead-id>)" --body "$(cat <<'EOF'
 ## Summary
 <2-3 bullets of what changed>
 
-**Beads:** `<bead-id>` — run `bd show <bead-id>` for full spec
+**Beads:** `<bead-id>` — run `bd show <bead-id> --full` for full spec
 
 ## Test Plan
 - [ ] <verification steps>
@@ -127,7 +127,7 @@ EOF
 )"
 
 # Check epic status — may have been auto-closed when last child was closed
-bd show <root-bead-id> --json | jq -r '.[0].status'
+bd get <root-bead-id> status
 # If status is already "closed" → skip bd close (auto-closed is fine)
 # If status is "open" → verify all children are "closed", then close it:
 
