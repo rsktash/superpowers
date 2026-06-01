@@ -5,285 +5,90 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review.
+Execute a plan by dispatching a fresh subagent per task, reviewing each task's output before moving to the next.
 
-**Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
-
-**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
+**Why subagents:** You construct exactly the context each task needs — subagents never inherit your session history. This keeps them focused and preserves your own context for coordination.
 
 **bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
-## When to Use
+**Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-```dot
-digraph when_to_use {
-    "Have implementation plan?" [shape=diamond];
-    "Tasks mostly independent?" [shape=diamond];
-    "Stay in this session?" [shape=diamond];
-    "subagent-driven-development" [shape=box];
-    "executing-plans" [shape=box];
-    "Manual execution or brainstorm first" [shape=box];
+## The Loop
 
-    "Have implementation plan?" -> "Tasks mostly independent?" [label="yes"];
-    "Have implementation plan?" -> "Manual execution or brainstorm first" [label="no"];
-    "Tasks mostly independent?" -> "Stay in this session?" [label="yes"];
-    "Tasks mostly independent?" -> "Manual execution or brainstorm first" [label="no - tightly coupled"];
-    "Stay in this session?" -> "subagent-driven-development" [label="yes"];
-    "Stay in this session?" -> "executing-plans" [label="no - parallel session"];
-}
-```
+For each task, in order:
 
-**vs. Executing Plans (parallel session):**
-- Same session (no context switch)
-- Fresh subagent per task (no context pollution)
-- Two-stage review after each task: spec compliance first, then code quality
-- Faster iteration (no human-in-loop between tasks)
+1. Read it: `bd show <task-id> --full`. Dispatch an implementer with the full task text plus the context it needs. Put the task's directive sections (Context Anchor, Acceptance Gate, Drift Detectors) at the top of the prompt.
+2. Answer any questions the implementer asks *before* it proceeds.
+3. Review the result (see **Termination**), fix anything open, then close the task.
 
-## The Process
+After the last task, dispatch one final review of the whole diff, then use superpowers-beads:finishing-a-development-branch.
 
-```dot
-digraph process {
-    rankdir=TB;
+## Termination — what counts as "reviewed"
 
-    subgraph cluster_per_task {
-        label="Per Task";
-        "Dispatch implementer subagent (./implementer-prompt.md)" [shape=box];
-        "Implementer subagent asks questions?" [shape=diamond];
-        "Answer questions, provide context" [shape=box];
-        "Implementer subagent implements, tests, commits, self-reviews" [shape=box];
-        "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
-        "Spec reviewer subagent confirms code matches spec?" [shape=diamond];
-        "Implementer subagent fixes spec gaps" [shape=box];
-        "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [shape=box];
-        "Code quality reviewer subagent approves?" [shape=diamond];
-        "Implementer subagent fixes quality issues" [shape=box];
-        "Close task bead and mark complete in TodoWrite" [shape=box];
-    }
+**A review verdict is not evidence.** A subagent that reports "PASS / spec compliant / approved" has produced prose, and prose proves nothing on its own. Close a task only on output the model cannot fabricate:
 
-    "Receive root bead ID, read spec and tasks from beads, create TodoWrite" [shape=box];
-    "More tasks remain?" [shape=diamond];
-    "Dispatch final code reviewer subagent for entire implementation" [shape=box];
-    "Use superpowers-beads:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
+- the test command actually run, with its output visible
+- `git diff --name-only` showing which files changed
+- `grep` confirming a symbol exists, or is gone
 
-    "Receive root bead ID, read spec and tasks from beads, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
-    "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
-    "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
-    "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
-    "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, commits, self-reviews" [label="no"];
-    "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
-    "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
-    "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
-    "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
-    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="yes"];
-    "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
-    "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
-    "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
-    "Code quality reviewer subagent approves?" -> "Close task bead and mark complete in TodoWrite" [label="yes"];
-    "Close task bead and mark complete in TodoWrite" -> "More tasks remain?";
-    "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
-    "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
-    "Dispatch final code reviewer subagent for entire implementation" -> "Use superpowers-beads:finishing-a-development-branch";
-}
-```
+Run two checks per task — spec (does the code match the task?) then quality (is it well-built?), spec first. But each check **terminates in a deterministic artifact you can see**, never in the reviewer's summary.
+
+A confident verdict from a *parallel* reviewer is the weakest signal here, not the strongest. A capable model's mistakes are fluent and well-formatted, and parallel batches that partially cancel are a known surface for manufactured "success" — so independent re-running matters more, not less.
+
+If a check fails, the same implementer fixes it and you re-run the check. Don't move on with anything open.
+
+**Why:** The dangerous failure on current models is not visible drift — it's a thorough, convincing, wrong report. Only deterministic output catches it; another subagent's prose does not.
+
+## Coordination Gate
+
+Reviewing code is anchored by the task's Acceptance Gate. Your *own* coordination actions are not — and that ungated space is where drift happens.
+
+Before any status action — closing, reopening, or deferring a bead, or declaring work "done" — state in one line:
+
+1. the observable condition that justifies it, and
+2. that you confirmed the tool actually supports the state you're setting.
+
+**Why:** This rule is minted from a real failure — reopening a closed bead "to keep its knowledge live as a tripwire." Both checks catch it: closing a bead doesn't hide its knowledge (false premise), and bd has no such status (unsupported state). Coordination actions taken on reflex, not evidence, are the controller's version of slop.
+
+## Review Tier — declare it, don't skip it silently
+
+Right-size review per task, but make the decision visible and challengeable:
+
+- `trivial-deterministic` (isolated, complete spec) → one deterministic check
+- `behavioral` (multi-file, judgment, integration) → spec + quality
+
+State the tier and a one-line reason up front. **Why:** silently downgrading review reads identically to having reviewed — the problem isn't judging a task trivial, it's making that judgment invisible.
+
+## Implementer Status
+
+Implementers report one of four:
+
+- **DONE** → review.
+- **DONE_WITH_CONCERNS** → read the concerns first. Correctness/scope → address before review. Observation ("this file is getting large") → note and review.
+- **NEEDS_CONTEXT** → provide what's missing, re-dispatch.
+- **BLOCKED** → change something before retrying, never re-run the same model unchanged: context problem → add context; needs more reasoning → stronger model; too large → split; plan is wrong → escalate to the human.
 
 ## Model Selection
 
-Use the least powerful model that can handle each role to conserve cost and increase speed.
+Least powerful model that fits, to save cost and time:
 
-**Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
+- 1–2 files, complete spec → cheap/fast model
+- multi-file integration → standard model
+- design judgment or broad codebase understanding → most capable model
 
-**Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
-
-**Architecture, design, and review tasks**: use the most capable available model.
-
-**Task complexity signals:**
-- Touches 1-2 files with a complete spec → cheap model
-- Touches multiple files with integration concerns → standard model
-- Requires design judgment or broad codebase understanding → most capable model
-
-## Handling Implementer Status
-
-Implementer subagents report one of four statuses. Handle each appropriately:
-
-**DONE:** Proceed to spec compliance review.
-
-**DONE_WITH_CONCERNS:** The implementer completed the work but flagged doubts. Read the concerns before proceeding. If the concerns are about correctness or scope, address them before review. If they're observations (e.g., "this file is getting large"), note them and proceed to review.
-
-**NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
-
-**BLOCKED:** The implementer cannot complete the task. Assess the blocker:
-1. If it's a context problem, provide more context and re-dispatch with the same model
-2. If the task requires more reasoning, re-dispatch with a more capable model
-3. If the task is too large, break it into smaller pieces
-4. If the plan itself is wrong, escalate to the human
-
-**Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
-
-## Prompt Templates
-
-- `./implementer-prompt.md` - Dispatch implementer subagent
-- `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
-- `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
-
-When dispatching implementer subagents, extract the directive sections (Context Anchor, Acceptance Gate, Drift Detectors) from the task body and place them at the TOP of the prompt (primacy position). Place dynamic context (file contents, codebase state) at the BOTTOM (recency position). This leverages the attention sink phenomenon — LLMs attend most strongly to tokens at the beginning and end of context.
-
-## Example Workflow
-
-```
-You: I'm using Subagent-Driven Development to execute this plan.
-
-[Receive root bead ID from writing-plans]
-[Read spec: bd show <root-id> --full]
-[List all child tasks: bd children <root-id>]
-[Read all task bodies in one call: bd show <task-1-id> <task-2-id> ... --full]
-[Create TodoWrite with all tasks]
-
-Task 1: Hook installation script
-
-[Read task from beads: bd show <task-1-id> --full]
-[Dispatch implementation subagent with full task text + context]
-
-Implementer: "Before I begin - should the hook be installed at user or system level?"
-
-You: "User level (~/.config/superpowers/hooks/)"
-
-Implementer: "Got it. Implementing now..."
-[Later] Implementer:
-  - Implemented install-hook command
-  - Added tests, 5/5 passing
-  - Self-review: Found I missed --force flag, added it
-  - Committed
-
-[Dispatch spec compliance reviewer]
-Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
-
-[Get git SHAs, dispatch code quality reviewer]
-Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
-
-[bd close <task-1-id> --reason "Done — spec and quality review passed"]
-[bd comments add <task-1-id> "Spec review: PASS"]
-[bd comments add <task-1-id> "Code quality review: PASS"]
-[Mark Task 1 complete in TodoWrite]
-
-Task 2: Recovery modes
-
-[Read task from beads: bd show <task-2-id> --full]
-[Dispatch implementation subagent with full task text + context]
-
-Implementer: [No questions, proceeds]
-Implementer:
-  - Added verify/repair modes
-  - 8/8 tests passing
-  - Self-review: All good
-  - Committed
-
-[Dispatch spec compliance reviewer]
-Spec reviewer: ❌ Issues:
-  - Missing: Progress reporting (spec says "report every 100 items")
-  - Extra: Added --json flag (not requested)
-
-[Implementer fixes issues]
-Implementer: Removed --json flag, added progress reporting
-
-[Spec reviewer reviews again]
-Spec reviewer: ✅ Spec compliant now
-
-[Dispatch code quality reviewer]
-Code reviewer: Strengths: Solid. Issues (Important): Magic number (100)
-
-[Implementer fixes]
-Implementer: Extracted PROGRESS_INTERVAL constant
-
-[Code reviewer reviews again]
-Code reviewer: ✅ Approved
-
-[bd close <task-2-id> --reason "Done — spec and quality review passed"]
-[bd comments add <task-2-id> "Spec review: PASS"]
-[bd comments add <task-2-id> "Code quality review: PASS"]
-[Mark Task 2 complete in TodoWrite]
-
-...
-
-[After all tasks]
-[Dispatch final code-reviewer]
-Final reviewer: All requirements met, ready to merge
-
-Done!
-```
-
-## Advantages
-
-**vs. Manual execution:**
-- Subagents follow TDD naturally
-- Fresh context per task (no confusion)
-- Parallel-safe (subagents don't interfere)
-- Subagent can ask questions (before AND during work)
-
-**vs. Executing Plans:**
-- Same session (no handoff)
-- Continuous progress (no waiting)
-- Review checkpoints automatic
-
-**Efficiency gains:**
-- No beads query overhead for subagents (controller provides full text from `bd show <id> --full`)
-- Controller curates exactly what context is needed
-- Subagent gets complete information upfront
-- Questions surfaced before work begins (not after)
-
-**Quality gates:**
-- Self-review catches issues before handoff
-- Two-stage review: spec compliance, then code quality
-- Review loops ensure fixes actually work
-- Spec compliance prevents over/under-building
-- Code quality ensures implementation is well-built
-
-**Cost:**
-- More subagent invocations (implementer + 2 reviewers per task)
-- Controller does more prep work (extracting all tasks upfront)
-- Review loops add iterations
-- But catches issues early (cheaper than debugging later)
-
-## Red Flags
+## Invariants
 
 **Never:**
-- Start implementation on main/master branch without explicit user consent
-- Skip reviews (spec compliance OR code quality)
-- Proceed with unfixed issues
-- Dispatch multiple implementation subagents in parallel (conflicts)
-- Make implementer subagents query beads directly (provide full task text from `bd show <task-id> --full` instead — reviewer subagents may query beads for context)
-- Skip scene-setting context (subagent needs to understand where task fits)
-- Ignore subagent questions (answer before letting them proceed)
-- Accept "close enough" on spec compliance (spec reviewer found issues = not done)
-- Skip review loops (reviewer found issues = implementer fixes = review again)
-- Let implementer self-review replace actual review (both are needed)
-- **Start code quality review before spec compliance is ✅** (wrong order)
-- Move to next task while either review has open issues
-
-**If subagent asks questions:**
-- Answer clearly and completely
-- Provide additional context if needed
-- Don't rush them into implementation
-
-**If reviewer finds issues:**
-- Implementer (same subagent) fixes them
-- Reviewer reviews again
-- Repeat until approved
-- Don't skip the re-review
-
-**If subagent fails task:**
-- Dispatch fix subagent with specific instructions
-- Don't try to fix manually (context pollution)
+- Start on main/master without explicit user consent.
+- Close a task while a check shows failures.
+- Run the quality check before the spec check passes.
+- Run two implementers in parallel on the same worktree (they conflict).
+- Make implementers query beads — hand them the full task text from `bd show <id> --full`.
+- Treat an implementer's self-review as the review. Both happen.
 
 ## Integration
 
-**Required workflow skills:**
-- **superpowers-beads:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers-beads:writing-plans** - Creates the plan this skill executes
-- **superpowers-beads:requesting-code-review** - Code review template for reviewer subagents
-- **superpowers-beads:finishing-a-development-branch** - Complete development after all tasks
-
-**Subagents should use:**
-- **superpowers-beads:test-driven-development** - Subagents follow TDD for each task
-
-**Alternative workflow:**
-- **superpowers-beads:executing-plans** - Use for parallel session instead of same-session execution
+- **superpowers-beads:using-git-worktrees** — REQUIRED before starting.
+- **superpowers-beads:writing-plans** — creates the plan this skill executes.
+- **superpowers-beads:finishing-a-development-branch** — after all tasks complete.
+- Implementers follow **superpowers-beads:test-driven-development** per task.

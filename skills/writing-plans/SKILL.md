@@ -45,7 +45,7 @@ This structure informs the task decomposition. Each task should produce self-con
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
-**The 10-Minute Rule:** Each task should be completable in 10-15 minutes of execution. This is long enough to accomplish meaningful work but short enough to stay within the LLM's effective attention span. If a task takes longer, the executor's attention drifts and quality degrades. If a task is shorter, the overhead of context switching dominates.
+**The 10-Minute Rule:** Each task should be completable in 10-15 minutes of execution. This keeps the whole task — its gate, its files, its steps — small enough to hold and verify as one unit. A task that runs much longer usually bundles more than one concern (split it); a much shorter one is dominated by context-switching overhead.
 
 **Single Responsibility:** Task titles must not contain "and." A task like "Update types and implement middleware" has two concerns — the executor will lose focus on one. Split it into "Task 1: Update types" and "Task 2: Implement middleware."
 
@@ -179,6 +179,8 @@ Tasks are prompts, not documentation. When you create a task for a future execut
 
 **Acceptance Gate:** Every item must be machine-verifiable. Bad: "works correctly." Good: "test_validate_jwt_expired passes." Bad: "handles errors." Good: "invalid token returns 401 with ErrorResponse body." If you can't write a command that checks it, it's not a gate item.
 
+A gate item must also be falsifiable against *under-doing*, not just not-doing — name what would make a passing result still wrong. "Tests pass" is satisfied by a test that exercises one of nine fields. Write the gate so that under-coverage fails it: "a typo in any mapped field fails a test; every variant has its own assertion." **Why:** a fluent executor will satisfy the literal minimum convincingly — a loose gate certifies slop. (Observed: a task whose gate said "3 passing tests" got 3 tests covering 3 of 9 fields, and passed.)
+
 **Drift Detectors:** You know all sibling tasks. Use that knowledge. If Task 3 handles integration and Task 4 handles error responses, then Task 2's drift detectors should say "DO NOT wire into server — that is Task 3's job" and "DO NOT define error response format — that is Task 4's job." Generic warnings like "stay focused" are useless.
 
 **Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.
@@ -243,35 +245,20 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 - Tasks that modify existing files without a "Before you start" section
 
-## Remember
-- Exact file paths always
-- Complete code in every step — if a step changes code, show the code
-- Exact commands with expected output
-- DRY, YAGNI, TDD, frequent commits
-
 ## Self-Review
 
-After creating all task beads, review the plan against the spec. This is a checklist you run yourself — not a subagent dispatch.
+After all task beads exist, run one audit pass over them yourself (not a subagent dispatch). This is deliberately separate from the rules above: those guide writing each task; this catches what only surfaces once the whole plan is on the page — and it forces you to *re-confirm* claims you made while authoring rather than trust that you did. (Re-confirming, not trusting, is the point: "I already verified that" while authoring is exactly the assertion this pass exists to test.)
 
-**1. Spec coverage:** Read the root spec bead via `bd show <root-id> --full` and verify each requirement has a corresponding task bead. List any gaps.
+Read the beads (`bd show id1 id2 id3 --full`) and re-run each rule section above against every task:
+- **No Placeholders**, and **Verify Before You Cite** — re-open and confirm every cited path/symbol; citation drift is fabrication, fix or remove it.
+- the **Writing Directive Tasks** bars — Context Anchor explains WHY; every gate item machine-verifiable *and* falsifiable against under-doing; Drift Detectors name specific sibling tasks; every step has a `→ gate:` link and no gate item is orphaned; no title contains "and".
+- **Before you start** present on every task that modifies existing files; rule-governed areas reference the relevant `.claude/rules/` file.
 
-**2. Placeholder scan:** Read each task bead via `bd show <task-id> --full` (batch with `bd show id1 id2 id3 --full`) and check for red flags — any of the patterns from the "No Placeholders" section above. Fix them by updating the bead.
+Then two checks only possible now that all tasks exist:
+- **Spec coverage:** every requirement in the root spec (`bd show <root-id> --full`) maps to a task bead. Add a bead for any gap.
+- **Type consistency:** names, signatures, and shapes used in later tasks match what earlier tasks defined — `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-**2b. Attention anchors:** Does every task that modifies existing files have a "Before you start" section listing what to read? Does every task touching a rule-governed area reference the relevant `.claude/rules/` file? If not, add them.
-
-**2c. Attention quality:** For each task bead, verify:
-- Context Anchor explains WHY this task matters to the plan, not just WHAT it does
-- All Acceptance Gate items are machine-verifiable (can be checked with a command, not a judgment call)
-- Drift Detectors reference specific sibling tasks by name ("that is Task 3's job"), not generic warnings
-- Every step has a `→ gate:` link to an acceptance gate item
-- No acceptance gate item is orphaned (every item has at least one step that satisfies it)
-- Task title does not contain "and" (split into two tasks if it does)
-
-**2d. Citation reality check:** For every file path, function name, signature, or regex cited in any task body, confirm by opening the file that the path exists and the symbol matches what was cited. Citation drift is a fabrication — fix the task body or remove the reference.
-
-**3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
-
-If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task bead.
+Fix inline; no need to re-review.
 
 ## Execution Handoff
 

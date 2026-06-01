@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# PreToolUse hook: block blind retries of an identical command.
+#
+# Enforces the executing-plans rule "do not re-run the same failing command;
+# read the error and diagnose, or stop and ask" — but MECHANICALLY, so it fires
+# regardless of where the correction sits in context. A skill rule decays as the
+# session grows; a hook does not. This is the "mechanical -> automate" half.
+#
+# Behaviour:
+#   - tracks the previous tool invocation per session
+#   - counts how many times the SAME Bash command runs back-to-back
+#   - any different command, or any intervening non-Bash tool (a Read, an Edit —
+#     i.e. actual diagnosis), resets the counter, so legitimate diagnose-then-retry
+#     is never blocked
+#   - blocks once the identical run count exceeds CC_RETRY_GUARD_MAX (default 2,
+#     i.e. two identical runs are allowed, the third is blocked)
+#
+# Fails OPEN: any parse error, missing jq, or malformed input -> exit 0 (allow).
+set -uo pipefail
+
+command -v jq >/dev/null 2>&1 || exit 0
+input="$(cat)" || exit 0
+[ -n "$input" ] || exit 0
+
+tool="$(printf '%s' "$input"    | jq -r '.tool_name // empty' 2>/dev/null)" || exit 0
+session="$(printf '%s' "$input" | jq -r '.session_id // "default"' 2>/dev/null)"
+arg="$(printf '%s' "$input"     | jq -r '.tool_input.command // .tool_input.file_path // .tool_input.pattern // ""' 2>/dev/null)"
+
+# normalize whitespace so trivial reformatting still counts as "the same command"
+arg="$(printf '%s' "$arg" | tr -s '[:space:]' ' ' | sed 's/^ *//;s/ *$//')"
+sig="${tool}|${arg}"
+
+max="${CC_RETRY_GUARD_MAX:-2}"
+
+state_dir="${TMPDIR:-/tmp}/cc-retry-guard"
+mkdir -p "$state_dir" 2>/dev/null || exit 0
+sfile="$state_dir/$(printf '%s' "$session" | tr -c 'A-Za-z0-9_.-' '_')"
+
+prev_sig=""; prev_count=0
+if [ -f "$sfile" ]; then
+  prev_count="$(sed -n '1p' "$sfile" 2>/dev/null)"
+  prev_sig="$(sed -n '2,$p' "$sfile" 2>/dev/null)"
+  case "$prev_count" in *[!0-9]*|'') prev_count=0;; esac
+fi
+
+if [ "$sig" = "$prev_sig" ]; then
+  count=$((prev_count + 1))
+else
+  count=1
+fi
+
+{ printf '%s\n' "$count"; printf '%s' "$sig"; } > "$sfile" 2>/dev/null || true
+
+if [ "$tool" = "Bash" ] && [ "$count" -gt "$max" ]; then
+  reason="retry-guard: this exact command has run ${count} times in a row with nothing changed between attempts. Re-running an identical command almost never fixes a failure. Read the error output and diagnose the cause, change the command, or stop and ask the user what to do. (If a retry is genuinely warranted — a known-transient network call — vary the command, add a wait, or raise CC_RETRY_GUARD_MAX.)"
+  jq -cn --arg r "$reason" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:$r}}'
+  exit 0
+fi
+
+exit 0
