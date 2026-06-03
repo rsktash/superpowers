@@ -21,6 +21,19 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
+## Checklist
+
+You MUST create a task for each of these items and complete them in order. The last item is the step most often skipped — keep it on the list until it is genuinely done:
+
+1. **Scope check** — confirm the spec is a single coherent project (decompose if not)
+2. **Map file structure** — which files are created/modified and what each is responsible for
+3. **Decompose into task beads** — bite-sized tasks, each with its directive sections
+4. **Self-review audit** — re-confirm every cited path/symbol and spec-coverage across all tasks
+5. **Present execution choice** — offer Inline vs Subagent-Driven and get the user's pick
+6. **Invoke the chosen execution skill** — `Skill(superpowers-beads:executing-plans)` or `Skill(superpowers-beads:subagent-driven-development)`, passing the root bead ID, as your next action
+
+**Terminal step:** Item 6 is complete only when the execution skill has actually been invoked — not when you have "started executing" by running git/bd/worktree commands or dispatching implementers from memory. The only skills you invoke after writing-plans are executing-plans or subagent-driven-development.
+
 ## Scope Check
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
@@ -272,7 +285,7 @@ After all task beads are created and linked, offer execution choice:
 
 **Which approach?"**
 
-Pass the root bead ID to the chosen execution skill.
+Pass the root bead ID to the chosen execution skill. This completes the final checklist task — and that task is not done until you have actually invoked the execution skill below, not merely "started executing."
 
 **If Inline Execution chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers-beads:executing-plans
