@@ -131,6 +131,8 @@ Parent: [epic title] — [one-line purpose of the whole feature]
 This task: [what this task does and WHY it matters to the plan]
 Depends on: [what prior tasks produced that this one consumes, or "—" if first task]
 
+**Execution:** [inline | subagent/cheap | subagent/standard | subagent/capable] — [one-line reason]
+
 **Acceptance Gate — this task is DONE when ALL pass:**
 - [ ] [observable signal: file exists, export present, test passes]
 - [ ] [observable signal: specific behavior verified]
@@ -198,6 +200,19 @@ A gate item must also be falsifiable against *under-doing*, not just not-doing �
 
 **Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.
 
+## Execution Annotation
+
+Every task body carries one `**Execution:**` line — the mode a hybrid executor should use for the task, with a one-line reason. You know every task's file count and spec completeness; decide at plan time so the choice is visible at plan review, not improvised at execution time.
+
+- `inline` — 1 file, complete spec, gate verifiable in one command, no judgment (config bump, rename, doc edit)
+- `subagent/cheap` — 1–2 files, complete spec, real implementation work
+- `subagent/standard` — multi-file integration
+- `subagent/capable` — design judgment or broad codebase understanding
+
+Default to `subagent/*`. `inline` is the exception — only when dispatch overhead clearly exceeds the work itself. Tiers are abstract — the executor maps them to its harness's models; never name a concrete model in the annotation.
+
+Inline Execution and Subagent-Driven execution ignore this line harmlessly; superpowers-beads:hybrid-execution routes on it.
+
 ## Verify Before You Cite
 
 Every file path, function, signature, regex, or line range you name in a task body must be opened and confirmed before it lands. Plans that cite symbols without reading them are fabrications.
@@ -264,7 +279,7 @@ After all task beads exist, run one audit pass over them yourself (not a subagen
 
 Read the beads (`bd show id1 id2 id3 --full`) and re-run each rule section above against every task:
 - **No Placeholders**, and **Verify Before You Cite** — re-open and confirm every cited path/symbol; citation drift is fabrication, fix or remove it.
-- the **Writing Directive Tasks** bars — Context Anchor explains WHY; every gate item machine-verifiable *and* falsifiable against under-doing; Drift Detectors name specific sibling tasks; every step has a `→ gate:` link and no gate item is orphaned; no title contains "and".
+- the **Writing Directive Tasks** bars — Context Anchor explains WHY; every gate item machine-verifiable *and* falsifiable against under-doing; Drift Detectors name specific sibling tasks; every step has a `→ gate:` link and no gate item is orphaned; no title contains "and"; every task carries an **Execution:** line with a reason whose value matches the rubric.
 - **Before you start** present on every task that modifies existing files; rule-governed areas reference the relevant `.claude/rules/` file.
 
 Then two checks only possible now that all tasks exist:
