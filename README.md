@@ -28,6 +28,7 @@ The original Superpowers stores specs and plans as markdown files in `docs/super
 | subagent-driven-development | Same dispatch model, beads for persistent tracking |
 | finishing-a-development-branch | Closes root epic bead, enforces bead ID in commits and PRs |
 | using-superpowers | Bootstrap mentions beads storage model |
+| hybrid-execution | New skill: routes each task inline or to a subagent based on the plan's Execution annotation |
 
 ## Important: Uninstall Original Superpowers First
 
@@ -65,7 +66,7 @@ cd superpowers
 
 1. **brainstorming** — Refines ideas, creates spec as an epic bead, commits summary to `docs/beads/`
 2. **writing-plans** — Decomposes spec into task beads with dependency ordering
-3. **executing-plans** (recommended) — Executes tasks via `bd ready` loop with step-level progress comments
+3. **executing-plans**, **subagent-driven-development**, or **hybrid-execution** — Executes tasks via `bd ready` loop; hybrid routes each task inline or to a subagent per its Execution annotation
 4. **finishing-a-development-branch** — Verifies all tasks closed, closes epic, merges/PRs with bead ID
 
 ### Summary file naming

@@ -106,7 +106,7 @@ When multiple skills could apply, use this order:
 
 ## Spec/Plan Storage
 
-This fork uses beads (`bd` CLI) as the single source of truth for specs, plans, and task progress. The brainstorming, writing-plans, executing-plans, and subagent-driven-development skills all use `bd` commands instead of writing markdown files. Run `bd ready` to see what work is available. Read `skills/shared/bd-defaults.md` for bd CLI conventions.
+This fork uses beads (`bd` CLI) as the single source of truth for specs, plans, and task progress. The brainstorming, writing-plans, executing-plans, subagent-driven-development, and hybrid-execution skills all use `bd` commands instead of writing markdown files. Run `bd ready` to see what work is available. Read `skills/shared/bd-defaults.md` for bd CLI conventions.
 
 ## Skill Types
 
