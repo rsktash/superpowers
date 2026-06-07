@@ -211,6 +211,8 @@ Every task body carries one `**Execution:**` line — the mode a hybrid executor
 
 Default to `subagent/*`. `inline` is the exception — only when dispatch overhead clearly exceeds the work itself. Tiers are abstract — the executor maps them to its harness's models; never name a concrete model in the annotation.
 
+Tier measures the judgment a task demands — nothing else. Scheduling never moves it: a task doesn't become `capable` by joining a parallel wave of `capable` siblings; which tasks run concurrently is the dependency graph's property, not the tier's. If the reason you're writing says the work is mechanical, a mirror, or follows an existing template, it is arguing for `standard` at most — fix the tier, not the reason. (Observed: a wave of pattern-following tasks annotated `capable` because the wave had been negotiated as "parallel capable agents" before the tasks were classified; the reasons still said "mechanical".)
+
 Inline Execution and Subagent-Driven execution ignore this line harmlessly; superpowers-beads:hybrid-execution routes on it.
 
 ## Verify Before You Cite

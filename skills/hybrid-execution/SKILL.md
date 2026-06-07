@@ -24,7 +24,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 1. `bd show <task-id> --full` — read the next ready task.
 2. Find its `**Execution:**` line: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`), each carrying the planner's one-line reason.
-3. Announce the route in one line: "Task N → <mode> (<planner's reason, or your override reason>)".
+3. Announce the route in one line, naming the model the tier resolves to (per Model Tiers): "Task N → subagent/standard → Sonnet (<planner's reason, or your override reason>)". Inline routes announce "Task N → inline (<reason>)". The announcement is not optional and the model is not implied — an unnamed model is unauditable from the transcript.
 4. Execute by mode:
    - **inline** → follow executing-plans Step 2 for this one task: set assignee, copy the body to `.bd/.scratch/progress.md`, attention-refresh the Acceptance Gate between steps, verify every gate item before closing.
    - **subagent/<tier>** → follow subagent-driven-development's loop for this one task: set assignee to the implementer's model, dispatch with the directive sections at the top of the prompt, declare the review tier, run spec then quality checks terminating in deterministic artifacts, close only on visible evidence.
@@ -37,8 +37,8 @@ After the last task: dispatch one final review of the whole diff (per subagent-d
 The annotation is the default, not a cage — but every override must be stated, never silent:
 
 - **Toward subagent** (annotation says `inline`, you dispatch): always allowed. State one line: what made the task bigger than planned.
-- **Toward inline** (annotation says `subagent/*`, you execute it yourself): requires justification against the rubric in writing-plans (1 file, complete spec, gate verifiable in one command, no judgment). State the justification before touching any file.
-- **Missing annotation** (plan predates this skill): classify the task yourself against the rubric, state the classification and reason, then proceed as if annotated.
+- **Toward inline** (annotation says `subagent/*`, you execute it yourself): requires justification against the rubric in writing-plans — all four criteria, read literally: 1 file (the task's Files list, not "one logical unit"), complete spec, gate verifiable in one command, no judgment. A multi-file task fails the first criterion no matter how small the diff or how much context you already hold. "The files are already in my context", "it's only N lines", and "dispatch overhead exceeds the work" are not criteria — the last is the planner's standard for annotating `inline`, not yours for overriding to it. If any criterion fails, dispatch. State the justification before touching any file.
+- **Missing annotation** (plan predates this skill): classify the task yourself against the rubric — fresh, per task, never by transcribing a dispatch plan or wave grouping already negotiated; scheduling never raises a tier. State the classification and reason, then proceed as if annotated.
 
 **Why stated, not silent:** silently downgrading to inline reads identically to having dispatched and reviewed. The problem isn't judging a task trivial — it's making that judgment invisible and unchallengeable.
 
