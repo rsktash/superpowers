@@ -17,7 +17,7 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 For each task, in order:
 
-1. Read it: `bd show <task-id> --full`. Mark it in progress and set the assignee (do NOT use --claim): `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <implementer-model-name>"` (e.g. "Alex / Claude Haiku 4.5" — the model of the implementer subagent you dispatch for this task per **Model Selection**, since that subagent does the work). Then dispatch an implementer with the full task text plus the context it needs. Put the task's directive sections (Context Anchor, Acceptance Gate, Drift Detectors) at the top of the prompt.
+1. Read it: `bd show <task-id> --full`. Mark it in progress and set the assignee (do NOT use --claim): `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <implementer-model-name>"` (e.g. "Alex / Claude Sonnet 4.6" — the model of the implementer subagent you dispatch for this task per **Model Selection**, since that subagent does the work). Then dispatch an implementer with the full task text plus the context it needs. Put the task's directive sections (Context Anchor, Acceptance Gate, Drift Detectors) at the top of the prompt.
 2. Answer any questions the implementer asks *before* it proceeds.
 3. Review the result (see **Termination**), fix anything open, then close the task.
 
@@ -70,7 +70,7 @@ Implementers report one of four:
 
 ## Model Selection
 
-Least powerful model that fits, to save cost and time:
+Your human partner's standing model policy (project memory, CLAUDE.md) overrides this rubric — check it before resolving any tier. Absent a policy: least powerful model that fits, to save cost and time:
 
 - 1–2 files, complete spec → cheap/fast model
 - multi-file integration → standard model

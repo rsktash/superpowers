@@ -44,7 +44,7 @@ The annotation is the default, not a cage — but every override must be stated,
 
 ## Model Tiers
 
-Tiers are abstract — map them to whatever harness you run on; for example, on Claude harnesses: `cheap` → Haiku, `standard` → Sonnet, `capable` → the session's model. Never downgrade a tier without stating it as an override.
+Tiers are abstract — resolve them against your human partner's standing model policy first (project memory, CLAUDE.md); a standing policy always overrides the default map. Default on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model. Never downgrade a tier without stating it as an override.
 
 ## Invariants
 
