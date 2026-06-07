@@ -124,4 +124,14 @@ CREATION-LOG line ~66 and any scenario text that names the small model contradic
 
 ---
 
+# Follow-up 3: `bd ... --claim` Reflex (2026-06-08)
+
+Production RED: biklod/5265560f L38 — mid-loop, the executor claimed a subagent task with `bd update biklod-9y3.31.4 --claim` and emitted no route announcement. `--claim` assigns the bead to the session git user, not the implementer model, erasing the attribution the whole tier/announcement system depends on. subagent-driven-development forbids `--claim` (Loop step 1), but hybrid-execution — the active driver — only said "set assignee to the implementer's model" and never restated the prohibition, so the muscle-memory verb won under cadence.
+
+Isolated baselines comply (a fresh agent reading both skills uses `--status=in_progress --assignee "… / <model>"` and explicitly says "not --claim") — same salience-under-load signature as the cheap-floor case. The biklod transcript is the standing RED.
+
+GREEN (+53 words): Loop step 4's subagent route now names the exact claim command and forbids `--claim` at the action point ("assigns the task to you and erases the model attribution the announcement just recorded"); one Red Flag interrupts the reflex. Verified under "move fast, 5th task, cadence" pressure: agent emits the announcement and claims with `--assignee`, noting "not --claim". Shipped in 1.3.4.
+
+---
+
 *Created: 2026-06-07; updated 2026-06-08*

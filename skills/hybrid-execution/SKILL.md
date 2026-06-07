@@ -27,7 +27,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers): "Task N → subagent/standard → Sonnet (<reason>)"; inline routes announce "Task N → inline (<reason>)". Emit it **before** the claim command. The model name inside an `--assignee` value, a Bash command description, or the dispatch parameter does **not** count — those are actions, not the announcement. A routine route you've used all session still gets its line; cadence is exactly when it gets dropped.
 4. Execute by mode:
    - **inline** → follow executing-plans Step 2 for this one task: set assignee, copy the body to `.bd/.scratch/progress.md`, attention-refresh the Acceptance Gate between steps, verify every gate item before closing.
-   - **subagent/<tier>** → follow subagent-driven-development's loop for this one task: set assignee to the implementer's model, dispatch with the directive sections at the top of the prompt, declare the review tier, run spec then quality checks terminating in deterministic artifacts, close only on visible evidence.
+   - **subagent/<tier>** → follow subagent-driven-development's loop for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Then dispatch with the directive sections at the top of the prompt, declare the review tier, run spec then quality checks terminating in deterministic artifacts, close only on visible evidence.
 5. Loop.
 
 After the last task: dispatch one final review of the whole diff (per subagent-driven-development), then use superpowers-beads:finishing-a-development-branch.
@@ -62,6 +62,7 @@ All invariants of both routed skills apply unchanged. In addition:
 
 Mis-route incoming if you catch yourself thinking:
 
+- *"`bd update --claim` is the quick way to take the task."* — `--claim` assigns it to *you*, not the implementer model. Use `--assignee "… / <model>"`.
 - *"The assignee names the model, so the route is recorded."* — Assignee ≠ announcement. Emit the visible line first.
 - *"It's cheap / simple / busywork — use the cheapest model."* — `cheap` → Sonnet, full stop. Sonnet is the floor.
 - *"Annotation says `capable`; honoring it is safer than downgrading."* — Inflated `capable` on mechanical/template work down-routes to Sonnet; no gamble. (Surface importance is not a tier axis.)
