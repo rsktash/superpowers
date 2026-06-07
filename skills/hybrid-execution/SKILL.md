@@ -24,7 +24,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 1. `bd show <task-id> --full` — read the next ready task.
 2. Find its `**Execution:**` line: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`), each carrying the planner's one-line reason.
-3. Announce the route in one line, naming the model the tier resolves to (per Model Tiers): "Task N → subagent/standard → Sonnet (<planner's reason, or your override reason>)". Inline routes announce "Task N → inline (<reason>)". The announcement is not optional and the model is not implied — an unnamed model is unauditable from the transcript.
+3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers): "Task N → subagent/standard → Sonnet (<reason>)"; inline routes announce "Task N → inline (<reason>)". Emit it **before** the claim command. The model name inside an `--assignee` value, a Bash command description, or the dispatch parameter does **not** count — those are actions, not the announcement. A routine route you've used all session still gets its line; cadence is exactly when it gets dropped.
 4. Execute by mode:
    - **inline** → follow executing-plans Step 2 for this one task: set assignee, copy the body to `.bd/.scratch/progress.md`, attention-refresh the Acceptance Gate between steps, verify every gate item before closing.
    - **subagent/<tier>** → follow subagent-driven-development's loop for this one task: set assignee to the implementer's model, dispatch with the directive sections at the top of the prompt, declare the review tier, run spec then quality checks terminating in deterministic artifacts, close only on visible evidence.
@@ -37,6 +37,7 @@ After the last task: dispatch one final review of the whole diff (per subagent-d
 The annotation is the default, not a cage — but every override must be stated, never silent:
 
 - **Toward subagent** (annotation says `inline`, you dispatch): always allowed. State one line: what made the task bigger than planned.
+- **Toward a lower subagent tier** (annotation says `capable`, the body argues for `standard`): **required, not optional.** The annotation is a ceiling to validate, not a floor to honor. If the body's reason describes mechanical work, a mirror, or adoption of a landed/reviewed template, it argues for `standard` at most — down-route to `subagent/standard` → Sonnet and state the override. There is no gamble in down-routing (Sonnet still gets a fresh reviewed subagent); honoring an inflated `capable` just burns the session model on busywork. "Important/user-facing" is not a tier axis — tier measures the judgment the task demands, nothing else.
 - **Toward inline** (annotation says `subagent/*`, you execute it yourself): requires justification against the rubric in writing-plans — all four criteria, read literally: 1 file (the task's Files list, not "one logical unit"), complete spec, gate verifiable in one command, no judgment. A multi-file task fails the first criterion no matter how small the diff or how much context you already hold. "The files are already in my context", "it's only N lines", and "dispatch overhead exceeds the work" are not criteria — the last is the planner's standard for annotating `inline`, not yours for overriding to it. If any criterion fails, dispatch. State the justification before touching any file.
 - **Missing annotation** (plan predates this skill): classify the task yourself against the rubric — fresh, per task, never by transcribing a dispatch plan or wave grouping already negotiated; scheduling never raises a tier. State the classification and reason, then proceed as if annotated.
 
@@ -44,7 +45,9 @@ The annotation is the default, not a cage — but every override must be stated,
 
 ## Model Tiers
 
-Tiers are abstract — resolve them against your human partner's standing model policy first (project memory, CLAUDE.md); a standing policy always overrides the default map. Default on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model. Never downgrade a tier without stating it as an override.
+Tiers are abstract — resolve them against your human partner's standing model policy first (project memory, CLAUDE.md); a standing policy always overrides the default map. Default on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model.
+
+A tier names the **judgment a task demands, not model cost.** `cheap` and `standard` both resolve to exactly Sonnet — Sonnet is the floor, there is no cheaper tier; "cheap" never licenses anything below Sonnet however small the task or cost-conscious your partner. State any tier change, in either direction, as a visible override.
 
 ## Invariants
 
@@ -54,6 +57,14 @@ All invariants of both routed skills apply unchanged. In addition:
 - Dispatch an implementer while uncommitted inline edits exist in the worktree — commit or revert first.
 - Execute a `subagent/capable` task inline. If it needs design judgment, it needs dispatch — or escalate to your human partner.
 - Blend procedures: an inline task gets executing-plans' gate verification; a dispatched task gets subagent-driven-development's two checks. No task gets a mixture, and no task gets neither.
+
+## Red Flags — STOP
+
+Mis-route incoming if you catch yourself thinking:
+
+- *"The assignee names the model, so the route is recorded."* — Assignee ≠ announcement. Emit the visible line first.
+- *"It's cheap / simple / busywork — use the cheapest model."* — `cheap` → Sonnet, full stop. Sonnet is the floor.
+- *"Annotation says `capable`; honoring it is safer than downgrading."* — Inflated `capable` on mechanical/template work down-routes to Sonnet; no gamble. (Surface importance is not a tier axis.)
 
 ## When an Inline Task Balloons
 
