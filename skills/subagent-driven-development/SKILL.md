@@ -76,6 +76,8 @@ Your human partner's standing model policy (project memory, CLAUDE.md) overrides
 - multi-file integration → standard model
 - design judgment or broad codebase understanding → most capable model
 
+The current Sonnet (Sonnet 5 today) is close to the session/most-capable model, so the third bullet is a **high bar, not a default**: reserve the most-capable model for real design judgment or broad synthesis, and let Sonnet carry multi-file integration. When unsure between `standard` and most-capable, pick `standard` — a fresh reviewed Sonnet subagent makes the down-route low-risk. (Model names are point-in-time; the tiers stay version-agnostic.)
+
 ## Invariants
 
 **Never:**
