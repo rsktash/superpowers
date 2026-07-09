@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# PreToolUse hook: DB-identity guard for destructive database commands.
+#
+# Enforces the core rule "confirm DB identity from row counts/data before
+# mutating; never infer the target from config defaults" — MECHANICALLY, at
+# the moment a mutation is about to run, immune to session decay.
+#
+# Tier 0 (deny-once reminder): a Bash command that invokes a DB client
+#   (psql/pg_restore/dropdb/createdb/alembic) AND contains a mutating keyword
+#   (DROP/TRUNCATE/DELETE FROM/UPDATE/ALTER) is denied ONCE per session with
+#   the identity reminder; re-running the exact same command proceeds. The
+#   deny reason is the delivery channel — deny reasons reach the model.
+#
+# Tier 1 (hard gate): DROP/TRUNCATE/dropdb aimed at a remote or tunneled
+#   database (port 5482 = the shared bd tracker serving biklod+teejar,
+#   'rsteam', or an explicit non-localhost -h host) is denied unless the
+#   command carries CC_DB_GUARD_OK=1. Typing the override IS the audit trail.
+#
+# Fails OPEN: any parse error, missing jq, or malformed input -> exit 0.
+set -uo pipefail
+
+command -v jq >/dev/null 2>&1 || exit 0
+input="$(cat)" || exit 0
+[ -n "$input" ] || exit 0
+
+tool="$(printf '%s' "$input" | jq -r '.tool_name // empty' 2>/dev/null)" || exit 0
+[ "$tool" = "Bash" ] || exit 0
+session="$(printf '%s' "$input" | jq -r '.session_id // "default"' 2>/dev/null)"
+cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // ""' 2>/dev/null)"
+[ -n "$cmd" ] || exit 0
+
+# explicit override: user/model typed the intent — allow everything
+printf '%s' "$cmd" | grep -q 'CC_DB_GUARD_OK=1' && exit 0
+
+# must actually invoke a DB client / migration tool (not merely mention SQL in
+# a grep or an edit) — word-start match on common invocations
+printf '%s' "$cmd" | grep -Eq '(^|[;&| ])(psql|pg_restore|dropdb|createdb|alembic)([ "]|$)' || exit 0
+
+deny() {
+  jq -cn --arg r "$1" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:$r}}'
+  exit 0
+}
+
+# ---- Tier 1: DROP/TRUNCATE against remote/tunneled targets --------------
+if printf '%s' "$cmd" | grep -Eiq '(DROP[[:space:]]+(TABLE|SCHEMA|DATABASE|INDEX)|TRUNCATE|(^|[;&| ])dropdb )'; then
+  remote=0
+  printf '%s' "$cmd" | grep -Eq '5482|rsteam' && remote=1
+  printf '%s' "$cmd" | grep -Eq -- '-h[= ]+' && ! printf '%s' "$cmd" | grep -Eq -- '-h[= ]+(localhost|127\.0\.0\.1|::1)' && remote=1
+  if [ "$remote" = 1 ]; then
+    deny "db-guard: DROP/TRUNCATE aimed at a REMOTE/tunneled database (port 5482 is the shared bd tracker serving biklod AND teejar). Hard-gated. Confirm the target's identity from actual data (row counts / known rows), then — only if certain — re-issue prefixed with CC_DB_GUARD_OK=1. Never infer the target from config defaults."
+  fi
+fi
+
+# ---- Tier 0: any mutation -> deny once per session with the reminder ----
+if printf '%s' "$cmd" | grep -Eiq '(DROP[[:space:]]+(TABLE|SCHEMA|DATABASE|INDEX)|TRUNCATE|DELETE[[:space:]]+FROM|UPDATE[[:space:]]+[a-zA-Z_"]+[[:space:]]+SET|ALTER[[:space:]]+(TABLE|SCHEMA)|(^|[;&| ])dropdb )'; then
+  state_dir="${TMPDIR:-/tmp}/cc-db-guard"
+  mkdir -p "$state_dir" 2>/dev/null || exit 0
+  sfile="$state_dir/$(printf '%s' "$session" | tr -c 'A-Za-z0-9_.-' '_')"
+  sig="$(printf '%s' "$cmd" | tr -s '[:space:]' ' ' | cksum | cut -d' ' -f1)"
+  if [ -f "$sfile" ] && grep -qx "$sig" "$sfile" 2>/dev/null; then
+    exit 0   # seen before this session — reminder already delivered
+  fi
+  printf '%s\n' "$sig" >> "$sfile" 2>/dev/null || true
+  deny "db-guard: database mutation detected. DB-identity rule: confirm the target from row counts/actual data FIRST (cheap SELECT against the same DSN) — config defaults are not identity. If identity is already confirmed this session, re-run this exact command to proceed."
+fi
+
+exit 0
