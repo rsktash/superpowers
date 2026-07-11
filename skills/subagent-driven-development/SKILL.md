@@ -17,11 +17,11 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 For each task, in order:
 
-1. Read it: `bd show <task-id> --full`. Mark it in progress and set the assignee (do NOT use --claim): `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <implementer-model-name>"` (e.g. "Alex / Claude Sonnet 4.6" — the model of the implementer subagent you dispatch for this task per **Model Selection**, since that subagent does the work). Then dispatch an implementer with the full task text plus the context it needs. Put the task's directive sections (Context Anchor, Acceptance Gate, Drift Detectors) at the top of the prompt.
+1. Read it: `bd show <task-id> --full`. Mark it in progress and set the assignee (do NOT use --claim): `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <implementer-model-name>"` (e.g. "Alex / Claude Sonnet 4.6" — the model of the implementer subagent you dispatch for this task per **Model Selection**, since that subagent does the work). Then dispatch an implementer with the full task text plus the context it needs. Put the task's directive sections (Context Anchor, Acceptance Gate, Drift Detectors) at the top of the prompt. The prompt also carries the **cache guard**: run only this task's targeted tests, never the full suite; no foreground command expected to outlive ~4 minutes, and no self-poll loops (`until …`, `while kill -0 …`, `sleep`-tail) — a subagent's prompt cache lives 5 minutes, and one blocking suite run turns every later turn into a full-context re-read.
 2. Answer any questions the implementer asks *before* it proceeds.
 3. Review the result (see **Termination**), fix anything open, then close the task.
 
-After the last task, dispatch one final review of the whole diff, then use superpowers-beads:finishing-a-development-branch.
+After the last task, run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff, then use superpowers-beads:finishing-a-development-branch.
 
 ## Termination — what counts as "reviewed"
 
@@ -87,6 +87,7 @@ The current Sonnet (Sonnet 5 today) is close to the session/most-capable model, 
 - Run two implementers in parallel on the same worktree (they conflict).
 - Make implementers query beads — hand them the full task text from `bd show <id> --full`.
 - Treat an implementer's self-review as the review. Both happen.
+- Let an implementer run the full test suite or wait on its own background jobs — targeted tests only; the suite runs once, here, backgrounded.
 
 ## Integration
 

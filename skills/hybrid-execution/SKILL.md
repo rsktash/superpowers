@@ -27,10 +27,10 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers): "Task N → subagent/standard → Sonnet (<reason>)"; inline routes announce "Task N → inline (<reason>)". Emit it **before** the claim command. The model name inside an `--assignee` value, a Bash command description, or the dispatch parameter does **not** count — those are actions, not the announcement. A routine route you've used all session still gets its line; cadence is exactly when it gets dropped.
 4. Execute by mode:
    - **inline** → follow executing-plans Step 2 for this one task: set assignee, copy the body to `.bd/.scratch/progress.md`, attention-refresh the Acceptance Gate between steps, verify every gate item before closing.
-   - **subagent/<tier>** → follow subagent-driven-development's loop for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Then dispatch with the directive sections at the top of the prompt, declare the review tier, run spec then quality checks terminating in deterministic artifacts, close only on visible evidence.
+   - **subagent/<tier>** → follow subagent-driven-development's loop for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Then dispatch with the directive sections at the top of the prompt — including subagent-driven-development's cache guard (targeted tests only; the full-suite gate stays in this session) — declare the review tier, run spec then quality checks terminating in deterministic artifacts, close only on visible evidence.
 5. Loop.
 
-After the last task: dispatch one final review of the whole diff (per subagent-driven-development), then use superpowers-beads:finishing-a-development-branch.
+After the last task: run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff (per subagent-driven-development), then use superpowers-beads:finishing-a-development-branch.
 
 ## Overriding an Annotation
 
@@ -59,6 +59,7 @@ All invariants of both routed skills apply unchanged. In addition:
 - Dispatch an implementer while uncommitted inline edits exist in the worktree — commit or revert first.
 - Execute a `subagent/capable` task inline. If it needs design judgment, it needs dispatch — or escalate to your human partner.
 - Blend procedures: an inline task gets executing-plans' gate verification; a dispatched task gets subagent-driven-development's two checks. No task gets a mixture, and no task gets neither.
+- Let a dispatched implementer run the full test suite or poll its own background jobs — targeted tests only; the suite gate runs once, in this session, backgrounded.
 
 ## Red Flags — STOP
 
