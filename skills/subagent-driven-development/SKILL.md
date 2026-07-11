@@ -31,7 +31,7 @@ After the last task, run the full test suite once from this session (backgrounde
 - `git diff --name-only` showing which files changed
 - `grep` confirming a symbol exists, or is gone
 
-Run two checks per task — spec (does the code match the task?) then quality (is it well-built?), spec first. But each check **terminates in a deterministic artifact you can see**, never in the reviewer's summary.
+Run ONE review per task — a single reviewer subagent whose prompt covers spec compliance first (does the code match the task?), then quality (is it well-built?); spec findings outrank quality findings. Every claim in its report **terminates in a deterministic artifact you can see**, never in the reviewer's summary. (Ruled 2026-07-12: the former cadence of two dispatches — a spec reviewer, then a quality reviewer — doubled review cost without a catch-rate gain; the quality half overlaps the end-of-plan whole-diff review.)
 
 A confident verdict from a *parallel* reviewer is the weakest signal here, not the strongest. A capable model's mistakes are fluent and well-formatted, and parallel batches that partially cancel are a known surface for manufactured "success" — so independent re-running matters more, not less.
 
@@ -54,8 +54,8 @@ Before any status action — closing, reopening, or deferring a bead, or declari
 
 Right-size review per task, but make the decision visible and challengeable:
 
-- `trivial-deterministic` (isolated, complete spec) → one deterministic check
-- `behavioral` (multi-file, judgment, integration) → spec + quality
+- `trivial-deterministic` (isolated, complete spec) → one deterministic check, no reviewer dispatch
+- `behavioral` (multi-file, judgment, integration) → the one combined spec+quality reviewer
 
 State the tier and a one-line reason up front. **Why:** silently downgrading review reads identically to having reviewed — the problem isn't judging a task trivial, it's making that judgment invisible.
 
@@ -83,7 +83,7 @@ The current Sonnet (Sonnet 5 today) is close to the session/most-capable model, 
 **Never:**
 - Start on main/master without explicit user consent.
 - Close a task while a check shows failures.
-- Run the quality check before the spec check passes.
+- Dispatch a second reviewer for the same task — spec and quality are sections of the ONE review pass (use `reviewer-prompt.md`).
 - Run two implementers in parallel on the same worktree (they conflict).
 - Make implementers query beads — hand them the full task text from `bd show <id> --full`.
 - Treat an implementer's self-review as the review. Both happen.
