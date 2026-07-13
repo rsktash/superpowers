@@ -32,7 +32,7 @@ You MUST create a task for each of these items and complete them in order. The l
 5. **Present execution choice** — offer Inline vs Subagent-Driven vs Hybrid and get the user's pick
 6. **Invoke the chosen execution skill** — `Skill(superpowers-beads:executing-plans)`, `Skill(superpowers-beads:subagent-driven-development)`, or `Skill(superpowers-beads:hybrid-execution)`, passing the root bead ID, as your next action
 
-**Terminal step:** Item 6 is complete only when the execution skill has actually been invoked — not when you have "started executing" by running git/bd/worktree commands or dispatching implementers from memory. The only skills you invoke after writing-plans are executing-plans, subagent-driven-development, or hybrid-execution.
+**Terminal step:** Item 6 is complete only when the execution skill has actually been invoked — not when you have "started executing" by running git/bd/worktree commands or dispatching implementers from memory. The only skills you invoke after writing-plans are executing-plans, subagent-driven-development, hybrid-execution, or codex-execution.
 
 ## Scope Check
 
@@ -294,13 +294,15 @@ Fix inline; no need to re-review.
 
 After all task beads are created and linked, offer execution choice:
 
-**"Plan complete — <N> task beads created under `<root-bead-id>`. Three execution options:**
+**"Plan complete — <N> task beads created under `<root-bead-id>`. Four execution options:**
 
 **1. Inline Execution** - Execute tasks in this session using executing-plans, driven by `bd ready`
 
 **2. Subagent-Driven** - I dispatch a fresh subagent per task, review between tasks
 
 **3. Hybrid (recommended when the plan mixes trivial and complex tasks)** - Route each task by its Execution annotation: trivial tasks inline, everything else to a fresh subagent
+
+**4. Codex Execution** - Task beads run via the codex CLI (zero-context executor); this session verifies each landing and runs the terminal whole-diff review
 
 **Which approach?"**
 
@@ -317,3 +319,7 @@ Pass the root bead ID to the chosen execution skill. This completes the final ch
 **If Hybrid chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers-beads:hybrid-execution
 - Routes each task by its **Execution:** annotation; overrides must be stated
+
+**If Codex Execution chosen:**
+- **REQUIRED SUB-SKILL:** Use superpowers-beads:codex-execution
+- Sequential codex dispatch per task + per-landing verification + terminal whole-diff review
