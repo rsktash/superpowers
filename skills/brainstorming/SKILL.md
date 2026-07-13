@@ -140,11 +140,11 @@ Wait for the user's response. If they request changes, update the bead and re-ru
 
 A visual companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question gets visuals.
 
-**Companion selection:** If the Pencil MCP server is available (pencil tools like `batch_design`, `get_screenshot` are present), use it as the visual companion. Otherwise, fall back to the browser-based companion.
+**Companion selection:** On Claude Code (the built-in Artifact tool is available), use Artifacts as the visual companion. On other harnesses, fall back to the browser-based companion.
 
 **Offering the companion:** When you anticipate that upcoming questions will involve visual content (mockups, layouts, diagrams), or the user asks for visuals, offer it once for consent:
 
-- **Pencil available:** > "Some of what we're working on might be easier to show visually. I can create mockups and wireframes in Pencil as we go. Want to try it?"
+- **Artifacts (Claude Code):** > "Some of what we're working on might be easier to show visually. I can put together mockups, diagrams, and side-by-side comparisons as Artifacts you can view right here as we go. Want to try it?"
 - **Browser fallback:** > "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
 
 **This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
@@ -157,5 +157,5 @@ A visual companion for showing mockups, diagrams, and visual options during brai
 A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use visuals.
 
 If they agree to the companion, read the detailed guide before proceeding:
-- **Pencil:** `skills/brainstorming/visual-companion-pencil.md`
+- **Artifacts (Claude Code):** load the `artifact-design` skill, then build with the Artifact tool. Update the same artifact in place across the session (redeploy the same file path) so the companion stays one evolving surface, and give a brief text summary of what changed each time.
 - **Browser:** `skills/brainstorming/visual-companion.md`
