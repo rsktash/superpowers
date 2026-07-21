@@ -30,7 +30,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
    - **subagent/<tier>** → follow subagent-driven-development's loop for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Then dispatch with the directive sections at the top of the prompt — including subagent-driven-development's cache guard (targeted tests only; the full-suite gate stays in this session) — declare the review tier, run the ONE combined spec+quality review (`reviewer-prompt.md`; spec section outranks quality) terminating in deterministic artifacts, close only on visible evidence.
 5. Loop.
 
-After the last task: run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff (per subagent-driven-development), then use superpowers-beads:finishing-a-development-branch.
+After the last task: run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff (per subagent-driven-development), then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
 
 ## Inline Task Procedure
 
@@ -106,7 +106,6 @@ If an inline task starts touching files beyond its Files list, that is a drift-d
 
 ## Integration
 
-- **superpowers-beads:using-git-worktrees** — REQUIRED before starting.
+- **superpowers-beads:using-git-worktrees** — REQUIRED before starting (also owns Finishing: merge back + cleanup).
 - **superpowers-beads:writing-plans** — produces the Execution annotations this skill routes on.
 - **superpowers-beads:subagent-driven-development** — owns the dispatch/review procedure.
-- **superpowers-beads:finishing-a-development-branch** — after all tasks complete.

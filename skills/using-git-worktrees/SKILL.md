@@ -206,14 +206,60 @@ Ready to implement auth feature
 - Auto-detect and run project setup
 - Verify clean test baseline
 
+## Finishing: Merge Back and Clean Up
+
+Once implementation is complete in the worktree, close it out and merge back. This is a solo-dev repo — there is no PR step, ever.
+
+### 1. Full Test Suite
+
+Run the full suite in the worktree. Background it — the suite gate belongs to the orchestrator session, not a subagent:
+
+```bash
+npm test / cargo test / pytest / go test ./...   # backgrounded; check output separately
+```
+
+**If tests fail:** stop, fix, re-run. Don't proceed to step 2 until green.
+
+### 2. Close the Root Epic (If Not Already Closed)
+
+```bash
+bd show <root-id>
+```
+
+Closing the last child task may already have auto-closed the epic — if `bd show` reports it `closed`, skip this step. If it's still `open` (and all children are closed), close it explicitly:
+
+```bash
+bd close <root-id> --reason "All tasks complete, merged to <base>"
+```
+
+### 3. Merge to Base Locally
+
+```bash
+git checkout <base>
+git merge <feature-branch>
+
+# Re-run the suite on the merged result — the worktree run above doesn't cover the merge itself
+npm test / cargo test / pytest / go test ./...
+```
+
+### 4. Remove the Worktree
+
+```bash
+git worktree remove <path>
+git branch -d <feature-branch>
+```
+
+### 5. Never Open a PR
+
+Solo-dev standing rule: work merges back to `<base>` locally, full stop. Do not `git push` the feature branch and do not run `gh pr create` — there's no reviewer on the other end.
+
 ## Integration
 
 **Called by:**
 - **brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows
 - **subagent-driven-development** - REQUIRED before executing any tasks
-- **executing-plans** - REQUIRED before executing any tasks
 - **hybrid-execution** - REQUIRED before executing any tasks
 - Any skill needing isolated workspace
 
 **Pairs with:**
-- **finishing-a-development-branch** - REQUIRED for cleanup after work complete
+- Finishing lives inside this skill now — see `## Finishing: Merge Back and Clean Up` above.

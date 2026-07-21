@@ -21,7 +21,7 @@ For each task, in order:
 2. Answer any questions the implementer asks *before* it proceeds.
 3. Review the result (see **Termination**), fix anything open, then close the task.
 
-After the last task, run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff, then use superpowers-beads:finishing-a-development-branch.
+After the last task, run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff, then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
 
 ## Termination — what counts as "reviewed"
 
@@ -91,7 +91,6 @@ The current Sonnet (Sonnet 5 today) is close to the session/most-capable model, 
 
 ## Integration
 
-- **superpowers-beads:using-git-worktrees** — REQUIRED before starting.
+- **superpowers-beads:using-git-worktrees** — REQUIRED before starting (also owns Finishing: merge back + cleanup).
 - **superpowers-beads:writing-plans** — creates the plan this skill executes.
-- **superpowers-beads:finishing-a-development-branch** — after all tasks complete.
 - Implementers follow **superpowers-beads:test-driven-development** per task.
