@@ -13,6 +13,19 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
+## Pre-Flight Plan Review
+
+Before the first dispatch, read the whole plan once: the epic spec (`bd show <root-id> --full`) and every task (`bd children <root-id>`, then `bd show <ids> --full`). Check for:
+
+1. **Tasks that contradict each other or the spec** — two tasks disagreeing on an interface, format, or decision, or a task drifting from what the spec says.
+2. **Anything a task ASKS FOR that a reviewer would flag as a defect** — the plan mandating a bug (e.g. a task whose steps produce the exact anti-pattern review would catch).
+3. **Missing dependency edges the task bodies imply** — a task that reads/consumes something a sibling task produces, with no dep link between them.
+4. **Gate items no step satisfies** — an Acceptance Gate checkbox nothing in the task's steps actually produces.
+
+Batch ALL findings into ONE question to your human partner before Task 1 — never drip them out mid-run as you happen to notice each one. If the review turns up nothing, say so in one line and start.
+
+**Why:** Catching a plan-level contradiction on Task 6 after Tasks 1-5 already built on the wrong assumption is expensive to unwind; reading the whole plan once up front is cheap by comparison, and one batched question costs your human partner one interruption instead of five.
+
 ## The Loop
 
 For each task, in order:

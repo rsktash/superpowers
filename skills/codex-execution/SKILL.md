@@ -23,6 +23,7 @@ Files, TDD steps). Codex cannot compensate for a vague bead.
 
 ## Preconditions (check BEFORE the first dispatch)
 
+- **Pre-Flight Plan Review:** run it (superpowers-beads:subagent-driven-development) over the whole plan and batch any findings into one question to your human partner before Task 1.
 - **AGENTS.md parity:** codex reads `AGENTS.md`, never `CLAUDE.md`. EVERY directory
   with a `CLAUDE.md` must carry a sibling `AGENTS.md` symlink (`ln -s CLAUDE.md AGENTS.md`).
   Verify: `find . -name CLAUDE.md -not -path "*/node_modules/*"` — each hit has a
