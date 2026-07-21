@@ -236,6 +236,7 @@ bd close <root-id> --reason "All tasks complete, merged to <base>"
 
 ```bash
 git checkout <base>
+git pull            # if <base> can move from elsewhere — keep it current before merging
 git merge <feature-branch>
 
 # Re-run the suite on the merged result — the worktree run above doesn't cover the merge itself
