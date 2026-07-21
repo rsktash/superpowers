@@ -39,6 +39,15 @@ If a check fails, the same implementer fixes it and you re-run the check. Don't 
 
 **Why:** The dangerous failure on current models is not visible drift — it's a thorough, convincing, wrong report. Only deterministic output catches it; another subagent's prose does not.
 
+### Acting on review findings
+
+A reviewer's finding is a claim, not a verdict. Reviewer citations — file:line, symbol names, "this is forbidden" framings — are routinely wrong; verify each one against the actual code before changing anything. No performative agreement ("You're absolutely right!", "Great catch!") and no implementing on reflex — restate the finding, check it against the codebase, then act or push back.
+
+- **Verify before implementing.** Open the cited file:line yourself. A confident, well-written finding is not evidence any more than a confident review verdict is (see above) — check it before touching code.
+- **One finding at a time.** Implement it, re-run the relevant check (test, grep, diff), confirm it holds, then move to the next. Don't batch fixes on the strength of the report alone.
+- **Push back with technical reasoning when a finding is wrong for THIS codebase.** Wrong platform assumption, missing context, breaks working code, YAGNI on an unused path — say so and why, instead of implementing to avoid friction.
+- **Findings that conflict with the plan's recorded decisions escalate to your human partner** — don't silently apply a suggestion that contradicts a decision already made for this plan.
+
 ## Coordination Gate
 
 Reviewing code is anchored by the task's Acceptance Gate. Your *own* coordination actions are not — and that ungated space is where drift happens.
