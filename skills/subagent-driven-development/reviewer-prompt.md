@@ -8,6 +8,7 @@ catch-rate gain.)
 ```
 Task tool (general-purpose or superpowers-beads:code-reviewer):
   description: "Review Task N: [task name]"
+  model: [REQUIRED — resolve per SKILL.md Model Selection / Review Tier; an omitted model silently inherits the session's most expensive one]
   prompt: |
     You are reviewing whether an implementation matches its specification AND
     whether it is well-built. Spec compliance comes first; spec findings outrank
