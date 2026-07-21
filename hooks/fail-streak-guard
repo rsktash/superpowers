@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# PostToolUse hook: mechanical ignition for systematic-debugging.
+#
+# systematic-debugging never self-invokes mid-firefight (4 calls in 206
+# analyzed sessions), yet every anger cluster sits on an unstructured debug
+# loop of blind command variation. This hook counts consecutive FAILING runs
+# of the same Bash "command class" and, once the streak crosses a threshold,
+# injects an advisory reminder to stop varying blindly and diagnose. Modeled
+# on hooks/retry-guard (same state-file idiom, same fail-open discipline).
+#
+# ADVISORY ONLY: this hook never blocks, never denies, never runs on
+# PreToolUse. It only ever emits PostToolUse additionalContext or nothing.
+#
+# Command class (pinned rule, do not "simplify"):
+#   class = first whitespace token, PLUS the second whitespace token only if
+#   that second token does NOT start with "-" (a flag) and does NOT contain
+#   "/" (a path/target). So:
+#     pytest -n4 tests/x -> "pytest"          (2nd token is a flag)
+#     pytest tests/y      -> "pytest"          (2nd token is a path)
+#     npm test            -> "npm test"
+#     npm install          -> "npm install"
+#     ./gradlew build      -> "./gradlew build"
+#     git commit           -> "git commit"
+#   This groups "the same tool, doing roughly the same kind of thing"
+#   without over-splitting on flags/paths (too narrow) or under-splitting on
+#   subcommands (too broad, e.g. lumping "npm test" with "npm install").
+#
+# Failure: .tool_response.exit_code // .tool_response.exitCode, numeric and
+# non-zero. Absent or non-numeric -> treated as success (streak resets).
+#
+# State: only the MOST RECENT class per session is tracked (single-signature
+# state, like retry-guard) under ${TMPDIR:-/tmp}/cc-fail-streak/<session>. A
+# different class arriving resets the counter to that new class. Only Bash
+# tool events are considered at all -- a non-Bash tool call neither counts
+# nor resets the streak.
+#
+# Fails OPEN: any parse error, missing jq, or malformed input -> exit 0.
+set -uo pipefail
+
+command -v jq >/dev/null 2>&1 || exit 0
+input="$(cat)" || exit 0
+[ -n "$input" ] || exit 0
+
+tool="$(printf '%s' "$input" | jq -r '.tool_name // empty' 2>/dev/null)" || exit 0
+[ "$tool" = "Bash" ] || exit 0
+
+session="$(printf '%s' "$input" | jq -r '.session_id // "default"' 2>/dev/null)"
+cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // ""' 2>/dev/null)"
+[ -n "$cmd" ] || exit 0
+
+# --- command class -----------------------------------------------------
+tok1="$(printf '%s' "$cmd" | awk '{print $1}')"
+tok2="$(printf '%s' "$cmd" | awk '{print $2}')"
+[ -n "$tok1" ] || exit 0
+
+class="$tok1"
+case "$tok2" in
+  '') ;;                # no second token
+  -*) ;;                # a flag -- doesn't narrow the class
+  */*) ;;               # a path/target -- doesn't narrow the class
+  *) class="$tok1 $tok2" ;;
+esac
+
+# --- success / failure ---------------------------------------------------
+exit_code="$(printf '%s' "$input" | jq -r '(.tool_response.exit_code // .tool_response.exitCode) // empty' 2>/dev/null)"
+case "$exit_code" in
+  ''|*[!0-9-]*) is_failure=0 ;;   # absent or non-numeric -> success
+  0) is_failure=0 ;;
+  *) is_failure=1 ;;
+esac
+
+max="${CC_FAIL_STREAK_MAX:-2}"
+
+state_dir="${TMPDIR:-/tmp}/cc-fail-streak"
+mkdir -p "$state_dir" 2>/dev/null || exit 0
+sfile="$state_dir/$(printf '%s' "$session" | tr -c 'A-Za-z0-9_.-' '_')"
+
+prev_class=""; prev_count=0
+if [ -f "$sfile" ]; then
+  prev_count="$(sed -n '1p' "$sfile" 2>/dev/null)"
+  prev_class="$(sed -n '2,$p' "$sfile" 2>/dev/null)"
+  case "$prev_count" in *[!0-9]*|'') prev_count=0;; esac
+fi
+
+if [ "$is_failure" -eq 0 ]; then
+  # success resets the streak for this class (and becomes the tracked class)
+  { printf '%s\n' "0"; printf '%s' "$class"; } > "$sfile" 2>/dev/null || true
+  exit 0
+fi
+
+if [ "$class" = "$prev_class" ]; then
+  count=$((prev_count + 1))
+else
+  count=1
+fi
+
+{ printf '%s\n' "$count"; printf '%s' "$class"; } > "$sfile" 2>/dev/null || true
+
+if [ "$count" -ge "$max" ]; then
+  reason="fail-streak-guard: ${class} has failed ${count} times in a row. Stop varying blindly: load superpowers-beads:systematic-debugging and diagnose before the next attempt. If two DIAGNOSED fixes have also failed, offer your human partner an outsourced second opinion (outsource-review) instead of a third variation."
+  jq -cn --arg r "$reason" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$r}}'
+  exit 0
+fi
+
+exit 0
