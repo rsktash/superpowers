@@ -27,6 +27,7 @@ The original Superpowers stores specs and plans as markdown files in `docs/super
 | subagent-driven-development | Same dispatch model, beads for persistent tracking |
 | using-superpowers | Bootstrap mentions beads storage model |
 | hybrid-execution | New skill: routes each task inline or to a subagent based on the plan's Execution annotation |
+| codex-execution | New skill: runs task beads via the codex CLI with per-landing verification and a terminal whole-diff review |
 
 ## Important: Uninstall Original Superpowers First
 
