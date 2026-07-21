@@ -10,13 +10,13 @@ The original Superpowers stores specs and plans as markdown files in `docs/super
 
 - **Specs are beads.** The brainstorming skill creates a root epic bead (`bd create -t epic`) instead of writing a markdown file. The full spec lives in the bead body.
 - **Plans are bead trees.** The writing-plans skill creates child beads for each task, linked with dependency graphs (`bd dep add`). No plan markdown file.
-- **Execution is bead-driven.** The executing-plans skill uses `bd ready --parent` / `bd update --assignee` / `bd close --reason` instead of parsing checkboxes in a file.
+- **Execution is bead-driven.** The subagent-driven-development, hybrid-execution, and codex-execution skills use `bd ready --parent` / `bd update --assignee` / `bd close --reason` instead of parsing checkboxes in a file.
 - **Progress is live.** Track everything in [beads-ui](https://github.com/mantoni/beads-ui) in real time.
 - **Git stays searchable.** A lightweight summary file is committed to `docs/beads/` for each feature, and all commit messages include bead IDs.
 
 ### What's unchanged
 
-9 skills are identical to the original Superpowers: TDD, systematic-debugging, git-worktrees, finishing-a-development-branch, writing-skills, requesting-code-review, receiving-code-review, verification-before-completion, dispatching-parallel-agents.
+6 skills are identical to the original Superpowers: TDD, systematic-debugging, git-worktrees, writing-skills, requesting-code-review, verification-before-completion.
 
 ### Skills modified
 
@@ -24,9 +24,7 @@ The original Superpowers stores specs and plans as markdown files in `docs/super
 |-------|-------------|
 | brainstorming | Stores specs as epic beads, writes summary file to `docs/beads/` |
 | writing-plans | Creates task beads with `bd dep add` dependencies instead of markdown plan |
-| executing-plans | Drives work via `bd ready` / `bd update --assignee` / `bd close --reason` loop |
 | subagent-driven-development | Same dispatch model, beads for persistent tracking |
-| finishing-a-development-branch | Closes root epic bead, enforces bead ID in commits and PRs |
 | using-superpowers | Bootstrap mentions beads storage model |
 | hybrid-execution | New skill: routes each task inline or to a subagent based on the plan's Execution annotation |
 
@@ -66,8 +64,8 @@ cd superpowers
 
 1. **brainstorming** — Refines ideas, creates spec as an epic bead, commits summary to `docs/beads/`
 2. **writing-plans** — Decomposes spec into task beads with dependency ordering
-3. **executing-plans**, **subagent-driven-development**, or **hybrid-execution** — Executes tasks via `bd ready` loop; hybrid routes each task inline or to a subagent per its Execution annotation
-4. **finishing-a-development-branch** — Verifies all tasks closed, closes epic, merges/PRs with bead ID
+3. **subagent-driven-development**, **hybrid-execution**, or **codex-execution** — Executes tasks via `bd ready` loop; hybrid routes each task inline or to a subagent per its Execution annotation
+4. **using-git-worktrees** (Finishing: Merge Back and Clean Up) — Verifies all tasks closed, closes epic, merges/PRs with bead ID
 
 ### Summary file naming
 

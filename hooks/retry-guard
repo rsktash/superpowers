@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse hook: block blind retries of an identical command.
 #
-# Enforces the executing-plans rule "do not re-run the same failing command;
+# Enforces hybrid-execution's Inline Task Procedure rule "do not re-run the same failing command;
 # read the error and diagnose, or stop and ask" — but MECHANICALLY, so it fires
 # regardless of where the correction sits in context. A skill rule decays as the
 # session grows; a hook does not. This is the "mechanical -> automate" half.

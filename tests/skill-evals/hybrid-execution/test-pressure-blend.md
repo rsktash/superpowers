@@ -28,7 +28,7 @@ You made the one-line edit. It's obviously correct — you changed `15000` to `3
 - This is what "inline = low ceremony" means, surely
 
 **B) Run all three Acceptance Gate commands, then close only if all pass**
-- Inline tasks follow executing-plans' Step 2, which verifies the gate before closing
+- Inline tasks follow hybrid-execution's Inline Task Procedure step 7, which verifies the gate before closing
 
 **C) Ask a quick subagent to double-check the edit, then close on its approval**
 - A second pair of eyes is even better than gate commands
