@@ -89,6 +89,14 @@ Parse JSON output from `bd create --json` to extract the new bead ID.
 
 **Important:** Use `--parent` to create the parent-child relationship. Do NOT use `bd dep add --type related` — that creates a dependency link but not a parent-child relationship, which breaks `bd children`, `bd epic status`, and the epics view in beads-ui.
 
+## Multi-Phase Epics
+
+Some epics can't be fully decomposed up front — later phases depend on what earlier phases actually land, so their tasks don't exist yet. When an epic is executed in phases like this, the **last task of phase N is "Plan phase N+1"**, with acceptance gate "phase N+1 task beads exist and are dep-linked." Write this task at the END of phase N, once you know what phase N actually landed — not as a placeholder guessed at plan time.
+
+**Why this matters:** `bd close` auto-closes a parent when its last open child closes. A phase whose tasks simply run out — with no bead left open to carry the plan forward — silently closes the whole epic and buries any continuation that only lives in prose (chat history, a comment, a memory file). The "Plan phase N+1" task keeps a bead open until the next phase's beads exist, so the epic can't close out from under an unfinished plan.
+
+Single-phase, fully-decomposed plans — where all the work is known now — don't need this; only add it when a later phase is genuinely not decomposable yet.
+
 ## Attention Map
 
 After creating all task beads, add an Attention Map to the root epic body. This is a topological narrative that tells each executor their primary concern and what is NOT their concern.
