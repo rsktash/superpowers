@@ -21,6 +21,8 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
+**Mandatory step:** writing-plans is the mandatory step between an epic bead and ANY execution skill (hybrid-execution, subagent-driven-development, codex-execution). Executing an undecomposed epic — one with no child tasks — is a bypass, not a shortcut.
+
 ## Checklist
 
 You MUST create a task for each of these items and complete them in order. The last item is the step most often skipped — keep it on the list until it is genuinely done:

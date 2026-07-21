@@ -13,6 +13,8 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
+**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children is a spec, not a plan — STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
+
 ## Pre-Flight Plan Review
 
 Before the first dispatch, read the whole plan once: the epic spec (`bd show <root-id> --full`) and every task (`bd children <root-id>`, then `bd show <ids> --full`). Check for:
