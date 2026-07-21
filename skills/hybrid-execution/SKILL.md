@@ -9,10 +9,10 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Why hybrid:** A whole-plan mode choice is too coarse. Plans mix trivial tasks (config bump, rename) with complex ones (multi-file integration). Dispatching a subagent for a 2-minute edit is pure ceremony; executing a heavy task inline floods this session's context with implementation detail and degrades every review that follows. Routing per task keeps ceremony proportional and this session's context clean.
 
-**This skill owns routing only.** The per-task procedure for `inline` lives in this skill's own Inline Task Procedure section below; the procedure for `subagent/<tier>` lives in subagent-driven-development's Loop — follow each exactly as written; do not improvise a blend:
+**This skill owns routing and scheduling.** The per-task procedure for `inline` lives in this skill's own Inline Task Procedure section below; the per-task procedure for `subagent/<tier>` — claim, BASE recording, dispatch, review package, termination evidence — lives in subagent-driven-development's Loop. Follow each exactly as written; do not improvise a blend. What this skill adds on top is *when* those steps run: The Loop below pipelines each task's review against the next task's implementation.
 
 - `inline` → the Inline Task Procedure below
-- `subagent/<tier>` → superpowers-beads:subagent-driven-development, The Loop
+- `subagent/<tier>` → superpowers-beads:subagent-driven-development, The Loop (per-task procedure), scheduled per The Loop below
 
 **bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
 
@@ -28,11 +28,36 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 2. Find its `**Execution:**` line: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`), each carrying the planner's one-line reason.
 3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers): "Task N → subagent/standard → Sonnet (<reason>)"; inline routes announce "Task N → inline (<reason>)". Emit it **before** the claim command. The model name inside an `--assignee` value, a Bash command description, or the dispatch parameter does **not** count — those are actions, not the announcement. A routine route you've used all session still gets its line; cadence is exactly when it gets dropped.
 4. Execute by mode:
-   - **inline** → follow the Inline Task Procedure (below) for this one task.
-   - **subagent/<tier>** → follow subagent-driven-development's loop for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Then dispatch with the directive sections at the top of the prompt — including subagent-driven-development's cache guard (targeted tests only; the full-suite gate stays in this session) — declare the review tier, run the ONE combined spec+quality review (`reviewer-prompt.md`; spec section outranks quality) terminating in deterministic artifacts, close only on visible evidence.
-5. Loop.
+   - **inline** → follow the Inline Task Procedure (below) for this one task, start to close.
+   - **subagent/<tier>** → follow subagent-driven-development's per-task procedure for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Record `BASE=$(git rev-parse HEAD)`, declare the review tier, then dispatch the implementer with the directive sections at the top of the prompt — including subagent-driven-development's cache guard (targeted tests only; the full-suite gate stays in this session).
+5. **Pipeline the review — this is the default loop shape.** When task N's implementer reports DONE and its commits exist on the branch:
+   1. Freeze the evidence: `scripts/review-package BASE HEAD` (run from `skills/subagent-driven-development/`) writes the review package file. Record `HEAD_SHA=$(git rev-parse HEAD)`.
+   2. Dispatch N's ONE combined spec+quality reviewer (`reviewer-prompt.md`; spec section outranks quality) **in the background**, handing it the frozen package file path. If the reviewer needs to run anything at all — targeted tests, greps — the controller first creates a temporary read-only worktree pinned at N's HEAD, `git worktree add .worktrees/review-<short-sha> <HEAD_SHA>`, names it in the prompt as the ONLY directory the reviewer may run commands in, and removes it (`git worktree remove .worktrees/review-<short-sha>`) after the verdict is processed. (`trivial-deterministic` tasks skip the reviewer entirely: run the one deterministic check yourself, close, move on — nothing to pipeline.)
+   3. Immediately claim and dispatch task N+1 (steps 1–4). Do not idle on N's verdict — the frozen package cannot be perturbed by N+1's work, dispatched or inline.
+   4. When N's verdict returns, process it per subagent-driven-development's Termination: deterministic artifacts only, verify findings before acting, close N only on visible evidence. Then delete the review file and remove the review worktree.
+6. Loop.
 
-After the last task: run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff (per subagent-driven-development), then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
+**Pipeline safety rules — non-negotiable:**
+
+- **The reviewer reads the FROZEN package, never the live tree.** The working tree moves the moment N+1 starts; a reviewer that opens live files is reviewing N+1's half-finished work as if it were N's. Every path the reviewer touches is either inside the package file or inside the read-only review worktree pinned at N's HEAD — no exceptions, including "it's probably the same commits."
+- **One verdict outstanding, max.** If N+1's implementer lands while N's verdict is still out, generate N+1's package, but process N's verdict before dispatching N+2. A stack of unprocessed verdicts is unreviewed work compounding.
+- **A FAIL verdict on N freezes the frontier.** No new dispatches until the same implementer lands the fix as commits on top of N's (never a rebase or rewrite of reviewed commits) and the fix is re-reviewed to PASS. An in-flight N+1 implementer may finish and report; nothing new starts.
+- **Serial implementers, still.** Pipelining overlaps a *reviewer* with an implementer — never two implementers. One implementer in the session worktree at a time; anything wider requires Hybrid Parallel (below), which only your human partner can invoke, by name.
+
+After the last task: drain the pipeline — process every outstanding verdict, fix and re-review anything open. Then run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff (per subagent-driven-development), then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
+
+## Hybrid Parallel (opt-in)
+
+Frontier parallelism — 2–3 implementers running concurrently — exists, but it is never the default and never inferred. It activates ONLY when your human partner explicitly says **"hybrid parallel"**. "Go faster", "parallelize where you can", a wide ready frontier, or a looming deadline are not that phrase — under all of them, the pipelined Loop above is the ceiling. If you believe a plan would benefit, ask; do not assume.
+
+When invoked:
+
+- **Width: 2–3 implementers**, never more, regardless of how wide the ready frontier is.
+- **Eligibility — both conditions, checked per pair:** the tasks appear simultaneously in `bd ready --parent <root-id> --json`, AND their scopes are disjoint — no file shared between their Files lists, and no "Consumes From" edge between them per the epic's Attention Map. A single shared file or a single consumes-from edge disqualifies the pair: those tasks run serially, pipelined as usual. Eligibility is computed from the plan's recorded lists, never from a felt sense that "they probably won't collide."
+- **Isolation:** each implementer works in its own worktree on its own branch, created per using-git-worktrees conventions (`git worktree add .worktrees/<task-id> -b <task-branch>`). No implementer ever shares a worktree with another implementer — that invariant survives this mode untouched.
+- **Merge-back is serial and controller-owned:** the controller merges completed branches back one at a time, in dependency order, re-running the merged task's targeted tests after EACH merge. Two branches that each pass in isolation can still break composed — the post-merge test run is what catches that. Reviews stay per task and pipelined exactly as in The Loop, each packaged from its own branch's BASE..HEAD.
+
+**Shared test environment caveat:** one shared test environment — a single docker-compose stack, one attached device, one seeded database — forces serial test gates no matter how many implementers run: their test runs queue on the shared resource and the wall-clock win evaporates. Pipelined reviews still apply and still pay off (the reviewer reads a frozen package, not the environment), but frontier mode does not help there. Check for this before proposing or accepting hybrid parallel.
 
 ## Inline Task Procedure
 
@@ -85,10 +110,12 @@ A tier names the **judgment a task demands, not model cost.** `cheap` and `stand
 
 ## Invariants
 
-All invariants of the Inline Task Procedure and of subagent-driven-development apply unchanged. In addition:
+All invariants of the Inline Task Procedure and of subagent-driven-development apply unchanged — with one scoping note. Subagent-driven-development's "never run two implementers in parallel on the same worktree" stands exactly as written: same-worktree implementer concurrency is forbidden everywhere, always. Separate-worktree implementer concurrency is allowed ONLY under Hybrid Parallel, on your human partner's literal "hybrid parallel". Reviewer-vs-implementer overlap, by contrast, is always allowed — the reviewer works from the frozen package and, for command runs, the controller's read-only review worktree; it never touches the live working tree, so there is nothing for it to collide with.
 
-**Never:**
-- Dispatch an implementer while uncommitted inline edits exist in the worktree — commit or revert first.
+In addition, **never:**
+- Dispatch an implementer while uncommitted inline edits exist in the worktree — commit or revert first. Pipelining does not loosen this: task N's commits exist before N's package is generated, and the live tree is clean of uncommitted inline edits before N+1's implementer starts.
+- Run implementers concurrently outside Hybrid Parallel — and even inside it, never two in one worktree, never more than 2–3 total, never on tasks whose Files lists overlap or that share a Consumes-From edge.
+- Point a reviewer at the live working tree, or dispatch new work past an unresolved FAIL verdict.
 - Execute a `subagent/capable` task inline. If it needs design judgment, it needs dispatch — or escalate to your human partner.
 - Blend procedures: an inline task gets the Inline Task Procedure's gate verification; a dispatched task gets subagent-driven-development's combined review. No task gets a mixture, and no task gets neither.
 - Let a dispatched implementer run the full test suite or poll its own background jobs — targeted tests only; the suite gate runs once, in this session, backgrounded.
@@ -101,6 +128,8 @@ Mis-route incoming if you catch yourself thinking:
 - *"The assignee names the model, so the route is recorded."* — Assignee ≠ announcement. Emit the visible line first.
 - *"It's cheap / simple / busywork — use the cheapest model."* — `cheap` → Sonnet, full stop. Sonnet is the floor.
 - *"Annotation says `capable`; honoring it is safer than downgrading."* — Inflated `capable` on mechanical/template work down-routes to Sonnet; no gamble. (Surface importance is not a tier axis.)
+- *"The frontier is wide and the tasks look independent — spin up parallel implementers."* — Width is not consent. Hybrid Parallel starts on the literal words "hybrid parallel" from your human partner, nothing else.
+- *"The reviewer can just read the current tree — it's the same commits."* — It isn't, the moment N+1 starts. Frozen package or the read-only review worktree; the live tree is never review input.
 
 ## When an Inline Task Balloons
 
