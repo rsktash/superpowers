@@ -41,6 +41,7 @@ You MUST create a task for each of these items and complete them in order:
 
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
+- **Evidence before design (suspected problems only):** when the brainstorm's premise is a suspected defect, limitation, or incompatibility — not a requested feature — first show the problem exists: a repro, an error, a concrete failing case. If the premise dissolves under evidence, say so and stop; a brainstorm built on an unverified premise designs a solution to nothing. Feature/new-capability brainstorms are exempt.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
