@@ -68,6 +68,10 @@ Right-size review per task, but make the decision visible and challengeable:
 
 State the tier and a one-line reason up front. **Why:** silently downgrading review reads identically to having reviewed — the problem isn't judging a task trivial, it's making that judgment invisible.
 
+## Reviewer Prompt Bias
+
+**The reviewer decides severity, not you.** If the reviewer prompt you are writing contains "do not flag", "don't treat X as a defect", "at most Minor", or "the plan chose" — stop. Provide context (what the task asked for, what landed); never verdicts. Pre-briefing the desired outcome turns the review into an echo.
+
 ## Implementer Status
 
 Implementers report one of four:
