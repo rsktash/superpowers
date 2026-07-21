@@ -20,7 +20,7 @@ else
     exit 1
 fi
 
-if assert_contains "$output" "Load Plan\|read.*plan\|extract.*tasks" "Mentions loading plan"; then
+if assert_contains "$output" "bd show\|read.*task\|read.*plan\|dispatch.*task\|extract.*tasks" "Mentions loading the plan's tasks (bd-based in this fork)"; then
     : # pass
 else
     exit 1
