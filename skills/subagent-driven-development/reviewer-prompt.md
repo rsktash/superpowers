@@ -15,6 +15,7 @@ Task tool (general-purpose or superpowers-beads:code-reviewer):
 
     BASE_SHA: [commit before task]
     HEAD_SHA: [current commit(s)]
+    REVIEW_PACKAGE: [path printed by review-package]
 
     ## What Was Requested
 
@@ -42,7 +43,9 @@ Task tool (general-purpose or superpowers-beads:code-reviewer):
     - Accept their interpretation of requirements
 
     **DO:**
-    - Read the actual code they wrote (`git diff BASE_SHA HEAD_SHA`)
+    - Read the actual code they wrote: open REVIEW_PACKAGE (commit list + stat +
+      full diff with 15 lines of context) in one call. Consult the working tree
+      only for context beyond what the diff hunks show.
     - Compare actual implementation to requirements line by line
     - Check for missing pieces they claimed to implement
     - Look for extra features they didn't mention
