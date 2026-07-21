@@ -15,8 +15,12 @@ run_claude() {
         cmd="$cmd --allowed-tools=$allowed_tools"
     fi
 
-    # Run Claude in headless mode with timeout
-    if timeout "$timeout" bash -c "$cmd" > "$output_file" 2>&1; then
+    # Run Claude in headless mode with timeout (GNU timeout is absent on stock macOS)
+    local timeout_prefix=""
+    if command -v timeout >/dev/null 2>&1; then
+        timeout_prefix="timeout $timeout"
+    fi
+    if $timeout_prefix bash -c "$cmd" > "$output_file" 2>&1; then
         cat "$output_file"
         rm -f "$output_file"
         return 0
