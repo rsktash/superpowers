@@ -102,7 +102,7 @@ Mis-route incoming if you catch yourself thinking:
 
 ## When an Inline Task Balloons
 
-If an inline task starts touching files beyond its Files list, that is a drift-detector stop (per the Inline Task Procedure). Recovery: revert the uncommitted work, re-route the task as `subagent/standard`, and state the override. Do not push through inline.
+If an inline task starts touching files beyond its Files list, that is a drift-detector stop. Recovery: revert the uncommitted work, re-route the task as `subagent/standard`, and state the override. Do not push through inline.
 
 ## Integration
 
