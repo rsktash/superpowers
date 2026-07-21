@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# PreToolUse + PostToolUse hook: advisory nudge that a completion claim
+# (bd close / git commit) is about to fire without a verification run since
+# the last code edit.
+#
+# verification-before-completion has 0 invocations across 206 analyzed
+# sessions, while false "fixed"/"passing" claims drew the sharpest user
+# pushback. A skill rule decays as the session grows; this hook fires
+# mechanically at the moment a completion claim becomes an action -- the
+# instant `bd close` or `git commit` is about to run.
+#
+# ADVISORY ONLY: permissionDecision is ALWAYS "allow". This hook never
+# denies, never blocks. It only ever adds additionalContext or emits
+# nothing.
+#
+# Registered on BOTH PreToolUse and PostToolUse (see hooks/hooks.json):
+#   - PostToolUse, matcher Edit|Write|NotebookEdit: records a code edit.
+#   - PostToolUse, matcher Bash: records a passing verification run.
+#   - PreToolUse,  matcher Bash: checks bd close / git commit and, if code
+#     changed since the last passing verification, injects the reminder.
+#
+# State: two per-session timestamp files (touch, no content) under
+#   ${TMPDIR:-/tmp}/cc-completion-gate/<sanitized-session>/
+#     last_edit   -- mtime of the most recent qualifying code edit
+#     last_verify -- mtime of the most recent passing verify command
+# Comparison uses mtimes directly ([ file1 -nt file2 ]), matching the
+# state-file idiom used by retry-guard / fail-streak-guard.
+#
+# last_edit updates when: tool is Edit/Write/NotebookEdit AND
+# .tool_input.file_path is present and does NOT match the ERE
+# \.(md|txt|json|ya?ml)$ (docs/config-only edits don't count as "code
+# changed"). Missing file_path -> ignored.
+#
+# last_verify updates when: a PostToolUse Bash event's exit code
+# (.tool_response.exit_code // .tool_response.exitCode) is 0 AND the
+# command matches the ERE:
+#   pytest|npm test|npm run build|go test|cargo test|dotnet test|bats|test-[A-Za-z0-9-]*\.sh|run-skill-tests
+# Exit code 0 of a recognized verify command is the whole heuristic --
+# this hook never parses test OUTPUT for pass/fail.
+#
+# Trigger: a PreToolUse Bash event whose command matches the ERE
+#   (^|[;&|][[:space:]]*)bd close|(^|[;&|][[:space:]]*)git commit
+# fires the advisory when last_edit exists AND (last_verify is missing OR
+# older than last_edit).
+#
+# Fails OPEN: missing jq, parse error, or empty input -> exit 0 silently.
+set -uo pipefail
+
+command -v jq >/dev/null 2>&1 || exit 0
+input="$(cat)" || exit 0
+[ -n "$input" ] || exit 0
+
+event="$(printf '%s' "$input" | jq -r '.hook_event_name // empty' 2>/dev/null)" || exit 0
+tool="$(printf '%s' "$input" | jq -r '.tool_name // empty' 2>/dev/null)" || exit 0
+session="$(printf '%s' "$input" | jq -r '.session_id // "default"' 2>/dev/null)"
+
+state_dir="${TMPDIR:-/tmp}/cc-completion-gate/$(printf '%s' "$session" | tr -c 'A-Za-z0-9_.-' '_')"
+mkdir -p "$state_dir" 2>/dev/null || exit 0
+edit_file="$state_dir/last_edit"
+verify_file="$state_dir/last_verify"
+
+case "$tool" in
+  Edit|Write|NotebookEdit)
+    file_path="$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty' 2>/dev/null)"
+    [ -n "$file_path" ] || exit 0
+    if printf '%s' "$file_path" | grep -Eq '\.(md|txt|json|ya?ml)$'; then
+      exit 0
+    fi
+    touch "$edit_file" 2>/dev/null || true
+    exit 0
+    ;;
+  Bash)
+    cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // ""' 2>/dev/null)"
+    [ -n "$cmd" ] || exit 0
+
+    if [ "$event" = "PostToolUse" ]; then
+      exit_code="$(printf '%s' "$input" | jq -r '(.tool_response.exit_code // .tool_response.exitCode) // empty' 2>/dev/null)"
+      if [ "$exit_code" = "0" ] && printf '%s' "$cmd" | grep -Eq 'pytest|npm test|npm run build|go test|cargo test|dotnet test|bats|test-[A-Za-z0-9-]*\.sh|run-skill-tests'; then
+        touch "$verify_file" 2>/dev/null || true
+      fi
+      exit 0
+    fi
+
+    if [ "$event" = "PreToolUse" ]; then
+      if printf '%s' "$cmd" | grep -Eq '(^|[;&|][[:space:]]*)bd close|(^|[;&|][[:space:]]*)git commit'; then
+        if [ -f "$edit_file" ] && { [ ! -f "$verify_file" ] || [ "$edit_file" -nt "$verify_file" ]; }; then
+          jq -cn '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","additionalContext":"completion-gate: code changed since the last passing verification run. Run the relevant test/verify command first, or state explicitly that this claim is unverified (superpowers-beads:verification-before-completion)."}}'
+        fi
+      fi
+      exit 0
+    fi
+
+    exit 0
+    ;;
+  *)
+    exit 0
+    ;;
+esac
