@@ -118,6 +118,20 @@ else
     fail "non-Bash tool: no output (got: e1=[$e1] e2=[$e2])"
 fi
 
+echo ""
+echo "Test (f): multi-line commands -> class derives from first line only"
+reset_state
+SESSION="fsg-test-f"
+ML_CMD1=$(printf 'pytest -n4 tests/a\necho tail-one')
+ML_CMD2=$(printf 'pytest tests/b\necho tail-two')
+f1=$(event "$SESSION" "$ML_CMD1" 1 "Bash" | "$HOOK")
+f2=$(event "$SESSION" "$ML_CMD2" 1 "Bash" | "$HOOK")
+if [ -z "$f1" ] && printf '%s' "$f2" | grep -q "fail-streak-guard"; then
+    pass "multi-line commands share class via first line"
+else
+    fail "multi-line commands share class via first line (got: f1=[$f1] f2=[$f2])"
+fi
+
 reset_state
 
 echo ""

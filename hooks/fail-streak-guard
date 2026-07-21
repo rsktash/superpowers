@@ -49,8 +49,8 @@ cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // ""' 2>/dev/null)"
 [ -n "$cmd" ] || exit 0
 
 # --- command class -----------------------------------------------------
-tok1="$(printf '%s' "$cmd" | awk '{print $1}')"
-tok2="$(printf '%s' "$cmd" | awk '{print $2}')"
+tok1="$(printf '%s' "$cmd" | awk 'NR==1{print $1}')"
+tok2="$(printf '%s' "$cmd" | awk 'NR==1{print $2}')"
 [ -n "$tok1" ] || exit 0
 
 class="$tok1"
