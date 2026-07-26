@@ -206,6 +206,8 @@ Tasks are prompts, not documentation. When you create a task for a future execut
 
 A gate item must also be falsifiable against *under-doing*, not just not-doing — name what would make a passing result still wrong. "Tests pass" is satisfied by a test that exercises one of nine fields. Write the gate so that under-coverage fails it: "a typo in any mapped field fails a test; every variant has its own assertion." **Why:** a fluent executor will satisfy the literal minimum convincingly — a loose gate certifies slop. (Observed: a task whose gate said "3 passing tests" got 3 tests covering 3 of 9 fields, and passed.)
 
+A gate's numbers and factual premises are claims too: derive each from a same-session measurement and check it doesn't contradict evidence already gathered. (Observed 2026-07-26: a gate required ">= 3 distinct offsets" to mean two DST transitions — a spring/fall pair yields 2 — and placed a zone in the DST set the same session had measured as a one-off transition.)
+
 **Drift Detectors:** You know all sibling tasks. Use that knowledge. If Task 3 handles integration and Task 4 handles error responses, then Task 2's drift detectors should say "DO NOT wire into server — that is Task 3's job" and "DO NOT define error response format — that is Task 4's job." Generic warnings like "stay focused" are useless.
 
 **Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.

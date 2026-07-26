@@ -53,6 +53,11 @@ PROMPT
    task consumes, and QUOTE any cross-task contract a prior executor stated (e.g. a
    batch-naming contract) into the consumer task's prompt — contracts travel in
    prompts, not in your memory.
+   Fill slots carry facts, not judgment: the bead's own content, landed shas, quoted
+   contracts, the task's named test modules. Any constraint you ADD beyond the bead
+   (an environment fact, a "do not run X") must cite a tool run from THIS session —
+   and environment/toolchain facts expire when any task changes the toolchain;
+   re-verify or omit. The executor treats every slot line as ground truth.
 3. Verify the landing (below). Only then dispatch the next task.
 
 ## Per-landing verification (NON-OPTIONAL; codex claims are leads, not citations)
@@ -92,5 +97,6 @@ architecture boundaries — findings fixed inline by the orchestrator, own commi
 | Trusting codex's test counts | Re-run yourself; every count you report must be your own run. |
 | Full suite per task | Plan-level gate runs it once; per-task runs violate the ruling. |
 | Prompt-only blocker fixes | Ruling goes on the BEAD (audit trail + survives re-dispatch). |
+| Unverified constraint in a fill slot | Executor obeys it as ground truth; a stale pre-toolchain-bump "fact" becomes a binding false order. Verify same-session or omit. (Observed: allTests, 2026-07-26 — cost a full round trip.) |
 | Skipping AGENTS.md parity check | Codex executes with stale or missing rules in nested dirs. |
 | Passing `--model` by guess | The configured default is the ruling; a guessed model id silently downgrades. |

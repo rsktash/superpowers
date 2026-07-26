@@ -4,6 +4,28 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.1] - 2026-07-26
+
+Two guardrails against unverified orchestrator assertions reaching executors,
+from the 2026-07-26 volunteered-rigor incident analysis (Opus 5 sessions
+`40391637` / `25d32456`): every fabrication that reached an executor entered
+through orchestrator-added content — dispatch-prompt fill slots and gate
+premises — never through an audited bead body.
+
+### Changed
+
+- **codex-execution**: dispatch-prompt fill slots carry facts, not judgment —
+  any constraint the orchestrator adds beyond the bead must cite a
+  same-session tool run, and environment/toolchain facts expire when a task
+  changes the toolchain. New Common-mistakes row. (Observed: a stale
+  pre-toolchain-bump "allTests executes none" order; codex correctly refused,
+  costing a full round trip.)
+- **writing-plans**: acceptance-gate numbers and factual premises are claims —
+  derive each from a same-session measurement and check it against evidence
+  already gathered. (Observed: a ">= 3 distinct offsets" gate that
+  mis-encoded two DST transitions, plus a zone the same session had already
+  measured as a one-off.)
+
 ## [1.4.0] - 2026-07-22
 
 Usage-analysis-driven overhaul of the skill roster (epic `superpowers-yz0`),
