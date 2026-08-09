@@ -20,7 +20,7 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children is a spec, not a plan — STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
 
-**Before the first routed task:** run Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) over the whole plan and batch any findings into one question to your human partner.
+**Before the first routed task:** run Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) over the whole plan and batch any findings into one question to your human partner. Then set up the Session Task List display mirror (per subagent-driven-development): replace the session todo list wholesale — one todo per task bead, `<bead-id>: <title>`, in plan order — and thereafter flip todos only at claim (in_progress) and close (completed), for inline and dispatched tasks alike. bd stays the single source of truth.
 
 ## The Loop
 
@@ -71,6 +71,7 @@ Follow this procedure for any task routed `inline`.
    bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
    ```
    Example assignee: "Alex / Claude Opus 4.6"
+   Flip the task's todo to in_progress.
 2. Extract the **Acceptance Gate** from the task body — the machine-verifiable completion criteria (`- [ ]` lines under "Acceptance Gate"). Keep these visible; you re-read them between steps and verify them before closing.
 3. If the task body references images, resolve them to local files and view them before implementing.
 4. Copy the task body into `.bd/.scratch/progress.md` once, at the start of the task — this is your working copy for checkbox flips.
@@ -83,7 +84,7 @@ Follow this procedure for any task routed `inline`.
 7. **Verify the Acceptance Gate before closing:**
    - Re-read every gate item from the task body.
    - Run the verification command for each (test, file check, grep for export).
-   - If ALL pass: `bd close <task-id> --reason "Done — all gate items verified"`.
+   - If ALL pass: `bd close <task-id> --reason "Done — all gate items verified"` (todo → completed).
    - If ANY fail: do not close. Identify which items failed and why, fix them, then re-verify ALL items — not just the failed ones, since fixes can regress others. Only close once every item passes.
    - If gate verification fails twice, stop and ask your human partner.
 

@@ -32,11 +32,17 @@ Files, TDD steps). Codex cannot compensate for a vague bead.
 - Model comes from `~/.codex/config.toml` — do NOT pass `--model` unless the user ruled one.
 - Tracker access: the sandbox blocks network by default; bd needs it (see flags below).
 
+**Session task list (display mirror):** before the first dispatch, replace the session
+todo list wholesale — one todo per task bead, `<bead-id>: <title>`, in plan order.
+Flip to in_progress at dispatch; to completed only after per-landing verification
+confirms the bead closed (codex closing it is a claim, not the flip trigger). bd stays
+the single source of truth — no other todo updates.
+
 ## The Loop (SEQUENTIAL — one working tree; parallel codex runs collide)
 
 Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
-1. Pick the next ready task; announce "Task N → codex" as its own line.
+1. Pick the next ready task; announce "Task N → codex" as its own line. Flip its todo to in_progress.
 2. Launch in background (`run_in_background:true`), arm ONE fallback heartbeat, kill it
    the instant the run completes:
 
@@ -58,7 +64,7 @@ PROMPT
    (an environment fact, a "do not run X") must cite a tool run from THIS session —
    and environment/toolchain facts expire when any task changes the toolchain;
    re-verify or omit. The executor treats every slot line as ground truth.
-3. Verify the landing (below). Only then dispatch the next task.
+3. Verify the landing (below); todo → completed. Only then dispatch the next task.
 
 ## Per-landing verification (NON-OPTIONAL; codex claims are leads, not citations)
 
