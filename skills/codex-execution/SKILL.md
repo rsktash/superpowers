@@ -43,8 +43,7 @@ the single source of truth — no other todo updates.
 Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 1. Pick the next ready task; announce "Task N → codex" as its own line. Flip its todo to in_progress.
-2. Launch in background (`run_in_background:true`), arm ONE fallback heartbeat, kill it
-   the instant the run completes:
+2. Launch in background (`run_in_background:true`) — completion re-invokes the session; no fallback heartbeat:
 
 ```bash
 codex exec -s workspace-write -c sandbox_workspace_write.network_access=true \

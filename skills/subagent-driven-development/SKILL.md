@@ -36,11 +36,11 @@ Before Task 1, replace the session todo list (TaskCreate/TodoWrite) wholesale: o
 
 For each task, in order:
 
-1. Read it: `bd show <task-id> --full`. Mark it in progress and set the assignee (do NOT use --claim): `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <implementer-model-name>"` (e.g. "Alex / Claude Sonnet 4.6" — the model of the implementer subagent you dispatch for this task per **Model Selection**, since that subagent does the work). Flip the task's todo to in_progress. Record `BASE=$(git rev-parse HEAD)` — the pre-dispatch commit the review package will diff against. Then dispatch an implementer with the full task text plus the context it needs. Put the task's directive sections (Context Anchor, Acceptance Gate, Drift Detectors) at the top of the prompt. The prompt also carries the **cache guard**: run only this task's targeted tests, never the full suite; no foreground command expected to outlive ~4 minutes, and no self-poll loops (`until …`, `while kill -0 …`, `sleep`-tail) — a subagent's prompt cache lives 5 minutes, and one blocking suite run turns every later turn into a full-context re-read.
+1. Read it: `bd show <task-id> --full`. Mark it in progress and set the assignee (do NOT use --claim): `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <implementer-model-name>"` (e.g. "Alex / Claude Sonnet 4.6" — the model of the implementer subagent you dispatch for this task per **Model Selection**, since that subagent does the work). Flip the task's todo to in_progress. Record `BASE=$(git rev-parse HEAD)` — the pre-dispatch commit the review package will diff against. Then dispatch an implementer with the full task text plus the context it needs. Put the task's directive sections (Context Anchor, Acceptance Gate, Drift Detectors) at the top of the prompt. The prompt also carries the **test-scope directive**: run only this task's targeted tests, never the full suite — the full-suite gate runs once, in the orchestrator's session. Gates may run in the foreground; if the implementer backgrounds a command, it must poll it to completion before ending its turn — an agent that stops with a live background child sends no completion notification (silent stall).
 2. Answer any questions the implementer asks *before* it proceeds.
 3. Generate the review package: `scripts/review-package BASE HEAD` (run from this skill's directory — `skills/subagent-driven-development/`; BASE is the pre-dispatch commit recorded in step 1 — NEVER `HEAD~1`, which silently drops all but the last commit of a multi-commit task) and pass the reviewer the printed file path. Review the result (see **Termination**), fix anything open, then close the task (todo → completed). Once the verdict is processed, delete the review file (`.bd/.scratch` hygiene).
 
-After the last task, run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff, then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
+After the last task, run the full test suite once from this session (the suite gate belongs to the orchestrator), dispatch one final review of the whole diff, then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
 
 ## Termination — what counts as "reviewed"
 
@@ -119,7 +119,7 @@ The current Sonnet (Sonnet 5 today) is close to the session/most-capable model, 
 - Run two implementers in parallel on the same worktree (they conflict).
 - Make implementers query beads — hand them the full task text from `bd show <id> --full`.
 - Treat an implementer's self-review as the review. Both happen.
-- Let an implementer run the full test suite or wait on its own background jobs — targeted tests only; the suite runs once, here, backgrounded.
+- Let an implementer run the full test suite — targeted tests only; the suite gate runs once, here. An implementer that backgrounds a job must finish it before ending its turn.
 
 ## Integration
 
