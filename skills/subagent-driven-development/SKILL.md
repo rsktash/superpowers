@@ -54,7 +54,7 @@ Run ONE review per task — a single reviewer subagent whose prompt covers spec 
 
 A confident verdict from a *parallel* reviewer is the weakest signal here, not the strongest. A capable model's mistakes are fluent and well-formatted, and parallel batches that partially cancel are a known surface for manufactured "success" — so independent re-running matters more, not less.
 
-If a check fails, the same implementer fixes it and you re-run the check. Don't move on with anything open.
+If a check fails, route the fix per **Fix Routing** (below) and re-run the check. Don't move on with anything open.
 
 **Why:** The dangerous failure on current models is not visible drift — it's a thorough, convincing, wrong report. Only deterministic output catches it; another subagent's prose does not.
 
@@ -66,6 +66,7 @@ A reviewer's finding is a claim, not a verdict. Reviewer citations — file:line
 - **One finding at a time.** Implement it, re-run the relevant check (test, grep, diff), confirm it holds, then move to the next. Don't batch fixes on the strength of the report alone.
 - **Push back with technical reasoning when a finding is wrong for THIS codebase.** Wrong platform assumption, missing context, breaks working code, YAGNI on an unused path — say so and why, instead of implementing to avoid friction.
 - **Findings that conflict with the plan's recorded decisions escalate to your human partner** — don't silently apply a suggestion that contradicts a decision already made for this plan.
+- **Fix Routing — who applies a verified finding.** A finding whose fix is fully specified by the finding itself — dead code, a comment's wording, a test the reviewer already wrote and watched pass — is applied by the controller, inline on the current diff: commit, re-run the one check, done. A round back to the implementer is justified only by the implementer knowing something the controller doesn't — a design call, a non-obvious code path, a fix the finding doesn't fully specify — never by preferring the work happen elsewhere. When a round IS dispatched, it carries ALL outstanding findings for the task; a round per finding is pure ceremony. (Fixes land as commits on top of the reviewed ones either way.)
 
 ## Coordination Gate
 

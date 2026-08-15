@@ -4,6 +4,21 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.18] - 2026-08-16
+
+### Added
+
+- **Fix Routing in subagent-driven-development** (referenced from
+  hybrid-execution's FAIL rule): a verified finding whose fix is fully
+  specified by the finding itself is applied by the controller inline on the
+  current diff; a round back to the implementer must be justified by
+  implementer-held context (design call, non-obvious path), and a dispatched
+  round carries ALL outstanding findings — never one round per finding.
+  Driver: an Opus run spent five dispatch rounds on one task, several of
+  them inline-sized edits (dead CSS, comment wording, a test the reviewer
+  had already written and run) — "the same implementer fixes it" read as
+  "every fix is a round".
+
 ## [1.4.17] - 2026-08-16
 
 ### Added
