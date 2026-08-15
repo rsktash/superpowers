@@ -4,6 +4,23 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.4] - 2026-08-15
+
+Two residency reducers from the 2026-08-15 token audit of the solo project
+(18 orchestrator + 248 executor transcripts): dispatch-prompt boilerplate and
+oversized tasks were the two schema-level contributors to fleet spend.
+
+### Changed
+
+- **subagent-driven-development**: static environment boilerplate moves to the
+  project's `docs/dispatch-env.md`, referenced by path from dispatch prompts
+  instead of inlined. (Measured: the same ~250-token block inlined in 248
+  dispatch prompts, each resident in the orchestrator to session end.)
+- **writing-plans**: new Context Ceiling rule under Bite-Sized Task
+  Granularity — a task whose executor would plausibly accumulate >~150K tokens
+  of context is two tasks. (Measured: the top decile of executors reached
+  200–418K resident and dominated fleet spend.)
+
 ## [1.4.1] - 2026-07-26
 
 Two guardrails against unverified orchestrator assertions reaching executors,

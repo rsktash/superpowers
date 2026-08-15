@@ -62,6 +62,8 @@ This structure informs the task decomposition. Each task should produce self-con
 
 **The 10-Minute Rule:** Each task should be completable in 10-15 minutes of execution. This keeps the whole task — its gate, its files, its steps — small enough to hold and verify as one unit. A task that runs much longer usually bundles more than one concern (split it); a much shorter one is dominated by context-switching overhead.
 
+**The Context Ceiling:** estimate what the executor must hold — every file in Files, everything under Before-you-start, test output across its run. If that plausibly exceeds ~150K tokens, it is two tasks, split at the same seams as any other split. **Why:** an executor re-pays its whole accumulated context on every turn, so cost grows with the square of task length — and an executor near its ceiling degrades exactly when the work gets hard. The fattest tenth of dispatched executors dominates fleet spend.
+
 **Single Responsibility:** Task titles must not contain "and." A task like "Update types and implement middleware" has two concerns — the executor will lose focus on one. Split it into "Task 1: Update types" and "Task 2: Implement middleware."
 
 ## Plan Structure in Beads
