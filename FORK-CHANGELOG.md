@@ -4,6 +4,15 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.8] - 2026-08-15
+
+### Added
+
+- **scripts/backfill-exec-labels.sh**: one-time per-project migration for the
+  1.4.6 routing — mirrors each open bead's `**Execution:**` line as an
+  `exec:<mode>` label via one `bd batch` call. Dry-run by default, idempotent
+  (skips labelled beads, leaves annotation-less beads alone).
+
 ## [1.4.7] - 2026-08-15
 
 ### Changed (trial)
