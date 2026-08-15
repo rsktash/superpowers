@@ -4,6 +4,17 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.15] - 2026-08-16
+
+### Changed
+
+- **Implementer charter is referenced globally, not copied per project**:
+  dispatch prompts point at this skill's own `implementer-charter.md` by
+  absolute path (resolved from the skill directory at dispatch time — the
+  `scripts/review-package` mechanism). The per-project `docs/` copy step is
+  retired: one shipped copy, zero skew, no reseeding on revisions.
+  `docs/dispatch-env.md` stays per-project (project facts).
+
 ## [1.4.14] - 2026-08-16
 
 ### Changed (trial)

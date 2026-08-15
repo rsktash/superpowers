@@ -1,9 +1,9 @@
 # Implementer Charter
 
-Every dispatched implementer follows this charter. It is copied into each
-project as `docs/implementer-charter.md` on the project's first dispatch (see
-SKILL.md, The Loop) so dispatch prompts reference it by path instead of
-restating it. Read it after fetching your contract.
+Every dispatched implementer follows this charter. Dispatch prompts reference
+this file by its absolute path (resolved from the skill's own directory at
+dispatch time) instead of restating it — one global copy, always the shipped
+version. Read it after fetching your contract.
 
 ## Before You Begin
 
