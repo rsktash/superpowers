@@ -60,7 +60,7 @@ This structure informs the task decomposition. Each task should produce self-con
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
-**The 10-Minute Rule:** Each task should be completable in 10-15 minutes of execution. This keeps the whole task — its gate, its files, its steps — small enough to hold and verify as one unit. A task that runs much longer usually bundles more than one concern (split it); a much shorter one is dominated by context-switching overhead.
+**Task Size:** one coherent concern, bounded above by the Context Ceiling — not a clock. A task bundling two concerns splits; a task split only to stay under some minutes-count merges. Every task pays the full per-task ritual (claim, dispatch, subagent boot, review package, reviewer, verdict, close) regardless of size — so the unit is the largest single concern the executor can hold and the gate can verify as one piece. (Replaces the 10-Minute Rule, 1.4.14 trial — watch review FAIL rate and overhead-per-landed-diff.)
 
 **The Context Ceiling:** estimate what the executor must hold — every file in Files, everything under Before-you-start, test output across its run. If that plausibly exceeds ~150K tokens, it is two tasks, split at the same seams as any other split. **Why:** an executor re-pays its whole accumulated context on every turn, so cost grows with the square of task length — and an executor near its ceiling degrades exactly when the work gets hard. The fattest tenth of dispatched executors dominates fleet spend.
 

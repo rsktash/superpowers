@@ -4,6 +4,20 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.14] - 2026-08-16
+
+### Changed (trial)
+
+- **writing-plans**: the 10-Minute Rule is replaced by **Task Size** — one
+  coherent concern bounded by the Context Ceiling, not a clock. Rationale:
+  a firing-rate audit (254 subagents, 18 sessions) showed nearly every
+  per-task ritual fires and earns its keep (per-task review carries FAIL
+  marks in ~17% of reports; Hybrid Parallel has 12 real invocations;
+  pre-flight finds issues in most runs) — so the overengineering lever is
+  not removing rituals but running them fewer times. Doubling task size
+  halves ritual count. TRIAL: watch review FAIL rate and
+  overhead-per-landed-diff; revert if FAILs climb.
+
 ## [1.4.13] - 2026-08-16
 
 ### Changed
