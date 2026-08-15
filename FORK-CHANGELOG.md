@@ -4,6 +4,19 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.7] - 2026-08-15
+
+### Changed (trial)
+
+- **writing-plans**: the "code blocks required for code steps" rule (upstream
+  doctrine, ~2026-03, pre-Claude-5) is RELAXED: a step is behavior + gate
+  link; code blocks only where the exact text IS the spec (tricky algorithm,
+  exact regex, signature/wire format a sibling consumes). Test steps name
+  every asserted behavior; test code optional. Rationale: the falsifiable
+  Acceptance Gate (1.4.1) is the guard against under-doing; pre-written code
+  doubled authoring cost and drove the 2.1K-token average body. TRIAL: watch
+  the review FAIL rate on the next epics; revert if it climbs.
+
 ## [1.4.6] - 2026-08-15
 
 Workflow redesign: the orchestrator never touches a task body. Measured

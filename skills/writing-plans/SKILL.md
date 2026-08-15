@@ -168,22 +168,19 @@ Depends on: [what prior tasks produced that this one consumes, or "—" if first
 
 - [ ] **Step 1: Write the failing test** → gate: [which acceptance gate item this satisfies]
 
-```python
-def test_specific_behavior():
-    result = function(input)
-    assert result == expected
-```
+`test_specific_behavior` asserts: [every behavior, named — "returns X for input Y", "raises Z on empty input". Test code inline only when the exact assertion text is the spec.]
 
 - [ ] **Step 2: Run test to verify it fails** → gate: [same item]
 
 Run: `pytest tests/path/test.py::test_name -v`
 Expected: FAIL with "function not defined"
 
-- [ ] **Step 3: Write minimal implementation** → gate: [same item]
+- [ ] **Step 3: Implement `function(input)`** → gate: [same item]
+
+[Behavior, precisely: inputs, outputs, edge cases. A code block ONLY where the exact code is the spec — e.g. the regex, the signature a sibling consumes:]
 
 ```python
-def function(input):
-    return expected
+def function(input: list[str]) -> Shape:  # signature consumed by Task 4
 ```
 
 - [ ] **Step 4: Run test to verify it passes** → gate: [same item]
@@ -248,12 +245,12 @@ If any task changes schema, persisted data, rollout order, cross-layer contracts
 
 ## No Placeholders
 
-Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+Every step must be executable without guessing. These are **plan failures** — never write them:
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
-- "Write tests for the above" (without actual test code)
-- "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
-- Steps that describe what to do without showing how (code blocks required for code steps)
+- "Write tests for the above" (name every behavior each test asserts; test code itself is optional)
+- "Similar to Task N" (repeat the spec — the engineer may be reading tasks out of order)
+- Steps whose expected behavior isn't stated precisely. A step is behavior + its gate link. A code block is required ONLY where the exact text IS the spec — a tricky algorithm, an exact regex, a signature or wire format a sibling task consumes; ordinary code is the executor's job. The falsifiable Acceptance Gate, not pre-written code, is what guards against under-doing. (Relaxed 1.4.7, trial — watch the review FAIL rate.)
 - References to types, functions, or methods not defined in any task
 - Tasks that modify existing files without a "Before you start" section
 
