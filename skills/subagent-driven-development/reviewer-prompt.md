@@ -6,7 +6,7 @@ spec compliance FIRST, then code quality — one dispatch, one report, two secti
 catch-rate gain.)
 
 ```
-Task tool (subagent_type: superpowers-beads:task-reviewer — lean read-only toolset; general-purpose only if the review needs tools beyond Bash/Read/Grep/Glob):
+Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edits confined to the disposable review worktree; general-purpose only if the review needs browser/device/MCP tools):
   description: "Review Task N: [task name]"
   model: [REQUIRED — resolve per SKILL.md Model Selection / Review Tier; an omitted model silently inherits the session's most expensive one]
   prompt: |
@@ -20,18 +20,16 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean read-only too
 
     ## What Was Requested
 
-    [FULL TEXT of task requirements]
+    Task bead: <bead-id>. Fetch the contract yourself from the repo root:
+    `bd get <bead-id> body` — its requirements and its **Acceptance Gate** are
+    what you review against. [Never paste the task body into this prompt — the
+    reviewer fetches it; the controller's context never carries it.]
 
     ## What Implementer Claims They Built
 
     [From implementer's report]
 
-    ## Acceptance Gate
-
-    [PASTE the Acceptance Gate from the task body — the same gate items
-     the implementer was working against]
-
-    The implementer claims these gate items pass. Verify each one independently.
+    The implementer claims the gate items pass. Verify each one independently.
 
     ## CRITICAL: Do Not Trust the Report
 
@@ -50,6 +48,9 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean read-only too
     - Compare actual implementation to requirements line by line
     - Check for missing pieces they claimed to implement
     - Look for extra features they didn't mention
+    - Where a gate item claims coverage, prove it by falsification in the
+      review worktree: break the covered thing, show the check firing, revert.
+      "Passes" alone cannot distinguish a working guard from a decorative one.
 
     ## Section 1 — Spec Compliance (first, outranks Section 2)
 
@@ -98,6 +99,8 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean read-only too
     - **Spec compliance:** ✅ compliant | ❌ issues found — with specifics
       (missing / extra / mismatched, file:line). Flag prominently any gate item
       the implementer marked PASS that actually fails.
+    - **Experiments:** each falsification run — what you broke, what caught it
+      (or didn't), and the revert.
     - **Quality:** Strengths; Issues (Critical/Important/Minor, each with
       file:line and why); Assessment.
     - If Section 1 finds a spec failure, still report Section 2 briefly — the

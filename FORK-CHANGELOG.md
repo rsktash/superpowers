@@ -4,6 +4,22 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.11] - 2026-08-16
+
+### Changed
+
+- **task-reviewer agent + reviewer-prompt + SDD Termination**: falsification
+  experiments are first-class review evidence — mutate the disposable review
+  worktree to prove a guard fires (break the covered thing, show the check
+  catching it, revert), reported as what-broke/what-caught/revert. The
+  read-only guarantee moves from the toolset (reviewer regains Edit/Write) to
+  the structure: edits confined to the disposable worktree, live tree and
+  reviewed commits never touched. Ruled after a live review whose strongest
+  findings all required such experiments.
+- **reviewer-prompt**: the leftover "[FULL TEXT of task requirements]" paste
+  slot is gone — the reviewer fetches the bead body itself (`bd get <id>
+  body`), same 1.4.6 doctrine as implementers.
+
 ## [1.4.10] - 2026-08-16
 
 ### Added
