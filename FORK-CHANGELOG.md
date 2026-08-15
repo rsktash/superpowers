@@ -4,6 +4,19 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.10] - 2026-08-16
+
+### Added
+
+- **agents/implementer.md, agents/task-reviewer.md**: lean agent definitions
+  for the two per-task dispatch roles. Restricted `tools:` frontmatter
+  (implementer: Bash/Read/Edit/Write/Grep/Glob; reviewer read-only without
+  Edit/Write) drops unused tool schemas and the browser/MCP surface from each
+  subagent's context prefix. Measured baseline: 26.4K median prefix,
+  re-read ~594M tokens across 22.5K fleet turns (23% of fleet cache traffic).
+  Dispatch templates now name these agents; general-purpose stays the route
+  for tasks genuinely needing browser/device/MCP tools.
+
 ## [1.4.9] - 2026-08-16
 
 ### Changed

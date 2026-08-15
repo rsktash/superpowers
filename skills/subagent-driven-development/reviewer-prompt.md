@@ -6,7 +6,7 @@ spec compliance FIRST, then code quality — one dispatch, one report, two secti
 catch-rate gain.)
 
 ```
-Task tool (general-purpose or superpowers-beads:code-reviewer):
+Task tool (subagent_type: superpowers-beads:task-reviewer — lean read-only toolset; general-purpose only if the review needs tools beyond Bash/Read/Grep/Glob):
   description: "Review Task N: [task name]"
   model: [REQUIRED — resolve per SKILL.md Model Selection / Review Tier; an omitted model silently inherits the session's most expensive one]
   prompt: |

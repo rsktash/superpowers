@@ -6,7 +6,7 @@ into the project from this skill's `implementer-charter.md` on first
 dispatch) — the prompt carries ONLY what is specific to this task.
 
 ```
-Task tool (general-purpose):
+Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smaller prefix; use general-purpose ONLY when the task genuinely needs browser/device/MCP tools):
   description: "Implement <bead-id>: [task name]"
   model: [REQUIRED — resolve per SKILL.md Model Selection; an omitted model silently inherits the session's most expensive one]
   prompt: |
