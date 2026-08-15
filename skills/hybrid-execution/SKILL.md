@@ -26,12 +26,12 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
-1. `bd show <task-id> --full` — read the next ready task.
-2. Find its `**Execution:**` line: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`), each carrying the planner's one-line reason.
+1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, mode from its `exec:` label (`bd label list <task-id>`): `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). Legacy plan without the label: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body.
+2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end.
 3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers): "Task N → subagent/standard → Sonnet (<reason>)"; inline routes announce "Task N → inline (<reason>)". Emit it **before** the claim command. The model name inside an `--assignee` value, a Bash command description, or the dispatch parameter does **not** count — those are actions, not the announcement. A routine route you've used all session still gets its line; cadence is exactly when it gets dropped.
 4. Execute by mode:
    - **inline** → follow the Inline Task Procedure (below) for this one task, start to close.
-   - **subagent/<tier>** → follow subagent-driven-development's per-task procedure for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Record `BASE=$(git rev-parse HEAD)`, declare the review tier, then dispatch the implementer with the directive sections at the top of the prompt — including subagent-driven-development's test-scope directive (targeted tests only; the full-suite gate stays in this session).
+   - **subagent/<tier>** → follow subagent-driven-development's per-task procedure for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Record `BASE=$(git rev-parse HEAD)`, declare the review tier, then dispatch the implementer per subagent-driven-development's `implementer-prompt.md` — by bead id, the implementer fetches its own contract — including the test-scope directive (targeted tests only; the full-suite gate stays in this session).
 5. **Pipeline the review — this is the default loop shape.** When task N's implementer reports DONE and its commits exist on the branch (`trivial-deterministic` tasks skip 5.1–5.2 entirely: run the one deterministic check yourself, close, move on — no package, no reviewer, nothing to pipeline):
    1. Freeze the evidence: `scripts/review-package BASE HEAD` (run from `skills/subagent-driven-development/`) writes the review package file. Record `HEAD_SHA=$(git rev-parse HEAD)`.
    2. Dispatch N's ONE combined spec+quality reviewer (`reviewer-prompt.md`; spec section outranks quality) **in the background**, handing it the frozen package file path. If the reviewer needs to run anything at all — targeted tests, greps — the controller first creates a temporary read-only worktree pinned at N's HEAD, `git worktree add .worktrees/review-<short-sha> <HEAD_SHA>`, names it in the prompt as the ONLY directory the reviewer may run commands in, and removes it (`git worktree remove .worktrees/review-<short-sha>`) after the verdict is processed.
@@ -56,16 +56,16 @@ Frontier parallelism — 2–3 implementers running concurrently — exists, but
 
 Follow this procedure for any task routed `inline`.
 
-1. Read the task and set the assignee — never `--claim`:
+1. Get the contract and claim — never `--claim`:
    ```bash
-   bd show <task-id> --full
+   bd show <task-id>
+   bd get <task-id> body > .bd/.scratch/progress.md
    bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
    ```
-   Example assignee: "Alex / Claude Opus 4.6"
-   Flip the task's todo to in_progress.
-2. Extract the **Acceptance Gate** from the task body — the machine-verifiable completion criteria (`- [ ]` lines under "Acceptance Gate"). Keep these visible; you re-read them between steps and verify them before closing.
+   Read `.bd/.scratch/progress.md` — it is your complete contract AND your working copy; the body enters context once, as the file you'll work in. If `bd show`'s section index lists `design`, also read `bd show <task-id> --section design`. Example assignee: "Alex / Claude Opus 4.6". Flip the task's todo to in_progress.
+2. Extract the **Acceptance Gate** from the working copy — the machine-verifiable completion criteria (`- [ ]` lines under "Acceptance Gate"). Keep these visible; you re-read them between steps and verify them before closing.
 3. If the task body references images, resolve them to local files and view them before implementing.
-4. Copy the task body into `.bd/.scratch/progress.md` once, at the start of the task — this is your working copy for checkbox flips.
+4. Checkbox flips happen in `.bd/.scratch/progress.md` — it already exists from step 1; never re-print the body to get a working copy.
 5. For each step in the task body:
    - **First step only:** read everything listed under "Before you start" — files, rules, callers. Do not skip this.
    - **Attention refresh:** before executing, re-read the Acceptance Gate items. Attention on initial goals decays after 3-4 tool calls; re-injecting the gate keeps focus on the actual completion criteria.

@@ -4,38 +4,41 @@ Use this template when dispatching an implementer subagent.
 
 ```
 Task tool (general-purpose):
-  description: "Implement Task N: [task name]"
+  description: "Implement <bead-id>: [task name]"
   model: [REQUIRED — resolve per SKILL.md Model Selection; an omitted model silently inherits the session's most expensive one]
   prompt: |
-    You are implementing Task N: [task name]
+    You are implementing task <bead-id> ("[task name]") — one task of a larger plan.
 
-    ## Context Anchor
+    ## Get Your Contract (first, before anything else)
 
-    [PASTE the Context Anchor section from the task body — parent goal, this task's role, dependencies.
-     If the task body doesn't have a Context Anchor, write one: explain where this task fits
-     in the overall plan and what depends on its output.]
+    1. Read `docs/dispatch-env.md` at the repo root — repo layout, bd invocation, test
+       commands, worktree rules.
+    2. From the repo root: `bd show <bead-id>` (metadata, deps, section index), then
+       `bd get <bead-id> body > .bd/.scratch/progress.md` and **Read that file** — it is
+       your complete contract AND your working copy. If the section index lists a
+       `design` section, also read `bd show <bead-id> --section design`.
+    3. The body's directive sections govern you:
+       - **Context Anchor** — where this task fits in the plan; judgment calls follow it.
+       - **Acceptance Gate** — the ONLY criteria for "done." Do not add your own. This
+         task is DONE when ALL gate items pass. Not before.
+       - **Drift Detectors** — what NOT to do; sibling tasks own adjacent work. If you
+         find yourself editing files not in the Files list, STOP.
+    4. As you complete each `- [ ]` step, flip it to `- [x]` in
+       `.bd/.scratch/progress.md` (Edit tool, local only — no per-step `bd update`).
+       After all steps pass: `bd update <bead-id> --body-file .bd/.scratch/progress.md`
+       once.
 
-    ## Acceptance Gate
+    ## Orchestrator Addenda
 
-    [PASTE the Acceptance Gate from the task body — the machine-verifiable completion criteria.
-     These are the ONLY criteria for "done." Do not add your own.]
+    [ONLY task-specific facts not already in the bead — each citing a same-session tool
+     run. Never restate body content: the bead is the single source of truth, and every
+     line here is resident in the controller's context for the rest of its session.
+     Empty is normal.]
 
-    This task is DONE when ALL gate items pass. Not before.
+    ## Test Scope
 
-    ## Drift Detectors
-
-    [PASTE the Drift Detectors from the task body — what NOT to do, which sibling tasks
-     handle adjacent concerns. If editing files not in the Files list, STOP.]
-
-    ## Task Description
-
-    [FULL TEXT of task from plan — paste the complete task body here.
-     The subagent should not need to read any file to understand the task.]
-
-    ## Codebase Context
-
-    [Scene-setting: relevant file contents, existing patterns, dependencies.
-     This is dynamic context — place it AFTER the stable directive sections above.]
+    Run ONLY this task's targeted tests: [exact commands]. Never the full suite — the
+    suite gate runs once, in the controller's session.
 
     ## Before You Begin
 

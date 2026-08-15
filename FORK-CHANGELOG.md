@@ -4,6 +4,33 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.6] - 2026-08-15
+
+Workflow redesign: the orchestrator never touches a task body. Measured
+(solo project): bodies were delivered up to 4x per task — orchestrator
+`--full` read, pasted into the dispatch prompt, executor `--full` read,
+executor Write of the progress copy — two of those resident in the
+long-lived orchestrator (~4K/task, ~800K per 200-task project).
+
+### Changed (breaking doctrine reversal)
+
+- **subagent-driven-development**: implementer-prompt.md no longer pastes
+  Context Anchor / Gate / Drift / full task text — the prompt names the bead
+  id and the implementer fetches its own contract (`bd show` +
+  `bd get <id> body > .bd/.scratch/progress.md` + Read). The "hand them the
+  full task text" invariant is REVERSED: never paste bodies, never open them
+  in the controller session. Pre-Flight Plan Review now runs as a READ-ONLY
+  subagent (the whole plan enters its context, not the controller's).
+- **hybrid-execution**: the Loop routes from `bd ready --json` + the `exec:`
+  label — the controller never opens a body (legacy fallback: grep the one
+  `**Execution:**` line). Inline Task Procedure delivers the contract via
+  the progress-copy redirect — body in context once, as the working file.
+- **writing-plans**: the Execution annotation is mirrored as a bead label at
+  create time (`-l "exec:<mode>"`) so routing needs no body read.
+
+Companion (pending): `bd workfile` command + labels in `ready --json` in the
+beads repo — until then the get-redirect pattern and `bd label list` serve.
+
 ## [1.4.5] - 2026-08-15
 
 Compression sweep (progressive disclosure): rarely-needed sections move to

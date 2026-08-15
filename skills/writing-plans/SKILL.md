@@ -74,8 +74,9 @@ For each task, write the body to a scratch file, then create the bead:
 ```bash
 # Write task body to scratch file (Edit tool shows diff for user review)
 # → .bd/.scratch/task-N.md
-# Create bead from file:
-bd create "Task N: <name>" -p 1 --parent <root-bead-id> --body-file .bd/.scratch/task-N.md --json
+# Create bead from file — the exec: label mirrors the body's **Execution:** line
+# so the router reads labels, never bodies:
+bd create "Task N: <name>" -p 1 --parent <root-bead-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" --json
 # Clean up:
 rm .bd/.scratch/task-N.md
 ```
@@ -216,7 +217,7 @@ A gate's numbers and factual premises are claims too: derive each from a same-se
 
 ## Execution Annotation
 
-Every task body carries one `**Execution:**` line — the mode a hybrid executor should use for the task, with a one-line reason. You know every task's file count and spec completeness; decide at plan time so the choice is visible at plan review, not improvised at execution time.
+Every task body carries one `**Execution:**` line — the mode a hybrid executor should use for the task, with a one-line reason. You know every task's file count and spec completeness; decide at plan time so the choice is visible at plan review, not improvised at execution time. Mirror the mode as a bead label at create time (`-l "exec:subagent/standard"`; on a legacy plan, `bd label add <id> "exec:<mode>"`) — the router routes from the ready list plus this label and never opens a body.
 
 - `inline` — 1 file, complete spec, gate verifiable in one command, no judgment (config bump, rename, doc edit)
 - `subagent/cheap` — 1–2 files, complete spec, real implementation work
