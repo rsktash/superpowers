@@ -4,6 +4,32 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.19] - 2026-08-16
+
+### Changed
+
+- **Pre-Flight Plan Review fires at every execution entry** (SDD, hybrid,
+  codex): a session's first claim requires this session's pre-flight
+  report — same-session writing-plans handoffs (Self-Review is
+  author-blind, does not substitute) and mid-loop continuations included;
+  in hybrid it is now Step 0 of The Loop, not preamble prose. Scope = open
+  beads only, so cost shrinks as the plan progresses. New check class 5:
+  stale premises — task bodies the current tree already contradicts
+  (landed work invalidates the unexecuted remainder). Driver: transcript
+  sweep of 24 execution sessions showed pre-flight dispatched in 8 — only
+  fresh-session loop starts; a same-session handoff ran 13 implementers
+  and a continuation ran 28 with no pre-flight, and epic-92's resume-time
+  run caught three plan defects on the remainder.
+
+### Added
+
+- **`needs-plan` label for findings deferred as beads**: filed at creation
+  (SDD "Acting on review findings"); a ready bead carrying it is not
+  dispatchable at any entry point — it routes to writing-plans (or a
+  decision bead) first. Driver: epic-92's frontier surfaced four
+  review-filed defect beads (gates, no steps, unresolved decisions) as
+  dispatchable tasks.
+
 ## [1.4.18] - 2026-08-16
 
 ### Added

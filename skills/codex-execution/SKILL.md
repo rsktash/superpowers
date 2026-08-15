@@ -24,7 +24,7 @@ Files, TDD steps). Codex cannot compensate for a vague bead.
 ## Preconditions (check BEFORE the first dispatch)
 
 - **Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children is a spec, not a plan — STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
-- **Pre-Flight Plan Review:** run it (superpowers-beads:subagent-driven-development) over the whole plan and batch any findings into one question to your human partner before Task 1.
+- **Pre-Flight Plan Review:** run it (superpowers-beads:subagent-driven-development) at every execution entry — fresh session, continuation, or same-session handoff; scope = open beads; the session's first dispatch requires this session's report. Batch findings into one question. A ready bead labeled `needs-plan` is not dispatchable.
 - **AGENTS.md parity:** codex reads `AGENTS.md`, never `CLAUDE.md`. EVERY directory
   with a `CLAUDE.md` must carry a sibling `AGENTS.md` symlink (`ln -s CLAUDE.md AGENTS.md`).
   Verify: `find . -name CLAUDE.md -not -path "*/node_modules/*"` — each hit has a

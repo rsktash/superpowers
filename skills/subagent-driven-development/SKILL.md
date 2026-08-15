@@ -17,16 +17,21 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 ## Pre-Flight Plan Review
 
-Before the first dispatch, run the review as a READ-ONLY subagent — the whole plan (epic spec `--full` plus every task `--full`) enters that agent's context, never yours. Its prompt: read the epic and all children, check the four classes below, return findings only — no edits, no bd writes. Check for:
+Runs at EVERY execution entry — a fresh session picking up a plan, a continuation resuming mid-loop, and the same-session handoff from writing-plans alike. **A session's first claim requires this session's pre-flight report.** writing-plans' Self-Review does not substitute: that is the author re-reading its own work, and author-blind (a fabricated gate premise survives it); pre-flight is a fresh context, which is what catches fabrications.
+
+Scope = the epic spec plus OPEN beads only — closed tasks are never re-read, so the cost shrinks as the plan progresses. Run the review as a READ-ONLY subagent: the open plan enters that agent's context, never yours. Its prompt: read the epic and all open children, check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. Check for:
 
 1. **Tasks that contradict each other or the spec** — two tasks disagreeing on an interface, format, or decision, or a task drifting from what the spec says.
 2. **Anything a task ASKS FOR that a reviewer would flag as a defect** — the plan mandating a bug (e.g. a task whose steps produce the exact anti-pattern review would catch).
 3. **Missing dependency edges the task bodies imply** — a task that reads/consumes something a sibling task produces, with no dep link between them.
 4. **Gate items no step satisfies** — an Acceptance Gate checkbox nothing in the task's steps actually produces.
+5. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. Landed work invalidates the unexecuted remainder; this class is why continuations re-run pre-flight.
 
-Batch ALL findings into ONE question to your human partner before Task 1 — never drip them out mid-run as you happen to notice each one. If the review turns up nothing, say so in one line and start.
+Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one. If the review turns up nothing, say so in one line and start.
 
-**Why:** Catching a plan-level contradiction on Task 6 after Tasks 1-5 already built on the wrong assumption is expensive to unwind; reading the whole plan once up front is cheap by comparison, and one batched question costs your human partner one interruption instead of five.
+A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; it goes through writing-plans (or a decision bead) before it can be claimed.
+
+**Why:** Catching a plan-level contradiction on Task 6 after Tasks 1-5 already built on the wrong assumption is expensive to unwind; reading the open plan once per entry is cheap by comparison, and one batched question costs your human partner one interruption instead of five.
 
 ## Session Task List (display mirror)
 
@@ -66,6 +71,7 @@ A reviewer's finding is a claim, not a verdict. Reviewer citations — file:line
 - **One finding at a time.** Implement it, re-run the relevant check (test, grep, diff), confirm it holds, then move to the next. Don't batch fixes on the strength of the report alone.
 - **Push back with technical reasoning when a finding is wrong for THIS codebase.** Wrong platform assumption, missing context, breaks working code, YAGNI on an unused path — say so and why, instead of implementing to avoid friction.
 - **Findings that conflict with the plan's recorded decisions escalate to your human partner** — don't silently apply a suggestion that contradicts a decision already made for this plan.
+- **A finding deferred as a bead is labeled `needs-plan` at creation** (`-l needs-plan`). It carries a gate but no steps — the label keeps `bd ready` from surfacing it as dispatchable until writing-plans turns it into a task or a decision bead resolves it.
 - **Fix Routing — who applies a verified finding.** A finding whose fix is fully specified by the finding itself — dead code, a comment's wording, a test the reviewer already wrote and watched pass — is applied by the controller, inline on the current diff: commit, re-run the one check, done. A round back to the implementer is justified only by the implementer knowing something the controller doesn't — a design call, a non-obvious code path, a fix the finding doesn't fully specify — never by preferring the work happen elsewhere. When a round IS dispatched, it carries ALL outstanding findings for the task; a round per finding is pure ceremony. (Fixes land as commits on top of the reviewed ones either way.)
 
 ## Coordination Gate

@@ -20,13 +20,15 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children is a spec, not a plan — STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
 
-**Before the first routed task:** run Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) over the whole plan and batch any findings into one question to your human partner. Then set up the Session Task List display mirror (per subagent-driven-development): replace the session todo list wholesale — one todo per task bead, `<bead-id>: <title>`, in plan order — and thereafter flip todos only at claim (in_progress) and close (completed), for inline and dispatched tasks alike. bd stays the single source of truth.
+**Before the first routed task:** set up the Session Task List display mirror (per subagent-driven-development): replace the session todo list wholesale — one todo per task bead, `<bead-id>: <title>`, in plan order — and thereafter flip todos only at claim (in_progress) and close (completed), for inline and dispatched tasks alike. bd stays the single source of truth.
 
 ## The Loop
 
 Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
-1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, mode from its `exec:` label (`bd label list <task-id>`): `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). Legacy plan without the label: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body.
+**Step 0 — pre-flight gate, once per session, before this session's first claim:** if this session has not yet produced a pre-flight report, run Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) — every entry mode, the same-session handoff from writing-plans and mid-loop continuations included; scope = open beads. Batch findings into one question.
+
+1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, mode from its `exec:` label (`bd label list <task-id>`): `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). Legacy plan without the label: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
 2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end.
 3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers) — "Task N → subagent/standard → Sonnet (<reason>)", inline routes "Task N → inline (<reason>)" — emitted **before** the claim command. Assignee values, Bash command descriptions, and dispatch parameters are actions, not the announcement. Every route gets its line, however routine.
 4. Execute by mode:
