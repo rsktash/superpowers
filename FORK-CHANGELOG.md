@@ -4,6 +4,21 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.9] - 2026-08-16
+
+### Changed
+
+- **subagent-driven-development**: the constant behavioral half of the
+  implementer prompt (Before You Begin, Your Job, edit discipline, code
+  organization, escalation, self-review, report format) moves to a per-project
+  `docs/implementer-charter.md`, copied from the skill's new
+  `implementer-charter.md` on first dispatch. The prompt template now carries
+  only task-specific content: mission, contract fetch, worktree pin,
+  orchestrator addenda, test scope, and the status enum (kept inline because
+  verdict processing depends on it). Observed in a live 1.4.6 dispatch:
+  ~600-700 tokens of identical charter text re-inlined per dispatch. Also
+  fixes the template's `bd comments add` typo (`bd comment add`).
+
 ## [1.4.8] - 2026-08-15
 
 ### Added
