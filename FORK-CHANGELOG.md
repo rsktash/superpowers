@@ -4,6 +4,20 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.13] - 2026-08-16
+
+### Changed
+
+- **Comment audience tags**: deviations and cross-session notes are addressed
+  via a leading `[reviewer]` / `[next-phase]` / `[orchestrator]` / `[all]`
+  token, filtered with `bd comment list <id> --tag <t>` (beads commit
+  4a9521a; `--last N` added alongside). Charter logs deviations tagged;
+  reviewer-prompt reads `--tag reviewer` (with legacy full-list fallback and
+  "unlogged deviation is a finding"); writing-plans' phase-N+1 planning
+  session starts from `--tag next-phase` — the durable half of the
+  phase-gate session handoff. Measured driver: epic threads past 21K chars
+  made pull-all-and-extract a real cost.
+
 ## [1.4.12] - 2026-08-16
 
 ### Changed

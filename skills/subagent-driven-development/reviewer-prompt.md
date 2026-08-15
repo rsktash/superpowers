@@ -51,6 +51,11 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     - Where a gate item claims coverage, prove it by falsification in the
       review worktree: break the covered thing, show the check firing, revert.
       "Passes" alone cannot distinguish a working guard from a decorative one.
+    - Read the bead's addressed comments: `bd comment list <bead-id> --tag reviewer`
+      — tagged deviations are part of the spec you're checking against, and an
+      implemented deviation that was never logged is itself a finding. Legacy
+      fallback: if the filtered list is empty but the bead has comments, read
+      the full list once (pre-convention deviations are untagged).
 
     ## Section 1 — Spec Compliance (first, outranks Section 2)
 

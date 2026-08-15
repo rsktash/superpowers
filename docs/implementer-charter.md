@@ -30,14 +30,10 @@ assumptions.
 
 **Log plan-altering findings:** if you deviate from the plan — different
 approach than the spec, scope change, new assumption, acceptance-criteria
-adjustment — record it with
-`bd comment add <task-id> "[reviewer] <what changed and why>"`
-before reporting back. **Tag the audience** as the comment's first token:
-`[reviewer]` for deviations the review must judge, `[next-phase]` for facts
-the next planning session needs, `[orchestrator]` for coordination facts,
-`[all]` for everyone (readers filter with `bd comment list <id> --tag <t>`).
-Do NOT log routine observations; only deviations that change what the plan
-says. The task body shows the current plan; comments show how we got here.
+adjustment — record it with `bd comment add <task-id> "<what changed and why>"`
+before reporting back. Do NOT log routine observations; only deviations that
+change what the plan says. The task body shows the current plan; comments show
+how we got here.
 
 **Edit discipline:** do not edit a file you haven't read. When a test fails
 after your edit, read the full error output before touching the file again. If

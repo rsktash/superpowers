@@ -94,7 +94,7 @@ Parse JSON output from `bd create --json` to extract the new bead ID.
 
 ## Multi-Phase Epics
 
-Some epics can't be fully decomposed up front — later phases depend on what earlier phases actually land, so their tasks don't exist yet. When an epic is executed in phases like this, the **last task of phase N is "Plan phase N+1"**, with acceptance gate "phase N+1 task beads exist and are dep-linked." Write this task at the END of phase N, once you know what phase N actually landed — not as a placeholder guessed at plan time.
+Some epics can't be fully decomposed up front — later phases depend on what earlier phases actually land, so their tasks don't exist yet. When an epic is executed in phases like this, the **last task of phase N is "Plan phase N+1"**, with acceptance gate "phase N+1 task beads exist and are dep-linked." Write this task at the END of phase N, once you know what phase N actually landed — not as a placeholder guessed at plan time. The planning session executing that task starts by reading `bd comment list <id> --tag next-phase` across the epic and phase-N beads — the durable half of the phase-gate session handoff (phase close = session close).
 
 **Why this matters:** `bd close` auto-closes a parent when its last open child closes. A phase whose tasks simply run out — with no bead left open to carry the plan forward — silently closes the whole epic and buries any continuation that only lives in prose (chat history, a comment, a memory file). The "Plan phase N+1" task keeps a bead open until the next phase's beads exist, so the epic can't close out from under an unfinished plan.
 
