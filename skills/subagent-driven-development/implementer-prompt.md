@@ -16,7 +16,8 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
     ## Get Your Contract (first, before anything else)
 
     1. Read `docs/dispatch-env.md` at the repo root (repo layout, bd invocation,
-       test commands, worktree rules).
+       test commands, worktree rules), and `docs/CONTEXT.md` (domain glossary)
+       if it exists — bead bodies are written in its vocabulary.
     2. From the repo root: `bd show <bead-id>` (metadata, deps, section index),
        then `bd get <bead-id> body > .bd/.scratch/progress-<bead-id>.md` and
        **Read that file** — your complete contract AND your working copy: flip

@@ -5,11 +5,11 @@ description: Use when executing implementation plans whose tasks carry Execution
 
 # Hybrid Execution
 
-Execute a plan task-by-task, routing each task to the mode its plan annotation names: trivial tasks run inline in this session; everything else goes to a fresh subagent. Subagent dispatch is the default — inline is the exception, reserved for tasks where dispatch overhead exceeds the work itself.
+Execute a plan task-by-task, routing each task to the mode its plan annotation names: trivial tasks run inline in this session; everything else goes to a fresh subagent. Dispatch is the default — inline is reserved for tasks where dispatch overhead exceeds the work itself.
 
-**Why hybrid:** A whole-plan mode choice is too coarse. Plans mix trivial tasks (config bump, rename) with complex ones (multi-file integration). Dispatching a subagent for a 2-minute edit is pure ceremony; executing a heavy task inline floods this session's context with implementation detail and degrades every review that follows. Routing per task keeps ceremony proportional and this session's context clean.
+**Why hybrid:** a whole-plan mode is too coarse. Plans mix config bumps with multi-file integrations; a subagent for a 2-minute edit is pure ceremony, and a heavy task run inline floods this session with implementation detail, degrading every review that follows. Per-task routing keeps ceremony proportional and this session's context clean.
 
-**This skill owns routing and scheduling.** The per-task procedure for `inline` lives in this skill's own Inline Task Procedure section below; the per-task procedure for `subagent/<tier>` — claim, BASE recording, dispatch, review package, termination evidence — lives in subagent-driven-development's Loop. Follow each exactly as written; do not improvise a blend. What this skill adds on top is *when* those steps run: The Loop below pipelines each task's review against the next task's implementation.
+**This skill owns routing and scheduling.** The per-task procedure for `inline` lives in this skill's own Inline Task Procedure section below; the per-task procedure for `subagent/<tier>` — claim, BASE recording, dispatch, review package, termination evidence — lives in subagent-driven-development's Loop. Follow each exactly as written. What this skill adds on top is *when* those steps run: The Loop below pipelines each task's review against the next task's implementation.
 
 - `inline` → the Inline Task Procedure below
 - `subagent/<tier>` → superpowers-beads:subagent-driven-development, The Loop (per-task procedure), scheduled per The Loop below
@@ -28,7 +28,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, mode from its `exec:` label (`bd label list <task-id>`): `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). Legacy plan without the label: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body.
 2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end.
-3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers): "Task N → subagent/standard → Sonnet (<reason>)"; inline routes announce "Task N → inline (<reason>)". Emit it **before** the claim command. The model name inside an `--assignee` value, a Bash command description, or the dispatch parameter does **not** count — those are actions, not the announcement. A routine route you've used all session still gets its line; cadence is exactly when it gets dropped.
+3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers) — "Task N → subagent/standard → Sonnet (<reason>)", inline routes "Task N → inline (<reason>)" — emitted **before** the claim command. Assignee values, Bash command descriptions, and dispatch parameters are actions, not the announcement. Every route gets its line, however routine.
 4. Execute by mode:
    - **inline** → follow the Inline Task Procedure (below) for this one task, start to close.
    - **subagent/<tier>** → follow subagent-driven-development's per-task procedure for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Record `BASE=$(git rev-parse HEAD)`, declare the review tier, then dispatch the implementer per subagent-driven-development's `implementer-prompt.md` — by bead id, the implementer fetches its own contract — including the test-scope directive (targeted tests only; the full-suite gate stays in this session).
@@ -41,7 +41,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 **Pipeline safety rules — non-negotiable:**
 
-- **The reviewer reads the FROZEN package, never the live tree.** The working tree moves the moment N+1 starts; a reviewer that opens live files is reviewing N+1's half-finished work as if it were N's. Every path the reviewer touches is either inside the package file or inside the read-only review worktree pinned at N's HEAD — no exceptions, including "it's probably the same commits."
+- **The reviewer reads the FROZEN package, never the live tree.** The tree moves the moment N+1 starts; a reviewer opening live files is reviewing N+1's half-finished work as if it were N's. Every path the reviewer touches is inside the package file or the read-only review worktree pinned at N's HEAD.
 - **One verdict outstanding, max — per lane.** If N+1's implementer lands while N's verdict is still out, generate N+1's package, but process N's verdict before dispatching N+2. A stack of unprocessed verdicts is unreviewed work compounding. Under Hybrid Parallel the bound applies per branch lane: one outstanding verdict per implementer branch, processed before that lane's next dispatch.
 - **A FAIL verdict on N freezes the frontier.** No new dispatches until the same implementer lands the fix as commits on top of N's (never a rebase or rewrite of reviewed commits) and the fix is re-reviewed to PASS. An in-flight N+1 implementer may finish and report; nothing new starts. The re-review package spans N's original BASE to the fix tip; if an in-flight N+1 landed interleaved commits, they appear in the package's commit list — name that in the re-reviewer's dispatch so it judges only N's files.
 - **Serial implementers, still.** Pipelining overlaps a *reviewer* with an implementer — never two implementers. One implementer in the session worktree at a time; anything wider requires Hybrid Parallel (below), which only your human partner can invoke, by name.
@@ -50,7 +50,7 @@ After the last task: drain the pipeline — process every outstanding verdict, f
 
 ## Hybrid Parallel (opt-in)
 
-Frontier parallelism — 2–3 implementers running concurrently — exists, but it is never the default and never inferred. It activates ONLY when your human partner explicitly says **"hybrid parallel"**. "Go faster", "parallelize where you can", a wide ready frontier, or a looming deadline are not that phrase — under all of them, the pipelined Loop above is the ceiling: one implementer, always. If you believe a plan would benefit, ask — and treat only a reply containing the literal phrase as consent; "yes, speed it up" is not it. The moment the phrase is spoken, read `references/hybrid-parallel.md` and follow it exactly — width, eligibility, isolation, and merge-back rules all live there.
+Frontier parallelism — 2–3 implementers running concurrently — activates ONLY when your human partner says the literal phrase **"hybrid parallel"**. "Go faster", "parallelize where you can", a wide frontier, or a deadline are not that phrase — under all of them the pipelined Loop is the ceiling: one implementer, always. If you believe a plan would benefit, ask; only a reply containing the literal phrase is consent. On the phrase, read `references/hybrid-parallel.md` and follow it exactly — width, eligibility, isolation, and merge-back live there.
 
 ## Inline Task Procedure
 
@@ -68,10 +68,10 @@ Follow this procedure for any task routed `inline`.
 4. Checkbox flips happen in `.bd/.scratch/progress.md` — it already exists from step 1; never re-print the body to get a working copy.
 5. For each step in the task body:
    - **First step only:** read everything listed under "Before you start" — files, rules, callers. Do not skip this.
-   - **Attention refresh:** before executing, re-read the Acceptance Gate items. Attention on initial goals decays after 3-4 tool calls; re-injecting the gate keeps focus on the actual completion criteria.
+   - **Attention refresh:** re-read the Acceptance Gate items before executing — attention on initial goals decays after 3–4 tool calls.
    - Execute the step.
    - In `.bd/.scratch/progress.md`, flip the step's `- [ ]` to `- [x]` with the Edit tool. Local edit only — do not `bd update` per step.
-6. After all steps complete, sync the checkbox state to bd once: `bd update <task-id> --body-file .bd/.scratch/progress.md`. **Why:** a per-step `bd update` roundtrip is expensive enough that it gets skipped in practice; batching to once per task keeps the bookkeeping cheap enough to actually happen.
+6. After all steps complete, sync the checkbox state to bd once: `bd update <task-id> --body-file .bd/.scratch/progress.md`. **Why:** per-step `bd update` roundtrips get skipped in practice; batching keeps the bookkeeping cheap enough to happen.
 7. **Verify the Acceptance Gate before closing:**
    - Re-read every gate item from the task body.
    - Run the verification command for each (test, file check, grep for export).
@@ -88,8 +88,8 @@ Follow this procedure for any task routed `inline`.
 The annotation is the default, not a cage — but every override must be stated, never silent:
 
 - **Toward subagent** (annotation says `inline`, you dispatch): always allowed. State one line: what made the task bigger than planned.
-- **Toward a lower subagent tier** (annotation says `capable`, the body argues for `standard`): **required, not optional.** The annotation is a ceiling to validate, not a floor to honor. If the body's reason describes mechanical work, a mirror, or adoption of a landed/reviewed template, it argues for `standard` at most — down-route to `subagent/standard` → Sonnet and state the override. There is no gamble in down-routing (Sonnet still gets a fresh reviewed subagent); honoring an inflated `capable` just burns the session model on busywork. "Important/user-facing" is not a tier axis — tier measures the judgment the task demands, nothing else.
-- **Toward inline** (annotation says `subagent/*`, you execute it yourself): requires justification against the rubric in writing-plans — all four criteria, read literally: 1 file (the task's Files list, not "one logical unit"), complete spec, gate verifiable in one command, no judgment. A multi-file task fails the first criterion no matter how small the diff or how much context you already hold. "The files are already in my context", "it's only N lines", and "dispatch overhead exceeds the work" are not criteria — the last is the planner's standard for annotating `inline`, not yours for overriding to it. If any criterion fails, dispatch. State the justification before touching any file.
+- **Toward a lower subagent tier** (annotation says `capable`, the body argues for `standard`): **required, not optional.** The annotation is a ceiling to validate, not a floor to honor. A reason describing mechanical work, a mirror, or a landed/reviewed template argues for `standard` at most — down-route to Sonnet and state the override. Down-routing has no gamble (Sonnet still gets a fresh reviewed subagent); honoring an inflated `capable` burns the session model on busywork. Tier measures the judgment the task demands — surface importance is not an axis.
+- **Toward inline** (annotation says `subagent/*`, you execute it yourself): requires all four writing-plans criteria, read literally: 1 file (the task's Files list, not "one logical unit"), complete spec, gate verifiable in one command, no judgment. A multi-file task fails the first criterion however small the diff. "The files are already in my context", "it's only N lines", and "dispatch overhead exceeds the work" are not criteria — the last is the planner's standard for annotating `inline`, not yours for overriding to it. Any criterion fails → dispatch. State the justification before touching any file.
 - **Missing annotation** (plan predates this skill): classify the task yourself against the rubric — fresh, per task, never by transcribing a dispatch plan or wave grouping already negotiated; scheduling never raises a tier. State the classification and reason, then proceed as if annotated.
 
 **Why stated, not silent:** silently downgrading to inline reads identically to having dispatched and reviewed. The problem isn't judging a task trivial — it's making that judgment invisible and unchallengeable.
@@ -98,7 +98,7 @@ The annotation is the default, not a cage — but every override must be stated,
 
 Tiers are abstract — resolve them against your human partner's standing model policy first (project memory, CLAUDE.md); a standing policy always overrides the default map. Default on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model.
 
-A tier names the **judgment a task demands, not model cost.** `cheap` and `standard` both resolve to exactly Sonnet — Sonnet is the floor; "cheap" never licenses anything below it. `capable` → the session model is reserved for genuine design judgment or broad codebase synthesis, never the safe default for "anything non-trivial"; genuinely unsure between `standard` and `capable` → pick `standard`. State any tier change, in either direction, as a visible override. Full reasoning (why the floor sits where it does, what belongs on `standard`): `references/model-tiers.md`.
+A tier names the **judgment a task demands, not model cost.** `cheap` and `standard` both resolve to exactly Sonnet — the floor; "cheap" never licenses anything below it. `capable` → the session model is reserved for genuine design judgment or broad codebase synthesis, never the safe default for "anything non-trivial"; unsure between `standard` and `capable` → `standard`. State any tier change, in either direction, as a visible override. Full reasoning: `references/model-tiers.md`.
 
 ## Invariants
 
@@ -125,7 +125,7 @@ Mis-route incoming if you catch yourself thinking:
 
 ## When an Inline Task Balloons
 
-If an inline task starts touching files beyond its Files list, that is a drift-detector stop. Recovery: revert the uncommitted work, re-route the task as `subagent/standard`, and state the override. Do not push through inline.
+An inline task touching files beyond its Files list is a drift-detector stop: revert the uncommitted work, re-route as `subagent/standard`, state the override.
 
 ## Integration
 

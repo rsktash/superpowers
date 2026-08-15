@@ -27,7 +27,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 You MUST create a task for each of these items and complete them in order. The last item is the step most often skipped — keep it on the list until it is genuinely done:
 
-1. **Scope check** — confirm the spec is a single coherent project (decompose if not)
+1. **Scope check** — confirm the spec is a single coherent project (decompose if not) with no unresolved design fork (decision bead if it has one — see Decision Beads)
 2. **Map file structure** — which files are created/modified and what each is responsible for
 3. **Decompose into task beads** — bite-sized tasks, each with its directive sections
 4. **Self-review audit** — re-confirm every cited path/symbol and spec-coverage across all tasks
@@ -51,6 +51,14 @@ Before defining tasks, map out which files will be created or modified and what 
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
 
+## Vertical Slices
+
+Default task shape: a **tracer bullet** — a narrow but complete path through every layer the feature touches (schema → logic → surface → tests), demoable or verifiable on its own. Prefer this over horizontal layer-slices ("Task 1: types, Task 2: middleware, Task 3: wiring"): horizontal tasks are the ones that entangle — they need Consumes-From edges and Drift Detectors to referee every seam, and nothing is verifiable until the last slice lands. A vertical slice carries its own proof. Any prefactoring ("make the change easy, then make the easy change") is its own task, first.
+
+**The named exception — wide refactors — sequence as expand–contract.** A wide refactor is one mechanical change (rename a column, retype a shared symbol) whose blast radius fans across the codebase, so no vertical slice can land green. Expand: add the new form beside the old. Migrate: move call sites in batches sized by blast radius (per package, per directory), each batch a task blocked by the expand, CI green throughout because the old form survives. Contract: delete the old form in a final task blocked by every batch.
+
+(Vertical-slice and expand–contract rules adapted from mattpocock/skills `to-tickets`, MIT.)
+
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
@@ -65,6 +73,12 @@ This structure informs the task decomposition. Each task should produce self-con
 **The Context Ceiling:** estimate what the executor must hold — every file in Files, everything under Before-you-start, test output across its run. If that plausibly exceeds ~150K tokens, it is two tasks, split at the same seams as any other split. **Why:** an executor re-pays its whole accumulated context on every turn, so cost grows with the square of task length — and an executor near its ceiling degrades exactly when the work gets hard. The fattest tenth of dispatched executors dominates fleet spend.
 
 **Single Responsibility:** Task titles must not contain "and." A task like "Update types and implement middleware" has two concerns — the executor will lose focus on one. Split it into "Task 1: Update types" and "Task 2: Implement middleware."
+
+## Decision Beads
+
+A plan is never written over an unresolved design fork. If the spec — or your file-structure mapping — surfaces a genuine open decision (two viable architectures, an unvalidated external dependency, a data shape only research or a prototype can settle), STOP decomposing that region. Create a **decision bead**: a child task whose deliverable is the ruling, not code — `bd create "Decide: <fork>" --parent <root-id>` — blocking every task bead that depends on the outcome (`bd dep add <task> <decision>`). Resolve it (research, prototype, or a question to your human partner), record the ruling with `bd comment add`, close it, then write the tasks it was blocking. Task beads written over an open fork encode a guess as a contract — the executor will build the guess.
+
+For efforts where the forks outnumber the tasks — fog too thick to plan through — route to superpowers-beads:wayfinder instead of forcing a plan.
 
 ## Plan Structure in Beads
 
@@ -119,9 +133,9 @@ Format:
 
 | Task | Primary Concern | Consumes From | NOT Your Concern |
 |------|----------------|---------------|------------------|
-| 1: Types | Define interfaces | — | Do NOT implement logic |
-| 2: Middleware | JWT validation | Task 1 types | Do NOT wire into server |
-| 3: Integration | Route wiring | Task 2 middleware | Do NOT refactor middleware |
+| 1: Create-item slice | Create path end-to-end (schema, API, form, tests) | — | Do NOT touch edit/delete flows |
+| 2: Edit slice | Edit path end-to-end | Task 1 schema | Do NOT restructure the create form |
+| 3: Delete slice | Delete path + list empty state | Task 1 schema | Do NOT add bulk operations |
 ```
 
 Each row must have a specific "NOT Your Concern" — not generic advice, but the specific sibling task that handles what would be tempting to touch. This prevents cross-task scope creep.
@@ -198,7 +212,7 @@ git commit -m "feat: add specific feature (<bead-id>)"
 
 ## Writing Directive Tasks
 
-Tasks are prompts, not documentation. When you create a task for a future executor (yourself, a subagent, or a different session), you are performing prompt engineering. Task quality directly determines execution quality.
+Tasks are prompts, not documentation. When you create a task for a future executor (yourself, a subagent, or a different session), you are performing prompt engineering. Task quality directly determines execution quality. If the project has `docs/CONTEXT.md` (the domain glossary brainstorming maintains), write task bodies in its vocabulary — a glossary term replaces a twenty-word description and keeps naming consistent across tasks.
 
 **Context Anchor:** Explain WHY, not just WHAT. "Implement the middleware" is documentation. "This middleware is the security boundary between public routes and authenticated endpoints — Task 3 wires it in, Task 4 tests it" is a directive. The executor needs to understand the task's role in the plan to make correct judgment calls.
 

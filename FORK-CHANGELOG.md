@@ -4,6 +4,42 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.17] - 2026-08-16
+
+### Added
+
+- **Text Economy pass in writing-skills** (adapted from mattpocock/skills
+  `writing-for-agents`, MIT): leading words (collapse restatements into one
+  pretrained concept-token), no-op hunting (a sentence that doesn't change
+  behavior vs the model default is deleted whole), negation audit (state the
+  positive target; hard guardrails exempt), environment-as-source-of-truth
+  (docs cache only what no config confesses). Added to the Quality Checks
+  checklist. Pilot compression on hybrid-execution: 2817 → 2663 words
+  (−5.5%; conservative — the file is mostly guardrails the doctrine exempts).
+- **Vertical Slices in writing-plans** (adapted from mattpocock/skills
+  `to-tickets`, MIT): default task shape is a tracer bullet — a complete
+  thin path through every layer, demoable alone — replacing the horizontal
+  layer-slice examples (Attention Map example updated to match); wide
+  refactors sequence as expand–contract (expand → migrate in blast-radius
+  batches → contract).
+- **Decision Beads in writing-plans + brainstorming**: a plan is never
+  written over an unresolved design fork — the fork becomes a
+  `Decide: <fork>` child bead blocking the tasks that depend on its outcome;
+  brainstorming records dialogue-unsettleable forks in the spec as
+  explicitly open decisions.
+- **`docs/CONTEXT.md` domain glossary convention**: brainstorming maintains
+  it (one line per term of art), writing-plans writes task bodies in its
+  vocabulary, the implementer dispatch prompt reads it alongside
+  `dispatch-env.md`.
+- **wayfinder skill** (vendored from mattpocock/skills, MIT, bd-native):
+  multi-session foggy efforts chart as a `wayfinder:map` epic bead with
+  decision-ticket children — native `bd dep add` blocking, frontier via
+  `bd ready --parent`, claim via assignee, fog-of-war / out-of-scope
+  sections on the map body, graduate-before-close ordering to survive bd's
+  parent auto-close. Ticket types: research (AFK), prototype, discussion,
+  task. Complements decision beads (single fork) for fog that spans
+  sessions.
+
 ## [1.4.16] - 2026-08-16
 
 ### Changed

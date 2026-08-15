@@ -62,6 +62,7 @@ You MUST create a task for each of these items and complete them in order:
 - Cover: architecture, components, data flow, error handling, testing
 - Identify scope boundaries: which components will become separate implementation tasks? Where are the interfaces between them? What should each task NOT touch? This information feeds into writing-plans' Drift Detectors.
 - Be ready to go back and clarify if something doesn't make sense
+- A fork the dialogue can't settle — one needing research, a prototype, or an external fact — doesn't stall the spec: record it in the spec as an explicitly open decision. writing-plans turns each open decision into a blocking decision bead, resolved before the tasks it gates are written.
 
 **Design for isolation and clarity:**
 
@@ -100,6 +101,7 @@ You MUST create a task for each of these items and complete them in order:
     - `{short-title}`: slugified feature name
   - Contents: one-paragraph summary, key design decisions, acceptance criteria
   - This file is an **immutable snapshot** — written once, never updated. The bead is the source of truth.
+- Maintain `docs/CONTEXT.md`, the project's domain glossary: one line per term of art this design coined or leaned on ("materialization cascade", not its twenty-word expansion). Specs, bead bodies, and dispatch prompts write in this vocabulary — create the file on first use, append on later brainstorms, commit it with the summary file.
 - If mockups were created during brainstorming, export them as image files and embed references in the spec bead so downstream skills can find and view them. Check the project's CLAUDE.md or documentation for attachment storage conventions (directory structure, URI scheme, naming). If no convention exists, store exported images alongside the summary file and use relative paths in the bead content.
 - Commit the summary file and any exported mockups to git
 - Use elements-of-style:writing-clearly-and-concisely skill if available
@@ -110,7 +112,7 @@ After creating the spec bead, read it back via `bd show <bead-id> --full` (specs
 1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
-4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit — or, where only research or a prototype can settle it, mark it as an explicitly open decision for writing-plans' decision bead.
 5. **Scope boundary check:** Does the spec identify which areas will become separate implementation tasks? Are the interfaces between areas explicit? Could writing-plans generate specific Drift Detectors ("DO NOT touch X — that's another task's job") from this spec? If scope boundaries are vague, add them.
 
 Fix any issues inline. No need to re-review — just fix and move on.

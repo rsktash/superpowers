@@ -287,6 +287,18 @@ Use skill name only, with explicit requirement markers:
 
 **Why no @ links:** `@` syntax force-loads files immediately, consuming 200k+ context before you need them.
 
+## Text Economy
+
+Run this pass over every skill you write or edit — it compresses without deleting doctrine. (Techniques adapted from mattpocock/skills `writing-for-agents`, MIT.)
+
+**Leading words.** A leading word is a compact concept the model already holds from pretraining (*tight loop*, *fog of war*, *frozen*, *tracer bullet*). Collapse multi-sentence restatements into one: "fast, deterministic, low-overhead loop" → *tight loop*; "a loop you believe in" → *red*. Repeated as a token across the document it anchors behavior in fewer tokens AND gives attention a sharper hook. Prefer an existing word over coining one — a made-up term recruits no priors and costs definition tokens.
+
+**No-op hunting.** A sentence the model already obeys by default pays load to say nothing. The test is model-relative and empirical — does behavior change with the sentence removed? — settled by running the document, not debating it. A failing sentence is deleted whole, not trimmed. The test grades leading words too: a word too weak to beat the default ("be thorough" to an already thorough-ish agent) is a no-op, and the fix is a stronger word ("relentless"), not more sentences.
+
+**Negation audit.** A prohibition activates the forbidden concept — "don't think of an elephant" makes the elephant all there is — and the negation is a weak modifier the activated concept overruns. State the positive target instead ("write one-line comments", not "don't write long comments"). Hard guardrails that cannot be phrased positively — Invariants, Red Flags lists, rationalization tables — keep their prohibitions; pair each with the positive behavior where one exists.
+
+**Environment as source of truth.** A document that restates what `--help`, config files, or the directory layout already answer is a cache, earning its load only when the lookup is expensive. Cache the unwritten convention, the reason behind a choice, the gotcha no config confesses; leave one-command lookups to the environment, where they cannot go stale.
+
 ## Flowchart Usage
 
 ```dot
@@ -627,6 +639,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Re-test until bulletproof
 
 **Quality Checks:**
+- [ ] Text-economy pass (see Text Economy): leading words replace restatements, no-ops deleted, soft prohibitions flipped positive
 - [ ] Small flowchart only if decision non-obvious
 - [ ] Quick reference table
 - [ ] Common mistakes section
