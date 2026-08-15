@@ -4,6 +4,22 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.5] - 2026-08-15
+
+Compression sweep (progressive disclosure): rarely-needed sections move to
+`references/` files read on demand; every rule kept verbatim, nothing dropped.
+Loads shrink ~1.2K tokens per skill invocation.
+
+### Changed
+
+- **hybrid-execution** (20.3K -> 18.0K chars): Hybrid Parallel procedure ->
+  `references/hybrid-parallel.md` (activation rule stays in SKILL.md); Model
+  Tiers reasoning -> `references/model-tiers.md` (map + floor rule stay).
+- **writing-plans** (22.6K -> 20.1K chars): the three conditional review
+  lenses (Deploy Sequence, Cross-Layer Consistency, Semantic Regression
+  Sweep) -> `references/plan-review-lenses.md`, applied only when a task
+  touches schema/rollout/contracts/type shapes.
+
 ## [1.4.4] - 2026-08-15
 
 Two residency reducers from the 2026-08-15 token audit of the solo project

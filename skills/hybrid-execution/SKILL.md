@@ -50,16 +50,7 @@ After the last task: drain the pipeline — process every outstanding verdict, f
 
 ## Hybrid Parallel (opt-in)
 
-Frontier parallelism — 2–3 implementers running concurrently — exists, but it is never the default and never inferred. It activates ONLY when your human partner explicitly says **"hybrid parallel"**. "Go faster", "parallelize where you can", a wide ready frontier, or a looming deadline are not that phrase — under all of them, the pipelined Loop above is the ceiling. If you believe a plan would benefit, ask — and treat only a reply containing the literal phrase as consent; "yes, speed it up" is not it.
-
-When invoked:
-
-- **Width: 2–3 implementers**, never more, regardless of how wide the ready frontier is.
-- **Eligibility — both conditions, checked per pair:** the tasks appear simultaneously in `bd ready --parent <root-id> --json`, AND their scopes are disjoint — no file shared between their Files lists, and no "Consumes From" edge between them per the epic's Attention Map. A single shared file or a single consumes-from edge disqualifies the pair: those tasks run serially, pipelined as usual. Eligibility is computed from the plan's recorded lists, never from a felt sense that "they probably won't collide."
-- **Isolation:** each implementer works in its own worktree on its own branch, created per using-git-worktrees conventions (`git worktree add .worktrees/<task-id> -b <task-branch>`). No implementer ever shares a worktree with another implementer — that invariant survives this mode untouched.
-- **Merge-back is serial and controller-owned:** the controller merges completed branches back one at a time, in dependency order, re-running the merged task's targeted tests after EACH merge. Two branches that each pass in isolation can still break composed — the post-merge test run is what catches that. Reviews stay per task and pipelined exactly as in The Loop, each packaged from its own branch's BASE..HEAD.
-
-**Shared test environment caveat:** one shared test environment — a single docker-compose stack, one attached device, one seeded database — forces serial test gates no matter how many implementers run: their test runs queue on the shared resource and the wall-clock win evaporates. Pipelined reviews still apply and still pay off (the reviewer reads a frozen package, not the environment), but frontier mode does not help there. Check for this before proposing or accepting hybrid parallel.
+Frontier parallelism — 2–3 implementers running concurrently — exists, but it is never the default and never inferred. It activates ONLY when your human partner explicitly says **"hybrid parallel"**. "Go faster", "parallelize where you can", a wide ready frontier, or a looming deadline are not that phrase — under all of them, the pipelined Loop above is the ceiling: one implementer, always. If you believe a plan would benefit, ask — and treat only a reply containing the literal phrase as consent; "yes, speed it up" is not it. The moment the phrase is spoken, read `references/hybrid-parallel.md` and follow it exactly — width, eligibility, isolation, and merge-back rules all live there.
 
 ## Inline Task Procedure
 
@@ -107,9 +98,7 @@ The annotation is the default, not a cage — but every override must be stated,
 
 Tiers are abstract — resolve them against your human partner's standing model policy first (project memory, CLAUDE.md); a standing policy always overrides the default map. Default on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model.
 
-A tier names the **judgment a task demands, not model cost.** `cheap` and `standard` both resolve to exactly Sonnet — Sonnet is the floor, there is no cheaper tier; "cheap" never licenses anything below Sonnet however small the task or cost-conscious your partner. State any tier change, in either direction, as a visible override.
-
-**The `standard` floor now sits just under the session tier.** The current Sonnet (Sonnet 5 today) is close to the session model, not well beneath it as earlier Sonnets were. So `capable` → the session model is reserved for tasks demanding genuine design judgment or broad codebase synthesis — it is **not** the safe default for "anything non-trivial." Multi-file integration, mechanical mirrors, and adoption of a landed/reviewed template all belong on `standard` → Sonnet; the narrowed gap means down-routing an inflated `capable` costs almost nothing in quality while saving the session model for where its edge actually shows. When you're genuinely unsure between `standard` and `capable`, pick `standard` — a fresh reviewed Sonnet subagent makes that the low-risk side. (The map stays version-agnostic: `standard` resolves to whatever the current Sonnet is; "Sonnet 5" is just today's concrete anchor.)
+A tier names the **judgment a task demands, not model cost.** `cheap` and `standard` both resolve to exactly Sonnet — Sonnet is the floor; "cheap" never licenses anything below it. `capable` → the session model is reserved for genuine design judgment or broad codebase synthesis, never the safe default for "anything non-trivial"; genuinely unsure between `standard` and `capable` → pick `standard`. State any tier change, in either direction, as a visible override. Full reasoning (why the floor sits where it does, what belongs on `standard`): `references/model-tiers.md`.
 
 ## Invariants
 
