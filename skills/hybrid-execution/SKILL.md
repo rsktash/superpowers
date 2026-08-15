@@ -46,7 +46,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 - **A FAIL verdict on N freezes the frontier.** No new dispatches until the same implementer lands the fix as commits on top of N's (never a rebase or rewrite of reviewed commits) and the fix is re-reviewed to PASS. An in-flight N+1 implementer may finish and report; nothing new starts. The re-review package spans N's original BASE to the fix tip; if an in-flight N+1 landed interleaved commits, they appear in the package's commit list — name that in the re-reviewer's dispatch so it judges only N's files.
 - **Serial implementers, still.** Pipelining overlaps a *reviewer* with an implementer — never two implementers. One implementer in the session worktree at a time; anything wider requires Hybrid Parallel (below), which only your human partner can invoke, by name.
 
-After the last task: drain the pipeline — process every outstanding verdict, fix and re-review anything open. Then run the full test suite once from this session (backgrounded — the suite gate belongs to the orchestrator, whose cache survives the wait), dispatch one final review of the whole diff (per subagent-driven-development), then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
+After the last task: drain the pipeline — process every outstanding verdict, fix and re-review anything open. Then run the full test suite once — dispatched to `superpowers-beads:suite-gate`; the gate stays this session's decision, accepted only on deterministic evidence (commands, exit codes, output tails); warm-environment projects use their peer gate-runner instead. Dispatch one final review of the whole diff (per subagent-driven-development), then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
 
 ## Hybrid Parallel (opt-in)
 
@@ -110,7 +110,7 @@ In addition, **never:**
 - Point a reviewer at the live working tree, or dispatch new work past an unresolved FAIL verdict.
 - Execute a `subagent/capable` task inline. If it needs design judgment, it needs dispatch — or escalate to your human partner.
 - Blend procedures: an inline task gets the Inline Task Procedure's gate verification; a dispatched task gets subagent-driven-development's combined review. No task gets a mixture, and no task gets neither.
-- Let a dispatched implementer run the full test suite — targeted tests only; the suite gate runs once, in this session. A dispatched implementer that backgrounds a job must finish it before ending its turn.
+- Let a dispatched implementer run the full test suite — targeted tests only; the suite gate runs once, via the suite-gate dispatch. A dispatched implementer that backgrounds a job must finish it before ending its turn.
 
 ## Red Flags — STOP
 

@@ -40,7 +40,7 @@ For each task, in order:
 2. Answer any questions the implementer asks *before* it proceeds.
 3. Generate the review package: `scripts/review-package BASE HEAD` (run from this skill's directory — `skills/subagent-driven-development/`; BASE is the pre-dispatch commit recorded in step 1 — NEVER `HEAD~1`, which silently drops all but the last commit of a multi-commit task) and pass the reviewer the printed file path. Review the result (see **Termination**), fix anything open, then close the task (todo → completed). Once the verdict is processed, delete the review file (`.bd/.scratch` hygiene).
 
-After the last task, run the full test suite once from this session (the suite gate belongs to the orchestrator), dispatch one final review of the whole diff, then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
+After the last task, run the full test suite once — dispatched to `superpowers-beads:suite-gate` (the gate stays this session's decision: accept only deterministic evidence — commands, exit codes, output tails; warm-environment projects use their peer gate-runner instead). Then dispatch one final review of the whole diff, and finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
 
 ## Termination — what counts as "reviewed"
 
@@ -119,7 +119,7 @@ The current Sonnet (Sonnet 5 today) is close to the session/most-capable model, 
 - Run two implementers in parallel on the same worktree (they conflict).
 - Paste task bodies into dispatch prompts, or open them in this session at all — the dispatch names the bead id and the implementer fetches its own contract (`bd get <id> body`); the controller's context is the expensive, long-lived one. (Reversed 2026-08-15; the old rule "hand them the full task text" measurably doubled body delivery — implementers re-read via bd anyway.)
 - Treat an implementer's self-review as the review. Both happen.
-- Let an implementer run the full test suite — targeted tests only; the suite gate runs once, here. An implementer that backgrounds a job must finish it before ending its turn.
+- Let an implementer run the full test suite — targeted tests only; the suite gate runs once, via the suite-gate dispatch. An implementer that backgrounds a job must finish it before ending its turn.
 
 ## Integration
 

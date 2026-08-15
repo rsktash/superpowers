@@ -4,6 +4,20 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.12] - 2026-08-16
+
+### Changed
+
+- **Suite gate moves out of the orchestrator's context**: new lean read-only
+  `agents/suite-gate.md` (Bash/Read/Grep/Glob — a gate that can edit is a gate
+  that can "fix" its way to green) runs the full suite once per plan and
+  reports commands + exit codes + output tails. SDD, hybrid-execution,
+  using-git-worktrees, implementer-prompt updated; the gate remains the
+  coordinator's decision, accepted only on deterministic evidence.
+  Warm-environment projects (emulator/device) keep the peer gate-runner path.
+  Measured: suite output resident in a long orchestrator ~100-300K weighted
+  per round vs ~15-20K in a disposable agent.
+
 ## [1.4.11] - 2026-08-16
 
 ### Changed

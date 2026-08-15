@@ -212,10 +212,11 @@ Once implementation is complete in the worktree, close it out and merge back. Th
 
 ### 1. Full Test Suite
 
-Run the full suite in the worktree. Background it — the suite gate belongs to the orchestrator session, not a subagent:
+Run the full suite in the worktree — dispatched once to `superpowers-beads:suite-gate` (lean read-only agent; the suite output stays out of this session's context). The gate is still THIS session's decision: accept the verdict only on deterministic evidence — exact commands, exit codes, output tails. Warm-environment projects (emulator/device gates) use their peer gate-runner session instead.
 
-```bash
-npm test / cargo test / pytest / go test ./...   # backgrounded; check output separately
+```
+Task tool (subagent_type: superpowers-beads:suite-gate, model: sonnet):
+  prompt: run `npm test` (or cargo test / pytest / go test ./...) in <worktree>; report each command, exit code, last ~30 lines
 ```
 
 **If tests fail:** stop, fix, re-run. Don't proceed to step 2 until green.
