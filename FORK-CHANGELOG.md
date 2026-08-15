@@ -4,6 +4,17 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.16] - 2026-08-16
+
+### Changed
+
+- **The implementer charter ships inside the plugin as the implementer
+  agent's system prompt** (`agents/implementer.md`). No file to fetch, no
+  path to resolve, no per-project copies — the harness delivers it at
+  dispatch. `implementer-charter.md` deleted; dispatch prompts and SDK step 1
+  simplified (env file only). Supersedes 1.4.9's docs-file approach and
+  1.4.15's path-reference approach.
+
 ## [1.4.15] - 2026-08-16
 
 ### Changed

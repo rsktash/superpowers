@@ -1,9 +1,10 @@
 # Implementer Subagent Prompt Template
 
 Use this template when dispatching an implementer subagent. Everything
-constant across dispatches lives in this skill's `implementer-charter.md`,
-referenced by absolute path — the prompt carries ONLY what is specific to
-this task.
+constant across dispatches (the implementer charter: discipline, escalation,
+self-review, report format) is the `superpowers-beads:implementer` agent's own
+system prompt — shipped inside the plugin. The dispatch prompt carries ONLY
+what is specific to this task.
 
 ```
 Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smaller prefix; use general-purpose ONLY when the task genuinely needs browser/device/MCP tools):
@@ -15,10 +16,7 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
     ## Get Your Contract (first, before anything else)
 
     1. Read `docs/dispatch-env.md` at the repo root (repo layout, bd invocation,
-       test commands, worktree rules), then the Implementer Charter at
-       [ABSOLUTE PATH of this skill's `implementer-charter.md` — resolve from the
-       skill's own directory at dispatch time, same as `scripts/review-package`] —
-       the charter governs your discipline, escalation, self-review, and report format.
+       test commands, worktree rules).
     2. From the repo root: `bd show <bead-id>` (metadata, deps, section index),
        then `bd get <bead-id> body > .bd/.scratch/progress-<bead-id>.md` and
        **Read that file** — your complete contract AND your working copy: flip
@@ -46,6 +44,6 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
     Run ONLY this task's targeted tests: [exact commands]. Never the full suite —
     the suite gate runs once, as the controller's own dispatch.
 
-    Report per the charter. Status is one of:
+    Report per your charter (your system prompt). Status is one of:
     DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
 ```
