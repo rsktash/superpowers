@@ -222,6 +222,8 @@ A gate item must also be falsifiable against *under-doing*, not just not-doing �
 
 A gate's numbers and factual premises are claims too: derive each from a same-session measurement and check it doesn't contradict evidence already gathered. (Observed 2026-07-26: a gate required ">= 3 distinct offsets" to mean two DST transitions — a spring/fall pair yields 2 — and placed a zone in the DST set the same session had measured as a one-off transition.)
 
+A gate item names an outcome you observe, never the mechanism that promises it. If you can tick the item without producing and observing the artifact, it is a step, not a gate — "flag X is set", "the handler is wired", "Y is called" belong in steps. A gate written as mechanism-plus-intent ("X is set so Y never happens") certifies the mechanism and takes the intent on faith. And the plan's gates must collectively exercise the regime the artifact exists to survive — the second page, the full buffer, the many-items case — never only the one-of-everything case: an outcome gate run on a fixture too small to violate it passes vacuously. A gate that cannot fail on the small fixture names the fixture that can fail it. (Observed: "dontBreakRows is set so a row group never splits across a page" — the flag was set, the library keeps only single rows whole, no fixture ever reached page 2; the miss surfaced as an 8-bead defect cluster.)
+
 **Drift Detectors:** You know all sibling tasks. Use that knowledge. If Task 3 handles integration and Task 4 handles error responses, then Task 2's drift detectors should say "DO NOT wire into server — that is Task 3's job" and "DO NOT define error response format — that is Task 4's job." Generic warnings like "stay focused" are useless.
 
 **Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.
@@ -274,7 +276,7 @@ After all task beads exist, run one audit pass over them yourself (not a subagen
 
 Read the beads (`bd show id1 id2 id3 --full`) and re-run each rule section above against every task:
 - **No Placeholders**, and **Verify Before You Cite** — re-open and confirm every cited path/symbol; citation drift is fabrication, fix or remove it.
-- the **Writing Directive Tasks** bars — Context Anchor explains WHY; every gate item machine-verifiable *and* falsifiable against under-doing; Drift Detectors name specific sibling tasks; every step has a `→ gate:` link and no gate item is orphaned; no title contains "and"; every task carries an **Execution:** line with a reason whose value matches the rubric.
+- the **Writing Directive Tasks** bars — Context Anchor explains WHY; every gate item machine-verifiable *and* falsifiable against under-doing; no gate item is tickable without observing the artifact, and the plan's gates name the overflow-regime fixture they run on; Drift Detectors name specific sibling tasks; every step has a `→ gate:` link and no gate item is orphaned; no title contains "and"; every task carries an **Execution:** line with a reason whose value matches the rubric.
 - **Before you start** present on every task that modifies existing files; rule-governed areas reference the relevant `.claude/rules/` file.
 
 Then two checks only possible now that all tasks exist:

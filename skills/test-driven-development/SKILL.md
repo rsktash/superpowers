@@ -354,12 +354,12 @@ Bug found? Write failing test reproducing it. Follow TDD cycle. Test proves fix 
 
 Never fix bugs without a test.
 
-## Testing Anti-Patterns
+## Writing Good Tests
 
-When adding mocks or test utilities, read testing-anti-patterns.md to avoid common pitfalls:
-- Testing mock behavior instead of real behavior
-- Adding test-only methods to production classes
-- Mocking without understanding dependencies
+When writing or changing tests, adding mocks, or adding test helpers, read writing-good-tests.md:
+- Every test names the break it catches — no change detectors, no mirror assertions
+- Every test exercises the real thing — mock at the right level, never assert on the mock
+- Finish with the mutation check: each realistic mutation must fail at least one test
 
 ## Final Rule
 

@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# PreToolUse hook: deterministic lint of Acceptance Gate items in task
+# bodies at the moment they are committed to bd.
+#
+# writing-plans rules that gate items name an outcome you observe, never
+# the mechanism that promises it ("flag X is set", "handler is wired" are
+# steps, not gates). A checklist rule decays under a fast pass; this hook
+# fires mechanically when `bd create`/`bd update` is about to land a
+# --body-file / --design-file, scans the file's Acceptance Gate section,
+# and DENIES the command when a gate item is mechanism-phrased — the
+# offending lines are quoted back so the planner rewrites them before
+# retrying. (Observed: "dontBreakRows is set so a row group never splits
+# across a page" passed review as a gate; the flag was set, the promised
+# behavior never existed, and the miss cost an 8-bead defect cluster.)
+#
+# Scope is deliberately narrow to keep false positives near zero:
+#   - only Bash commands invoking bd create/update with --body-file or
+#     --design-file
+#   - only checklist lines ("- [ ] ..." / "- ...") inside a section whose
+#     header mentions "Acceptance Gate" (bold label or heading), ending at
+#     the next heading or bold-labeled section
+#   - only the mechanism idiom: "is/are set|wired|called|enabled|..."
+#
+# Fails OPEN: missing jq, unreadable file, parse error -> exit 0 silently.
+set -uo pipefail
+
+command -v jq >/dev/null 2>&1 || exit 0
+input="$(cat)" || exit 0
+[ -n "$input" ] || exit 0
+
+event="$(printf '%s' "$input" | jq -r '.hook_event_name // empty' 2>/dev/null)" || exit 0
+tool="$(printf '%s' "$input" | jq -r '.tool_name // empty' 2>/dev/null)" || exit 0
+[ "$event" = "PreToolUse" ] && [ "$tool" = "Bash" ] || exit 0
+
+cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // ""' 2>/dev/null)"
+[ -n "$cmd" ] || exit 0
+
+printf '%s' "$cmd" | grep -Eq '(^|[;&|][[:space:]]*)bd (create|update)\b' || exit 0
+
+body_file="$(printf '%s' "$cmd" | grep -oE -- '--(body|design)-file[= ][^ ;&|]+' | head -1 | sed -E 's/--(body|design)-file[= ]//' | tr -d '"'"'")"
+[ -n "$body_file" ] && [ -r "$body_file" ] || exit 0
+
+hits="$(awk '
+  tolower($0) ~ /acceptance gate/ { ingate=1; next }
+  ingate && /^(#|\*\*[A-Z])/       { ingate=0 }
+  ingate && /^[[:space:]]*[-*][[:space:]](\[[ x]\][[:space:]])?/ &&
+    $0 ~ /(is|are|was|were|has been|have been)[[:space:]]+(set|wired|called|enabled|registered|attached|configured|hooked|bound|imported|installed|defined|declared|added|present)([^a-z]|$)/ \
+    { printf "  line %d: %s\n", NR, $0 }
+' "$body_file" 2>/dev/null)" || exit 0
+
+[ -n "$hits" ] || exit 0
+
+reason="gate-lint: mechanism-phrased Acceptance Gate item(s) in ${body_file}:
+${hits}
+A gate item names an outcome you observe, never the mechanism that promises it — \"X is set / wired / called\" belongs in steps. Rewrite each flagged item as the observable result (and name the fixture big enough to violate it), then re-run this command. See writing-plans § Writing Directive Tasks."
+
+jq -cn --arg r "$reason" '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":$r}}'
+exit 0
