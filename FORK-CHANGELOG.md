@@ -4,6 +4,23 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.21] - 2026-08-17
+
+### Changed
+
+- **Pre-flight is state-triggered, not session-triggered** (SDD, hybrid,
+  codex): a completed pre-flight writes a durable marker on the root bead
+  (`pre-flight: <short-sha> / open: <ids>` comment). Every execution entry
+  resolves the marker instead of unconditionally re-running: current
+  (no commits since the SHA, no open child created/rewritten since) →
+  skip in one line; stale → re-run scoped to open beads whose Files
+  intersect the commits since the marker plus beads created/rewritten
+  since; absent → full review. Driver: 1.4.19's per-session rule made
+  multi-round epics pay a full open-plan scan every round with nothing
+  landed in between — the session boundary was a proxy for the real
+  trigger, landed work, which the epic-92 resume-time catch actually
+  came from.
+
 ## [1.4.19] - 2026-08-16
 
 ### Changed

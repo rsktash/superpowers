@@ -17,21 +17,31 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 ## Pre-Flight Plan Review
 
-Runs at EVERY execution entry — a fresh session picking up a plan, a continuation resuming mid-loop, and the same-session handoff from writing-plans alike. **A session's first claim requires this session's pre-flight report.** writing-plans' Self-Review does not substitute: that is the author re-reading its own work, and author-blind (a fabricated gate premise survives it); pre-flight is a fresh context, which is what catches fabrications.
+Pre-flight is **state-triggered, not session-triggered**: its findings come from landed work invalidating the unexecuted remainder and from author fabrications no author re-read can catch. writing-plans' Self-Review does not substitute — that is the author re-reading its own work, and author-blind (a fabricated gate premise survives it); pre-flight is a fresh context, which is what catches fabrications.
 
-Scope = the epic spec plus OPEN beads only — closed tasks are never re-read, so the cost shrinks as the plan progresses. Run the review as a READ-ONLY subagent: the open plan enters that agent's context, never yours. Its prompt: read the epic and all open children, check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. Check for:
+**Marker.** A completed pre-flight (findings resolved) is recorded on the root bead: `bd comment add <root-id> "pre-flight: <short-sha> / open: <id> <id> …"` — the commit it certified and the open beads it covered.
+
+**At every execution entry** — fresh session, mid-loop continuation, or same-session handoff from writing-plans alike — resolve the marker before the session's first claim (newest `pre-flight:` comment on the root bead, `bd comment list <root-id> --last 5`):
+
+- **No marker** → run the full review below over the epic spec plus ALL open beads.
+- **Marker current** — `git log <sha>..HEAD` is empty AND no open child's `updated_at` (`bd show <id> --json`) is newer than the marker comment → skip: one line citing the marker, then start. A multi-round epic pays nothing at round N+1 when nothing changed between rounds.
+- **Marker stale** → run the review scoped to what invalidated it: open beads whose Files lists intersect `git diff --name-only <sha>..HEAD`, plus beads created or rewritten since the marker — never the untouched remainder, never closed tasks.
+
+Either running path ends by writing a fresh marker. **A session's first claim requires a marker verified current or earned this session** — the check is one comment read plus one `git log`, so no entry mode is cheap enough to skip it.
+
+Run the review as a READ-ONLY subagent: the in-scope plan enters that agent's context, never yours. Its prompt: read the epic and the in-scope open children, check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. Check for:
 
 1. **Tasks that contradict each other or the spec** — two tasks disagreeing on an interface, format, or decision, or a task drifting from what the spec says.
 2. **Anything a task ASKS FOR that a reviewer would flag as a defect** — the plan mandating a bug (e.g. a task whose steps produce the exact anti-pattern review would catch).
 3. **Missing dependency edges the task bodies imply** — a task that reads/consumes something a sibling task produces, with no dep link between them.
 4. **Gate items no step satisfies** — an Acceptance Gate checkbox nothing in the task's steps actually produces.
-5. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. Landed work invalidates the unexecuted remainder; this class is why continuations re-run pre-flight.
+5. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. Landed work invalidates the unexecuted remainder; this class is why a stale marker re-runs pre-flight.
 
 Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one. If the review turns up nothing, say so in one line and start.
 
 A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; it goes through writing-plans (or a decision bead) before it can be claimed.
 
-**Why:** Catching a plan-level contradiction on Task 6 after Tasks 1-5 already built on the wrong assumption is expensive to unwind; reading the open plan once per entry is cheap by comparison, and one batched question costs your human partner one interruption instead of five.
+**Why:** Catching a plan-level contradiction on Task 6 after Tasks 1-5 already built on the wrong assumption is expensive to unwind; reading the affected remainder once per state change is cheap by comparison, and one batched question costs your human partner one interruption instead of five. (Observed: the session-triggered rule made multi-round epics pay a full open-plan scan every round even with nothing landed in between; the marker keeps the resume-time yield — staleness findings live only where work landed — while making the no-change round free.)
 
 ## Session Task List (display mirror)
 
