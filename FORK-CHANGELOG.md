@@ -4,6 +4,31 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.23] - 2026-08-18
+
+### Changed
+
+- **Filing threshold in subagent-driven-development ("Acting on review
+  findings")** — a verified finding is fixed in the round or triaged by
+  severity, never filed by default: standalone bead only for user-visible
+  wrong behavior, security, data loss, or blocks-current-work; everything
+  else is one comment line on the project's backlog bead. Mid-execution
+  filings land under the executing epic ONLY when they block that epic's own
+  acceptance (dep-linked); the epic's close-set is its plan batch plus its
+  own blockers. Sessions list every bead they created, with severity
+  justification, in the completion report — visibility without mid-run
+  stops. Driver: a DB-ledger audit (solo + zanjir, Aug 10–18) measured
+  threshold-free filings at 25–34% of all bead intake (~8–10/day), with
+  per-epic remainders growing 46–64% past the plan batch and daily intake
+  exceeding closes in both projects; the flood predates the 1.4.22
+  regression window — it is standing doctrine, not model drift. A hard
+  per-session filing budget was considered and rejected: a mid-run stop in
+  an overnight autonomous session is a stall. An absolute epic freeze was
+  considered and rejected: it would close epics green-on-paper over defects
+  in their own deliverable (the even-split failure at epic scale) — hence
+  the blocks-own-acceptance exception. Companion: per-project backlog beads
+  created and recorded in each project's `docs/dispatch-env.md`.
+
 ## [1.4.22] - 2026-08-18
 
 Regression-driven correction wave. Driver: a two-project transcript audit
