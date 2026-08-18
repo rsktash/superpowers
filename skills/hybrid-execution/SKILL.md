@@ -20,13 +20,13 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children is a spec, not a plan — STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
 
-**Before the first routed task:** set up the Session Task List display mirror (per subagent-driven-development): replace the session todo list wholesale — one todo per task bead, `<bead-id>: <title>`, in plan order — and thereafter flip todos only at claim (in_progress) and close (completed), for inline and dispatched tasks alike. bd stays the single source of truth.
+**Before the first routed task:** set up the Session Task List display mirror per subagent-driven-development — inline and dispatched tasks alike.
 
 ## The Loop
 
 Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
-**Step 0 — pre-flight gate, before this session's first claim:** resolve the pre-flight marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) — marker current → skip in one line citing it; absent or stale → run the review (full, or scoped to what invalidated the marker) and write a fresh marker. Every entry mode alike: fresh session, mid-loop continuation, same-session handoff from writing-plans. Batch findings into one question.
+**Step 0 — pre-flight gate:** resolve the pre-flight marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before this session's first claim, every entry mode alike.
 
 1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, mode from its `exec:` label (`bd label list <task-id>`): `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). Legacy plan without the label: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
 2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end. The one sanctioned read is the **scope glance** at claim time: the task's Files section only (`bd show <task-id> --section files`, ~10 lines) — enough to catch a task whose size or file overlap contradicts the route. Steps, gates, and context stay unread here.
@@ -48,7 +48,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 - **A FAIL verdict on N freezes the frontier.** No new dispatches until the fix lands as commits on top of N's (never a rebase or rewrite of reviewed commits) — by the same implementer, or by the controller when subagent-driven-development's Fix Routing applies — and the fix is re-reviewed to PASS. An in-flight N+1 implementer may finish and report; nothing new starts. The re-review package spans N's original BASE to the fix tip; if an in-flight N+1 landed interleaved commits, they appear in the package's commit list — name that in the re-reviewer's dispatch so it judges only N's files.
 - **Serial implementers, still.** Pipelining overlaps a *reviewer* with an implementer — never two implementers. One implementer in the session worktree at a time; anything wider requires Hybrid Parallel (below), which only your human partner can invoke, by name.
 
-After the last task: drain the pipeline — process every outstanding verdict, fix and re-review anything open. Then run the full test suite once — dispatched to `superpowers-beads:suite-gate`; the gate stays this session's decision, accepted only on deterministic evidence (commands, exit codes, output tails); warm-environment projects use their peer gate-runner instead. Dispatch one final review of the whole diff (per subagent-driven-development), then finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
+After the last task: drain the pipeline — process every outstanding verdict, fix and re-review anything open. Then close out per subagent-driven-development: suite gate, final whole-diff review, and using-git-worktrees' Finishing: Merge Back and Clean Up.
 
 ## Hybrid Parallel (opt-in)
 
@@ -83,7 +83,7 @@ Follow this procedure for any task routed `inline`.
 
 **When a step fails:** do not retry the same edit. Read the full error output, then use superpowers-beads:systematic-debugging to diagnose before touching the file again — the next edit must fix a diagnosed cause, not adjust the previous guess.
 
-**When a finding changes the plan:** if execution surfaces something that alters the plan — scope shift, different approach, new dependency, an acceptance-criteria adjustment — record it via `bd comment add <task-id> "<what changed and why>"` before continuing. Don't log routine observations, only deviations that change what the plan says. If any Acceptance Gate item is reworded at execution time — gate-lint or otherwise — the reword lands on the bead in the same round (`bd update --body-file`): the gate verified at close is the recorded one, never a private working-copy variant.
+**When a finding changes the plan:** if execution surfaces something that alters the plan — scope shift, different approach, new dependency, an acceptance-criteria adjustment — record it via `bd comment add <task-id> "<what changed and why>"` before continuing. Don't log routine observations, only deviations that change what the plan says.
 
 ## Overriding an Annotation
 
@@ -104,7 +104,7 @@ A tier names the **judgment a task demands, not model cost.** `cheap` and `stand
 
 ## Invariants
 
-All invariants of the Inline Task Procedure and of subagent-driven-development apply unchanged — with one scoping note. Subagent-driven-development's "never run two implementers in parallel on the same worktree" stands exactly as written: same-worktree implementer concurrency is forbidden everywhere, always. Separate-worktree implementer concurrency is allowed ONLY under Hybrid Parallel, on your human partner's literal "hybrid parallel". Reviewer-vs-implementer overlap, by contrast, is always allowed — the reviewer works from the frozen package and, for command runs, the controller's read-only review worktree; it never touches the live working tree, so there is nothing for it to collide with.
+All invariants of the Inline Task Procedure and of subagent-driven-development apply unchanged — with one scoping note. Same-worktree implementer concurrency is forbidden everywhere, always; separate-worktree implementer concurrency is allowed ONLY under Hybrid Parallel, on your human partner's literal "hybrid parallel". Reviewer-vs-implementer overlap is always allowed (frozen package + read-only review worktree, per Pipeline safety rules).
 
 In addition, **never:**
 - Dispatch an implementer while uncommitted inline edits exist in the worktree — commit or revert first. Pipelining does not loosen this: task N's commits exist before N's package is generated, and the live tree is clean of uncommitted inline edits before N+1's implementer starts.

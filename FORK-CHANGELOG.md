@@ -7,6 +7,20 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.25] - 2026-08-19
+
+Net `skills/` word delta: **-200** (43,269 → 43069).
+
+### Changed
+
+- **One wording per rule.** The pre-flight marker procedure (restated in
+  hybrid-execution and codex-execution), the Session Task List mirror and the
+  suite-gate closing (restated in hybrid-execution) now defer to their single
+  definition in subagent-driven-development; hybrid's reviewer-isolation
+  invariant is stated once, in Pipeline safety rules.
+- **Gate-reword rule promoted to `shared/bd-defaults.md`** — previously
+  hybrid-only, now binds all execution skills alongside the ruling-time sweep.
+
 ## [1.4.24] - 2026-08-19
 
 Net `skills/` word delta: **−428** (43,697 → 43,269).

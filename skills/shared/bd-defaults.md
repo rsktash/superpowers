@@ -61,6 +61,8 @@ After `bd update --body-file`, verify with `bd get <id> description` (raw, never
 
 A ruling that amends the spec sweeps, same session, the epic body's affected acceptance lines and every open bead's gate commands.
 
+A gate item reworded at execution time lands on the bead in the same round (`bd update --body-file`) — the gate verified at close is the recorded one, never a private working-copy variant.
+
 ## Attachments
 
 Bead content may embed images and files via custom URI schemes. These render in web UIs but `bd show` outputs raw markdown. When a bead references images relevant to your work, resolve them to local files and view them before proceeding.
