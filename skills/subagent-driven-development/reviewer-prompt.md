@@ -72,6 +72,13 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     - Did they interpret requirements differently than intended, solve the
       wrong problem, or implement the right feature the wrong way?
 
+    **Invented behavior:**
+    - List every observable behavior the diff exhibits that the task body
+      does not mandate. Each is a finding unless a logged `[reviewer]`
+      deviation covers it — silence in the task plus silence in the comments
+      plus new behavior in the diff is exactly the escape this check exists
+      for.
+
     **Acceptance Gate verification:**
     - For each gate item, run the verification independently (don't trust the
       implementer's evidence): does the test actually pass when you run it?
@@ -99,6 +106,11 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
 
     ## Report format
 
+    - **Verdict: PASS | FAIL** — nothing else. Any Section-1 finding
+      (missing, extra, mismatched, invented behavior) or any ❌ gate item is
+      FAIL; quality-only findings may ride a PASS. "PASS with findings" and
+      "conditional PASS" are FAIL misspelled — the verdict flips only after
+      the fix lands and its check re-runs.
     - **Gate status:** per gate item ✅ VERIFIED or ❌ FAILED, with evidence
       (command + output lines, file:line refs)
     - **Spec compliance:** ✅ compliant | ❌ issues found — with specifics

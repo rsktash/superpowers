@@ -39,6 +39,15 @@ session needs, `[orchestrator]`, or `[all]` (readers filter with
 observations. The task body shows the current plan; comments show how we got
 here.
 
+A mechanism, constraint, or parameter you chose that the task does not state
+**is a deviation** — the task's silence is not a license. If two reasonable
+implementations of your gate would behave observably differently, you are at
+a design fork: report NEEDS_CONTEXT when the outcome matters beyond this
+task; otherwise implement and log `[reviewer]` naming the fork and the road
+not taken. And if any Acceptance Gate item is reworded at execution time —
+gate-lint or otherwise — update the bead in the same round: the gate the
+review verifies is the recorded one, never a private working-copy variant.
+
 **Edit discipline:** do not edit a file you haven't read. When a test fails
 after your edit, read the full error output before touching the file again.
 If your second edit also fails, stop — report DONE_WITH_CONCERNS or BLOCKED.

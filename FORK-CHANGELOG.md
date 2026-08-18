@@ -4,6 +4,71 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+## [1.4.22] - 2026-08-18
+
+Regression-driven correction wave. Driver: a two-project transcript audit
+(solo + zanjir, Aug 12–17 baseline vs post-change) traced three review-escaping
+defects in 48h — an invented even-split pagination spanning three tasks, a
+coordinator-invented 3:1 image constraint, and two implementers resolving one
+unpinned plan gap in opposite directions (one a committed privilege
+escalation) — to the 1.4.7/1.4.14 trials plus amplifiers. Both trials'
+own watched metrics moved adversely; their terms are executed here.
+
+### Changed
+
+- **writing-plans / Task Size**: the 1.4.14 trial resolves — concern-based
+  sizing stays, but bounded above by a **reviewable-diff bound** with numeric
+  tripwires (~5 non-test files in Files, ~500 changed LOC); past either, the
+  task is presumed a phase and splits, and keeping it whole must be argued
+  visibly at plan time. (Observed: a coherent "one concern" landed as a
+  32-file, ~19K-LOC bead; closes/hour fell 7–14x, beyond the trial's 2x
+  design allowance.)
+- **writing-plans / No Placeholders**: the 1.4.7 blanket relaxation resolves
+  into the **fork test** — a step where two competent implementers could both
+  satisfy the gate with observably different behavior is hiding a decision:
+  pin it (code, enumeration, table, or explicit "either acceptable") or
+  extract a decision bead. Upstream decisions (spec/ruling/brainstorm) that a
+  task implements must appear in that task's own body — the executor reads
+  one bead, never the epic.
+- **writing-plans / gates**: every Acceptance Gate carries a **preservation
+  item** — what the change must leave intact, checked on the overflow
+  fixture. Floors alone invite mechanisms that clear them by degrading what
+  the gate doesn't mention. Self-Review checks it.
+- **Model tiers (writing-plans, SDD, hybrid)**: down-routing presumes a
+  pinned contract — a task leaving a mechanism or design fork to the executor
+  is `capable` regardless of file count; economize on the contract or on the
+  executor, never both. Hybrid's mandatory down-route override gains the same
+  guard.
+- **SDD / hybrid routing**: the body-blind rule gains its one sanctioned
+  read — the **scope glance** at claim time (`bd show <id> --section files`,
+  ~10 lines) so a mega-task or file overlap is caught at routing, not after
+  a burned session. Steps, gates, context stay unread.
+- **SDD / Termination + reviewer-prompt**: verdicts are binary **PASS |
+  FAIL** — any spec finding or failed gate item is FAIL; "PASS with
+  findings" / "conditional PASS" are FAIL misspelled. (Observed: hard FAILs
+  collapsed to zero under conditional-pass phrasings while a privilege
+  escalation rode one into a commit.)
+- **SDD / Fix Routing**: a controller-applied fix carries the implementer's
+  full obligations, sibling-site sweep included; a fix whose sweep spans
+  surfaces the finding didn't enumerate is not "fully specified" — dispatch
+  it. (Observed: an inline sweep skipped `server/test`, caught only by the
+  whole-diff review.)
+- **implementer charter + reviewer-prompt**: an unstated mechanism,
+  constraint, or parameter the implementer chose **is a deviation** — the
+  task's silence is not a license; observable-fork situations report
+  NEEDS_CONTEXT or log `[reviewer]` naming the road not taken. The reviewer
+  gains the mirror check: every observable behavior the diff exhibits that
+  the body doesn't mandate is a finding unless a logged deviation covers it.
+- **Gate rewording lands on the bead** (charter + hybrid inline procedure):
+  a gate item reworded at execution time — gate-lint or otherwise — updates
+  the bead in the same round; the gate verified at close is the recorded one.
+  (Observed: a gate-lint deny led to a working-copy-only reword, silently
+  diverging the recorded gate from the executed one.)
+
+### Fixed
+
+- hybrid-execution inline procedure: `bd comments add` typo → `bd comment add`.
+
 ## [1.4.21] - 2026-08-17
 
 ### Changed
