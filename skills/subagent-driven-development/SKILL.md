@@ -79,7 +79,7 @@ If a check fails, route the fix per **Fix Routing** (below) and re-run the check
 
 A reviewer's finding is a claim, not a verdict. Reviewer citations — file:line, symbol names, "this is forbidden" framings — are routinely wrong; verify each one against the actual code before changing anything. No performative agreement ("You're absolutely right!", "Great catch!") and no implementing on reflex — restate the finding, check it against the codebase, then act or push back.
 
-- **Verify before implementing.** Open the cited file:line yourself. A confident, well-written finding is not evidence any more than a confident review verdict is (see above) — check it before touching code.
+- **Verify before implementing.** Open the cited file:line yourself.
 - **One finding at a time.** Implement it, re-run the relevant check (test, grep, diff), confirm it holds, then move to the next. Don't batch fixes on the strength of the report alone.
 - **Push back with technical reasoning when a finding is wrong for THIS codebase.** Wrong platform assumption, missing context, breaks working code, YAGNI on an unused path — say so and why, instead of implementing to avoid friction.
 - **Findings that conflict with the plan's recorded decisions escalate to your human partner** — don't silently apply a suggestion that contradicts a decision already made for this plan.
@@ -88,6 +88,7 @@ A reviewer's finding is a claim, not a verdict. Reviewer citations — file:line
 - **A finding deferred as a bead is labeled `needs-plan` at creation** (`-l needs-plan`). It carries a gate but no steps — the label keeps `bd ready` from surfacing it as dispatchable until writing-plans turns it into a task or a decision bead resolves it.
 - **The session's completion report lists every bead it created**, each with its one-line severity justification — filing visibility without mid-run stops.
 - **Fix Routing — who applies a verified finding.** A finding whose fix is fully specified by the finding itself — dead code, a comment's wording, a test the reviewer already wrote and watched pass — is applied by the controller, inline on the current diff: commit, re-run the one check, done. A round back to the implementer is justified only by the implementer knowing something the controller doesn't — a design call, a non-obvious code path, a fix the finding doesn't fully specify — never by preferring the work happen elsewhere. When a round IS dispatched, it carries ALL outstanding findings for the task; a round per finding is pure ceremony. (Fixes land as commits on top of the reviewed ones either way.) A controller-applied fix carries the implementer's full obligations — including the sibling-site sweep for the defect class; a fix whose sweep spans surfaces the finding didn't enumerate is not "fully specified" — dispatch it.
+- **A second FAIL splits the task.** A task that fails review twice gets no third same-shape round: split it along its file map (per writing-plans' Task Size) into child beads and dispatch the pieces — the redo unit must shrink before any further round.
 
 ## Coordination Gate
 

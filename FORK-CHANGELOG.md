@@ -7,6 +7,29 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.26] - 2026-08-19
+
+Net `skills/` word delta: **+68** (43,069 → 43137) — two mechanisms bought by one displacement.
+
+### Added
+
+- **Second-FAIL split (subagent-driven-development):** a task that fails review
+  twice splits along its file map before any further round. (Measured: Task Size
+  raised dispatch medians to 12–20 min while 9 solo tasks looped 3–4 review
+  rounds — redo cost now scales with the split piece, not the whole task.)
+- **Codex-fatal lint (codex-execution):** pre-dispatch body lint for
+  sandbox-impossible commands, unrunnable gates, placeholders → `needs-plan`.
+  (Measured: 173 PLANNER RULING halt round-trips in zanjir.)
+
+### Changed
+
+- Displacement for the split rule: "Verify before implementing" bullet trimmed
+  to its unique clause (its rationale restated the section intro).
+
+Companion outside the plugin: runner-dispatch-guard hook re-armed the dead-man's
+switch as a touch-dismissed until-loop — TaskStop kills had produced 395 failed
+notifications; failure now fires only on genuine stalls.
+
 ## [1.4.25] - 2026-08-19
 
 Net `skills/` word delta: **-200** (43,269 → 43069).
