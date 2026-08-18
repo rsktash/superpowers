@@ -59,6 +59,8 @@ Do NOT use `--stdin` for piping content. Use `--body-file` instead — it enable
 
 After `bd update --body-file`, verify with `bd get <id> description` (raw, never outlined). Run `bd update` and `bd close` as separate Bash calls — don't `&&`-chain them.
 
+A ruling that amends the spec sweeps, same session, the epic body's affected acceptance lines and every open bead's gate commands.
+
 ## Attachments
 
 Bead content may embed images and files via custom URI schemes. These render in web UIs but `bd show` outputs raw markdown. When a bead references images relevant to your work, resolve them to local files and view them before proceeding.

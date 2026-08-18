@@ -3,7 +3,7 @@ name: wayfinder
 description: Use when a loose idea is too big for one session and wrapped in fog — the route to a spec, decision, or migration is not visible yet, and open decisions outnumber plannable tasks
 ---
 
-# Wayfinder
+# Wayfinder — budget 1100 words
 
 (Adapted for bd from mattpocock/skills `wayfinder`, MIT, © Matt Pocock.)
 

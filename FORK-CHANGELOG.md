@@ -4,6 +4,42 @@ Release history of the superpowers-beads fork. Upstream's own history stays in
 `CHANGELOG.md` / `RELEASE-NOTES.md` (vendored, never edited here — their top
 version marks the fork's upstream sync point).
 
+Every entry states the net `skills/` word delta. Additions displace: a release
+that grows the corpus names what it failed to remove.
+
+## [1.4.24] - 2026-08-19
+
+Net `skills/` word delta: **−428** (43,697 → 43,269).
+
+### Added
+
+- **Ruling-time tail sweep** (`shared/bd-defaults.md`): a ruling that amends the
+  spec sweeps, same session, the epic body's affected acceptance lines and every
+  open bead's gate commands. (Mechanism measured in zanjir-km5r: ruling 16 landed
+  as a comment while the epic body and seven tail beads kept the old contract;
+  two tasks' gates would have deadlocked or misdirected implementers.)
+- **Budget headers on every SKILL.md** — H1 carries `budget N words`; at-budget
+  files displace to add. (The corpus grew 39,869 → 43,697 monotonically across
+  1.3.11→1.4.23; no release net-shrank, including the one titled "text economy".)
+
+### Changed
+
+- **Filing threshold (subagent-driven-development)** now defers bead promotion to
+  the user-approval rule (`propose`, never file) and drops its embedded
+  measurement narrative.
+- **Doctrine de-narrated** — nine `(Observed:/Measured:)` parentheticals and six
+  `Why:` blocks compressed to their binding clause; evidence archived here:
+  threshold-free filing ran 25–34% of bead intake (~8–10 beads/day) with open
+  remainders outgrowing closures; a privilege escalation rode a "conditional
+  PASS" into a commit during a 48-hour window of softened verdicts; a coherent
+  "one concern" task landed as a 32-file ~19K-LOC bead (Task Size tripwires);
+  a "3 passing tests" gate passed covering 3 of 9 fields; `dontBreakRows`
+  cleared a mechanism-phrased gate with no fixture reaching page 2 (8-bead
+  defect cluster); an invented even-split pagination cleared every floor-phrased
+  gate; a wave of mechanical tasks got `capable` tiers from scheduling language;
+  a stale allTests constraint cost a round trip (2026-07-26); session-triggered
+  pre-flight made multi-round epics pay full scans on no-change rounds.
+
 ## [1.4.23] - 2026-08-18
 
 ### Changed

@@ -3,7 +3,7 @@ name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
 ---
 
-# Writing Plans
+# Writing Plans — budget 4000 words
 
 ## Overview
 
@@ -68,7 +68,7 @@ Default task shape: a **tracer bullet** — a narrow but complete path through e
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
-**Task Size:** one coherent concern, bounded above twice — by the Context Ceiling, and by the **reviewable-diff bound**: the expected diff must be verifiable as one piece by one reviewer. Tripwires: more than ~5 non-test files in Files, or an expected change beyond ~500 LOC — at either, the task is presumed a phase and splits along its file map even when the concern is coherent; keeping it whole requires stating why at plan time, visibly. The Files list is written before the size call, so the tripwire costs nothing to check. Within the bounds: a task bundling two concerns splits; a task split only to stay under some minutes-count merges — every task pays the full per-task ritual (claim, dispatch, subagent boot, review package, reviewer, verdict, close) regardless of size, so the unit is the largest single concern the bounds admit. (Replaces the 10-Minute Rule; upper tripwires added after a coherent "one concern" landed as a 32-file, ~19K-LOC bead.)
+**Task Size:** one coherent concern, bounded above twice — by the Context Ceiling, and by the **reviewable-diff bound**: the expected diff must be verifiable as one piece by one reviewer. Tripwires: more than ~5 non-test files in Files, or an expected change beyond ~500 LOC — at either, the task is presumed a phase and splits along its file map; keeping it whole requires stating why at plan time, visibly. Within the bounds: a task bundling two concerns splits; a task split only to stay under some minutes-count merges — the unit is the largest single concern the bounds admit.
 
 **The Context Ceiling:** estimate what the executor must hold — every file in Files, everything under Before-you-start, test output across its run. If that plausibly exceeds ~150K tokens, it is two tasks, split at the same seams as any other split. **Why:** an executor re-pays its whole accumulated context on every turn, so cost grows with the square of task length — and an executor near its ceiling degrades exactly when the work gets hard. The fattest tenth of dispatched executors dominates fleet spend.
 
@@ -110,7 +110,7 @@ Parse JSON output from `bd create --json` to extract the new bead ID.
 
 Some epics can't be fully decomposed up front — later phases depend on what earlier phases actually land, so their tasks don't exist yet. When an epic is executed in phases like this, the **last task of phase N is "Plan phase N+1"**, with acceptance gate "phase N+1 task beads exist and are dep-linked." Write this task at the END of phase N, once you know what phase N actually landed — not as a placeholder guessed at plan time. The planning session executing that task starts by reading `bd comment list <id> --tag next-phase` across the epic and phase-N beads — the durable half of the phase-gate session handoff (phase close = session close).
 
-**Why this matters:** `bd close` auto-closes a parent when its last open child closes. A phase whose tasks simply run out — with no bead left open to carry the plan forward — silently closes the whole epic and buries any continuation that only lives in prose (chat history, a comment, a memory file). The "Plan phase N+1" task keeps a bead open until the next phase's beads exist, so the epic can't close out from under an unfinished plan.
+**Why:** `bd close` auto-closes a parent when its last open child closes; the "Plan phase N+1" task keeps a bead open until the next phase's beads exist, so the epic can't close under an unfinished plan.
 
 Single-phase, fully-decomposed plans — where all the work is known now — don't need this; only add it when a later phase is genuinely not decomposable yet.
 
@@ -218,13 +218,13 @@ Tasks are prompts, not documentation. When you create a task for a future execut
 
 **Acceptance Gate:** Every item must be machine-verifiable. Bad: "works correctly." Good: "test_validate_jwt_expired passes." Bad: "handles errors." Good: "invalid token returns 401 with ErrorResponse body." If you can't write a command that checks it, it's not a gate item.
 
-A gate item must also be falsifiable against *under-doing*, not just not-doing — name what would make a passing result still wrong. "Tests pass" is satisfied by a test that exercises one of nine fields. Write the gate so that under-coverage fails it: "a typo in any mapped field fails a test; every variant has its own assertion." **Why:** a fluent executor will satisfy the literal minimum convincingly — a loose gate certifies slop. (Observed: a task whose gate said "3 passing tests" got 3 tests covering 3 of 9 fields, and passed.)
+A gate item must also be falsifiable against *under-doing*, not just not-doing — name what would make a passing result still wrong. "Tests pass" is satisfied by a test that exercises one of nine fields. Write the gate so that under-coverage fails it: "a typo in any mapped field fails a test; every variant has its own assertion." **Why:** a fluent executor will satisfy the literal minimum convincingly — a loose gate certifies slop.
 
 A gate's numbers and factual premises are claims too: derive each from a same-session measurement and check it doesn't contradict evidence already gathered. (Observed 2026-07-26: a gate required ">= 3 distinct offsets" to mean two DST transitions — a spring/fall pair yields 2 — and placed a zone in the DST set the same session had measured as a one-off transition.)
 
-A gate item names an outcome you observe, never the mechanism that promises it. If you can tick the item without producing and observing the artifact, it is a step, not a gate — "flag X is set", "the handler is wired", "Y is called" belong in steps. A gate written as mechanism-plus-intent ("X is set so Y never happens") certifies the mechanism and takes the intent on faith. And the plan's gates must collectively exercise the regime the artifact exists to survive — the second page, the full buffer, the many-items case — never only the one-of-everything case: an outcome gate run on a fixture too small to violate it passes vacuously. A gate that cannot fail on the small fixture names the fixture that can fail it. (Observed: "dontBreakRows is set so a row group never splits across a page" — the flag was set, the library keeps only single rows whole, no fixture ever reached page 2; the miss surfaced as an 8-bead defect cluster.)
+A gate item names an outcome you observe, never the mechanism that promises it. If you can tick the item without producing and observing the artifact, it is a step, not a gate — "flag X is set", "the handler is wired", "Y is called" belong in steps. A gate written as mechanism-plus-intent ("X is set so Y never happens") certifies the mechanism and takes the intent on faith. And the plan's gates must collectively exercise the regime the artifact exists to survive — the second page, the full buffer, the many-items case — never only the one-of-everything case: an outcome gate run on a fixture too small to violate it passes vacuously. A gate that cannot fail on the small fixture names the fixture that can fail it.
 
-A gate certifies arrival AND non-destruction. At least one item names what the change must leave intact — phrased observably and checked on the same overflow fixture ("pages before the split point render byte-identical", "no page's content height drops below its pre-change value"). A gate that only sets floors invites a mechanism that clears them by degrading everything the gate doesn't mention; the preservation item is what makes the wrong mechanism fail. (Observed: an invented even-split pagination cleared every floor-phrased gate across three tasks; the cost it imposed was on a surface no gate item named.)
+A gate certifies arrival AND non-destruction. At least one item names what the change must leave intact — phrased observably and checked on the same overflow fixture ("pages before the split point render byte-identical", "no page's content height drops below its pre-change value"). A gate that only sets floors invites a mechanism that clears them by degrading everything the gate doesn't mention; the preservation item is what makes the wrong mechanism fail.
 
 **Drift Detectors:** You know all sibling tasks. Use that knowledge. If Task 3 handles integration and Task 4 handles error responses, then Task 2's drift detectors should say "DO NOT wire into server — that is Task 3's job" and "DO NOT define error response format — that is Task 4's job." Generic warnings like "stay focused" are useless.
 
@@ -243,7 +243,7 @@ Default to `subagent/*`. `inline` is the exception — only when dispatch overhe
 
 Down-routing presumes a pinned contract: a task whose steps leave a mechanism or design fork to the executor (the fork test, No Placeholders) is `subagent/capable` regardless of file count. Economize on the contract or on the executor — never both in one task.
 
-Tier measures the judgment a task demands — nothing else. Scheduling never moves it: a task doesn't become `capable` by joining a parallel wave of `capable` siblings; which tasks run concurrently is the dependency graph's property, not the tier's. If the reason you're writing says the work is mechanical, a mirror, or follows an existing template, it is arguing for `standard` at most — fix the tier, not the reason. (Observed: a wave of pattern-following tasks annotated `capable` because the wave had been negotiated as "parallel capable agents" before the tasks were classified; the reasons still said "mechanical".)
+Tier measures the judgment a task demands — nothing else. Scheduling never moves it: a task doesn't become `capable` by joining a parallel wave of `capable` siblings; which tasks run concurrently is the dependency graph's property, not the tier's. If the reason you're writing says the work is mechanical, a mirror, or follows an existing template, it is arguing for `standard` at most — fix the tier, not the reason.
 
 Subagent-Driven execution ignores this line harmlessly; hybrid-execution routes on it.
 
@@ -257,7 +257,7 @@ Before writing a task step like `Modify <file>:<lines>`, `grep for <pattern>`, o
 - Confirm the regex matches what the codebase actually uses — the canonical name may differ from how callers reference it (local aliases, re-exports, wrapper functions)
 - Prefer symbol names over line ranges — line numbers rot on the next refactor
 
-**Why:** Reviewers repeatedly catch plans that reference non-existent files, wrong helper signatures, or regexes that miss real call sites. Every uncited reference is a lie the plan tells a future executor.
+**Why:** every uncited reference is a lie the plan tells a future executor.
 
 ## Plan Review Lenses (conditional)
 

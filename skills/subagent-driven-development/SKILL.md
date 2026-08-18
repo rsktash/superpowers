@@ -3,7 +3,7 @@ name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
 ---
 
-# Subagent-Driven Development
+# Subagent-Driven Development — budget 2800 words
 
 Execute a plan by dispatching a fresh subagent per task, reviewing each task's output before moving to the next.
 
@@ -41,7 +41,7 @@ Batch ALL findings into ONE question to your human partner before the session's 
 
 A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; it goes through writing-plans (or a decision bead) before it can be claimed.
 
-**Why:** Catching a plan-level contradiction on Task 6 after Tasks 1-5 already built on the wrong assumption is expensive to unwind; reading the affected remainder once per state change is cheap by comparison, and one batched question costs your human partner one interruption instead of five. (Observed: the session-triggered rule made multi-round epics pay a full open-plan scan every round even with nothing landed in between; the marker keeps the resume-time yield — staleness findings live only where work landed — while making the no-change round free.)
+**Why:** unwinding tasks built on a stale assumption is expensive; one re-read per state change is cheap, and one batched question costs one interruption instead of five.
 
 ## Session Task List (display mirror)
 
@@ -69,11 +69,11 @@ Run ONE review per task — a single reviewer subagent whose prompt covers spec 
 
 A confident verdict from a *parallel* reviewer is the weakest signal here, not the strongest. A capable model's mistakes are fluent and well-formatted, and parallel batches that partially cancel are a known surface for manufactured "success" — so independent re-running matters more, not less.
 
-**Verdicts are binary: PASS or FAIL.** Any spec-compliance finding or failed gate item is FAIL. "PASS with findings", "conditional PASS", "PASS once X is fixed" are FAIL misspelled — the condition is the finding, and the verdict flips only after the fix lands and its check re-runs. Quality-only findings may ride a PASS. (Observed: a 48-hour window in which hard FAILs vanished into conditional-pass phrasings while a privilege escalation rode one into a commit.)
+**Verdicts are binary: PASS or FAIL.** A verdict carrying any unresolved spec or gate finding is FAIL, however phrased; it flips only after the fix lands and its check re-runs. Quality-only findings may ride a PASS.
 
 If a check fails, route the fix per **Fix Routing** (below) and re-run the check. Don't move on with anything open.
 
-**Why:** The dangerous failure on current models is not visible drift — it's a thorough, convincing, wrong report. Only deterministic output catches it; another subagent's prose does not.
+**Why:** the dangerous failure is a thorough, convincing, wrong report; only deterministic output catches it.
 
 ### Acting on review findings
 
@@ -83,7 +83,7 @@ A reviewer's finding is a claim, not a verdict. Reviewer citations — file:line
 - **One finding at a time.** Implement it, re-run the relevant check (test, grep, diff), confirm it holds, then move to the next. Don't batch fixes on the strength of the report alone.
 - **Push back with technical reasoning when a finding is wrong for THIS codebase.** Wrong platform assumption, missing context, breaks working code, YAGNI on an unused path — say so and why, instead of implementing to avoid friction.
 - **Findings that conflict with the plan's recorded decisions escalate to your human partner** — don't silently apply a suggestion that contradicts a decision already made for this plan.
-- **Filing threshold — a finding that survives verification is fixed in the round (Fix Routing) or triaged by severity, never filed by default.** A standalone bead only for: wrong behavior a user can hit, security, data loss, or something that blocks current work. Everything else — improvements, polish, hardening candidates, observations — is one comment line on the project's backlog bead (`bd comment add <backlog-id> "<one line>"`), not a bead. A bead is a decision to spend a session; a line costs a line. (Measured: threshold-free filing ran 25–34% of all bead intake across two projects for a week, ~8–10 beads/day, and open remainders grew faster than sessions closed them.)
+- **Filing threshold — a finding that survives verification is fixed in the round (Fix Routing) or triaged by severity, never filed by default.** Propose a standalone bead only for: wrong behavior a user can hit, security, data loss, or something that blocks current work. Everything else is one comment line on the project's backlog bead (`bd comment add <backlog-id> "<one line>"`).
 - **Where a filing lands:** under the executing epic ONLY if it blocks that epic's own acceptance — a defect in what the epic built, or a gap that makes its gates unmeetable — dep-linked as a blocker. Everything else goes to the backlog line or, past the severity bar, a standalone bead outside the epic. The epic's close-set is its plan batch plus its own blockers, nothing else — that is what lets a five-task epic close at five.
 - **A finding deferred as a bead is labeled `needs-plan` at creation** (`-l needs-plan`). It carries a gate but no steps — the label keeps `bd ready` from surfacing it as dispatchable until writing-plans turns it into a task or a decision bead resolves it.
 - **The session's completion report lists every bead it created**, each with its one-line severity justification — filing visibility without mid-run stops.
@@ -98,7 +98,7 @@ Before any status action — closing, reopening, or deferring a bead, or declari
 1. the observable condition that justifies it, and
 2. that you confirmed the tool actually supports the state you're setting.
 
-**Why:** This rule is minted from a real failure — reopening a closed bead "to keep its knowledge live as a tripwire." Both checks catch it: closing a bead doesn't hide its knowledge (false premise), and bd has no such status (unsupported state). Coordination actions taken on reflex, not evidence, are the controller's version of slop.
+**Why:** coordination actions taken on reflex, not evidence, are the controller's version of slop.
 
 ## Review Tier — declare it, don't skip it silently
 

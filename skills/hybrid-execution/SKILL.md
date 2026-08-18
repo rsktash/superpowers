@@ -3,11 +3,11 @@ name: hybrid-execution
 description: Use when executing implementation plans whose tasks carry Execution annotations - routes each task to inline execution or subagent dispatch per the annotation
 ---
 
-# Hybrid Execution
+# Hybrid Execution — budget 2900 words
 
 Execute a plan task-by-task, routing each task to the mode its plan annotation names: trivial tasks run inline in this session; everything else goes to a fresh subagent. Dispatch is the default — inline is reserved for tasks where dispatch overhead exceeds the work itself.
 
-**Why hybrid:** a whole-plan mode is too coarse. Plans mix config bumps with multi-file integrations; a subagent for a 2-minute edit is pure ceremony, and a heavy task run inline floods this session with implementation detail, degrading every review that follows. Per-task routing keeps ceremony proportional and this session's context clean.
+**Why hybrid:** per-task routing keeps ceremony proportional and this session's context clean.
 
 **This skill owns routing and scheduling.** The per-task procedure for `inline` lives in this skill's own Inline Task Procedure section below; the per-task procedure for `subagent/<tier>` — claim, BASE recording, dispatch, review package, termination evidence — lives in subagent-driven-development's Loop. Follow each exactly as written. What this skill adds on top is *when* those steps run: The Loop below pipelines each task's review against the next task's implementation.
 
@@ -94,7 +94,7 @@ The annotation is the default, not a cage — but every override must be stated,
 - **Toward inline** (annotation says `subagent/*`, you execute it yourself): requires all four writing-plans criteria, read literally: 1 file (the task's Files list, not "one logical unit"), complete spec, gate verifiable in one command, no judgment. A multi-file task fails the first criterion however small the diff. "The files are already in my context", "it's only N lines", and "dispatch overhead exceeds the work" are not criteria — the last is the planner's standard for annotating `inline`, not yours for overriding to it. Any criterion fails → dispatch. State the justification before touching any file.
 - **Missing annotation** (plan predates this skill): classify the task yourself against the rubric — fresh, per task, never by transcribing a dispatch plan or wave grouping already negotiated; scheduling never raises a tier. State the classification and reason, then proceed as if annotated.
 
-**Why stated, not silent:** silently downgrading to inline reads identically to having dispatched and reviewed. The problem isn't judging a task trivial — it's making that judgment invisible and unchallengeable.
+**Why stated, not silent:** a silent downgrade is invisible and unchallengeable.
 
 ## Model Tiers
 

@@ -3,7 +3,7 @@ name: codex-execution
 description: Use when executing an implementation plan's task beads via the codex CLI instead of Claude subagents — session-budget execution, "run this plan with codex", or the Codex Execution mode chosen at the writing-plans handoff
 ---
 
-# Codex Execution
+# Codex Execution — budget 1100 words
 
 Execution mode: codex (`codex exec`, non-interactive) implements each task bead; this
 session orchestrates, verifies every landing, and runs the terminal whole-diff review.
@@ -102,6 +102,6 @@ architecture boundaries — findings fixed inline by the orchestrator, own commi
 | Trusting codex's test counts | Re-run yourself; every count you report must be your own run. |
 | Full suite per task | Plan-level gate runs it once; per-task runs violate the ruling. |
 | Prompt-only blocker fixes | Ruling goes on the BEAD (audit trail + survives re-dispatch). |
-| Unverified constraint in a fill slot | Executor obeys it as ground truth; a stale pre-toolchain-bump "fact" becomes a binding false order. Verify same-session or omit. (Observed: allTests, 2026-07-26 — cost a full round trip.) |
+| Unverified constraint in a fill slot | Executor obeys it as ground truth; a stale pre-toolchain-bump "fact" becomes a binding false order. Verify same-session or omit. |
 | Skipping AGENTS.md parity check | Codex executes with stale or missing rules in nested dirs. |
 | Passing `--model` by guess | The configured default is the ruling; a guessed model id silently downgrades. |
