@@ -1,0 +1,37 @@
+Glosses for writing-plans/SKILL.md. NOT loaded as context — the rule text carries
+behavior only; dates, incidents and displaced narratives live here.
+
+### (2026-08-19) Decision Beads gains a triage step; two incident parentheticals displaced here.
+RULE CHANGE: forks are parked ONLY as decision beads with dep-links, and are triaged under
+  precedence (ruling > code > spec > plan-time text) BEFORE being parked. Re-reading an
+  inherited fork list re-runs the triage. Also: a gate's factual premises must not contradict
+  the spec text they derive from or a standing ruling, not merely "evidence already gathered".
+
+INCIDENT (why the triage step exists): solo-eb4.6.104 carried a prior session's
+  "planning-round agenda" of 12 parked design forks, closing with "the epic is not dispatchable
+  until every line has a ruling". The epic was dropped from an unattended overnight run on that
+  basis. A later session inherited the framing and walked the forks to the owner one at a time.
+  Owner: "why the fuck are you being stuck with fucking gates which were written while writing
+  plans? isn't the brainstormed plan and decisions made by me is the first priority?" On audit
+  exactly ONE was genuinely a decision (which binding an endpoint resolves to when a chat holds
+  several counterparties — customer-visible, rulable either way). Eleven were plan defects:
+  a gate that never caught up with the rationale three lines above it in the same spec section
+  (escalated twice, under two agenda numbers), a bead contradicting itself GET-vs-POST, gate
+  vocabulary that never matched the shipped function, a Files-list omission, one answered
+  verbatim by a doc comment in the source file, two sequencing errors, two security defaults
+  with one safe answer, an unverified third-party API premise wanting an experiment, and four
+  gates that merely lacked an owner bead. An agenda line has no owner and no dep-link, so it
+  gates nothing mechanically while reading as a blocker — hence "decision bead or nothing".
+
+DISPLACED FROM THE RULE TEXT (behavior kept, narrative moved here per the corpus rule):
+  - Gate premises, observed 2026-07-26: a gate required ">= 3 distinct offsets" to mean two DST
+    transitions — a spring/fall pair yields 2 — and placed a zone in the DST set the same
+    session had already measured as a one-off transition.
+  - No Placeholders / the fork test: this replaced the 1.4.7 blanket relaxation, whose trial
+    metrics moved adversely — two implementers resolved one unpinned gap in opposite
+    directions, one of them a committed privilege escalation.
+
+NOT CHANGED, deliberately: "A plan is never written over an unresolved design fork" and
+  "One acceptance = ONE decision; bundled forks need separate rulings" both stand. Triage
+  happens before bead creation, not instead of it, and never authorises self-ruling on a
+  fork that survives it.
