@@ -7,6 +7,26 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.29] - 2026-08-23
+
+Net `skills/` word delta: **+29** (43,321 → 43,350) — displaced inside
+`brainstorming` to fit 2093/2100: the "Multiple choice preferred" key principle
+(verbatim duplicate of a process bullet) removed, and the "Present options" /
+"Lead with your recommended option" bullet pair merged.
+
+### Added
+
+- **Prune before proposing (brainstorming):** checklist step 4 and the
+  Exploring-approaches section now require pruning before options reach the
+  owner — a branch excluded by a ruling, code, spec, or a document already read
+  this session is not an approach; only survivors are proposed. (Measured:
+  2026-08-22 session, item-6 payment brainstorm offered a one-off-charge branch
+  already excluded by the auto-renewal scope bead read the same session; two
+  earlier sessions re-raised settled decisions the same way.) Exclusion: the
+  "Explore alternatives" key principle is unchanged — it governs generation
+  breadth before settling, not presentation. Companion rule landed the same day
+  in the owner's global CLAUDE.md Scope line ("only survivors are genuine").
+
 ## [1.4.28] - 2026-08-22
 
 Net `skills/` word delta: **+152** (43,169 → 43,321) — nothing displaced; the
