@@ -27,7 +27,9 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        `bd show <bead-id> --section design`.
     3. The body's directive sections govern you: **Context Anchor** (where this
        task fits), **Acceptance Gate** (the ONLY criteria for "done" — do not add
-       your own), **Drift Detectors** (editing files outside the Files list → STOP).
+       your own), **Drift Detectors** (editing files outside the Files list →
+       STOP — except a test your in-contract change broke, which is in-contract
+       to update; a structural ban still stops the turn).
 
     ## Your Worktree
 

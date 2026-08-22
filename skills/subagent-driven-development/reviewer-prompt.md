@@ -83,7 +83,8 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     - For each gate item, run the verification independently (don't trust the
       implementer's evidence): does the test actually pass when you run it?
       does the file/export actually exist? were only files in the Files list
-      modified (`git diff --name-only BASE_SHA HEAD_SHA`)?
+      modified, plus any test the change itself broke
+      (`git diff --name-only BASE_SHA HEAD_SHA`)?
     - Gate items the implementer marked PASS that actually fail are CRITICAL.
 
     ## Section 2 — Code Quality

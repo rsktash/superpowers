@@ -127,7 +127,7 @@ Mis-route incoming if you catch yourself thinking:
 
 ## When an Inline Task Balloons
 
-An inline task touching files beyond its Files list is a drift-detector stop: revert the uncommitted work, re-route as `subagent/standard`, state the override.
+An inline task touching files beyond its Files list is a drift-detector stop: revert the uncommitted work, re-route as `subagent/standard`, state the override. A test the change itself broke is in-contract to update and is not ballooning; a structural ban is.
 
 ## Integration
 

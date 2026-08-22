@@ -165,12 +165,12 @@ Depends on: [what prior tasks produced that this one consumes, or "—" if first
 **Acceptance Gate — this task is DONE when ALL pass:**
 - [ ] [observable signal: file exists, export present, test passes]
 - [ ] [observable signal: specific behavior verified]
-- [ ] [constraint: only files listed in Files were modified]
+- [ ] [constraint: only Files modified, plus any test the change broke]
 
 **Drift Detectors:**
 - DO NOT [thing another task handles] — that is Task N's job
 - DO NOT [tempting adjacent improvement]
-- If you find yourself editing files not listed in Files, STOP and re-read this section
+- Editing a file not in Files → STOP — unless it is a test this change broke
 
 **Files:**
 - Create: `exact/path/to/file.py`
@@ -230,6 +230,8 @@ A gate certifies arrival AND non-destruction. At least one item names what the c
 
 **Drift Detectors:** You know all sibling tasks. Use that knowledge. If Task 3 handles integration and Task 4 handles error responses, then Task 2's drift detectors should say "DO NOT wire into server — that is Task 3's job" and "DO NOT define error response format — that is Task 4's job." Generic warnings like "stay focused" are useless.
 
+One exception, yours to grant, never the executor's to take: a test broken solely by an in-contract change is in-contract to update. A test encoding a structural ban — import guards, dependency direction — still stops the turn: a design conflict, not a pin.
+
 **Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.
 
 ## Execution Annotation
@@ -260,6 +262,8 @@ Before writing a task step like `Modify <file>:<lines>`, `grep for <pattern>`, o
 - Prefer symbol names over line ranges — line numbers rot on the next refactor
 
 **Why:** every uncited reference is a lie the plan tells a future executor.
+
+A Files list is an absence claim symbol grep cannot verify: it finds callers, never constrainers (a test pinning old behaviour through a public function; a stub matching SQL text). Seal one only after adding, per touched module, its test files (by module path or by running them, never by grep) and any import-ban or dependency-direction config governing them.
 
 ## Plan Review Lenses (conditional)
 

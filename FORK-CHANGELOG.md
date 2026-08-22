@@ -7,6 +7,37 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.28] - 2026-08-22
+
+Net `skills/` word delta: **+152** (43,169 → 43,321) — nothing displaced; the
+additions were shaved to fit `writing-plans` at exactly 4000/4000, which leaves
+that file with zero headroom for the next change.
+
+### Added
+
+- **Files-list sealing (writing-plans):** a Files list is an absence claim symbol
+  grep cannot verify — grep finds callers, never constrainers. Seal only after
+  adding each touched module's test files, found by module path or by running
+  them, plus any import-ban or dependency-direction config. (Measured: 4 contract
+  defects in one zanjir session, all the same shape — a test pinning old
+  behaviour through a public function, a structural import ban, a pool stub
+  matching SQL text. Each cost a dispatch round-trip.)
+
+### Changed
+
+- **In-contract test updates no longer stop the turn.** A test broken solely by
+  an in-contract change is in-contract to update; a test encoding a structural
+  ban (import guards, dependency direction) still stops — that is a design
+  conflict, not a pin. The licence is the planner's to grant, so an executor
+  exercising it is not self-widening its contract.
+- **Sibling sweep — one wording, five sites.** The STOP-on-unlisted-files law was
+  restated in three places, not single-sourced as the 1.4.25 dedup pass implied:
+  `writing-plans` task template (gate item + drift detector), the
+  implementer prompt, and hybrid-execution's ballooning rule. The reviewer
+  prompt's Files-list check got the matching carve-out — without it the reviewer
+  re-mints downstream the round-trip the executor correctly avoided.
+  `agents/implementer.md` carries no restatement (verified).
+
 ## [1.4.26] - 2026-08-19
 
 Net `skills/` word delta: **+68** (43,069 → 43137) — two mechanisms bought by one displacement.
