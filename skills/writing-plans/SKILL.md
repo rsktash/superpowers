@@ -265,6 +265,8 @@ Before writing a task step like `Modify <file>:<lines>`, `grep for <pattern>`, o
 
 A Files list is an absence claim symbol grep cannot verify: it finds callers, never constrainers (a test pinning old behaviour through a public function; a stub matching SQL text). Seal one only after adding, per touched module, its test files (by module path or by running them, never by grep) and any import-ban or dependency-direction config governing them.
 
+The list also under-claims from the other side: it is sealed from the files the task will edit, never from the symbols it must call. While confirming a cited symbol's signature, confirm its visibility: a behaviour the task reuses rather than writes must be exported, or its home file joins Files carrying the export as its step — and that listing licenses exactly the visibility change, never the symbol's body or its neighbours. Several tasks reusing one private symbol: the export is prefactoring — its own task, first. An export that is itself contested (the privacy is a design boundary; an import-ban blocks the direction) is a decision bead, never a dispatch. Already-exported reuse adds nothing — the check rides the citation pass. **Why:** an executor facing a private symbol has two legal moves, retype or BLOCKED; both cost a round, and the retyped copy passes every gate while it drifts.
+
 ## Plan Review Lenses (conditional)
 
 If any task changes schema, persisted data, rollout order, cross-layer contracts, or a public type's shape or representation, read `references/plan-review-lenses.md` and apply its three lenses — Deploy Sequence and Rollout Safety, Cross-Layer Consistency, Semantic Regression Sweep — to those tasks. Plans touching none of those skip this file entirely.

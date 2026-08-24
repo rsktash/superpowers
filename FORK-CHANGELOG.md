@@ -7,6 +7,48 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.31] - 2026-08-24
+
+Net `skills/` word delta: **+151** (`writing-plans` 4131 → 4282). Nothing
+displaced — the owner waived the budget for this release, so the clause was
+sized to carry its own boundary rather than to fit. `writing-plans` was already
+131 words over its declared 4000 before this edit; that debt predates it and is
+untouched.
+
+### Added
+
+- **Seal Files lists against the call surface (writing-plans):** the seal rule
+  gains its second face. A list is sealed from the files a task will edit and
+  never from the symbols it must call, so a task whose reuse target is private
+  reaches its executor with two legal moves — retype the logic or report
+  BLOCKED — and both cost a round while the retyped copy passes every gate and
+  drifts. The planner now confirms a cited symbol's visibility during the
+  signature check it already performs: reuse must be exported, or the home file
+  joins Files carrying the export as its step.
+
+  Bounded deliberately, because the first draft was one-sided and rejected: the
+  listing licenses exactly the visibility change and never the symbol's body or
+  its neighbours; the file-step tie and the citation-pass anchor hold down
+  Files-list inflation, which would otherwise degrade hybrid-parallel lane
+  eligibility; a contested export routes to a decision bead rather than
+  manufacturing a stall. Already-exported reuse adds nothing — the check rides
+  a pass the planner already makes, so a task reusing public helpers generates
+  no Files change, no step and no gate item.
+
+### Not changed, deliberately
+
+- The five sites `1.4.28` swept for the STOP-on-unlisted-files law — the
+  writing-plans task template's gate item and drift detector, the implementer
+  prompt, hybrid-execution's ballooning rule, and the reviewer prompt's matching
+  check. This release changes no STOP semantics; the export authorisation
+  arrives through the Files list, which every executor-facing site already
+  honours unchanged. Both copies that prompted this edit were caught by the
+  reviewer's existing check — the detection side works, a round late, and
+  relaxing the executor side would have rebuilt the failure in mirror image.
+- The Self-Review bullet at the citation-audit step. Its umbrella ("re-run each
+  rule section above") covers the new clause, and duplicated restatements are
+  debt by this corpus's own rule.
+
 ## [1.4.29] - 2026-08-23
 
 Net `skills/` word delta: **+29** (43,321 → 43,350) — displaced inside

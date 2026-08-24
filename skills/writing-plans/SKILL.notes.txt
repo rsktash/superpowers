@@ -35,3 +35,34 @@ NOT CHANGED, deliberately: "A plan is never written over an unresolved design fo
   "One acceptance = ONE decision; bundled forks need separate rulings" both stand. Triage
   happens before bead creation, not instead of it, and never authorises self-ruling on a
   fork that survives it.
+
+CALL-SURFACE SEALING (1.4.31), observed 2026-08-24 in the solo/msklad-bot corpus:
+  Five commits, all landing as fix or dedup rather than planned work, share one shape — a task
+  needs behaviour that exists, the symbol is private, the Files list excludes its home, and the
+  executor's only legal moves are retype or BLOCKED. 0bdc784 retyped entitlement.ts's private
+  floorRow/laterOf/GRACE_DAYS math into routes/billing.ts; drift was then demonstrated by
+  mutating the original and watching the copy stay stale, which would have shown a customer a
+  silently wrong lapsed-delivery count. 97ee82c byte-copied alertedRecently out of
+  operator-alerts.ts. 18d1654, 317f455 and d8dd27f are the same shape in earlier weeks. The
+  third case, solo-eb4.6.82.2, read ~115K tokens of context before correctly reporting BLOCKED
+  on seven private symbols in routes/billing.ts, one of them a charge lock whose absence would
+  let two paths double-charge a stored card.
+  Two models (Sonnet twice, Opus once) hit the wall under one corpus, which argued text over
+  executor. Both of today's copies WERE caught by review — the detection side works; it is a
+  round late, not blind. The edit's job is to make that round unnecessary, never to relax the
+  STOP law that produced the correct BLOCKED.
+
+NOT CHANGED, deliberately: the five sites f229b88 swept for the STOP-on-unlisted-files law —
+  the writing-plans task template's gate item and drift detector, the implementer prompt,
+  hybrid-execution's ballooning rule, and the reviewer prompt's matching check. This edit
+  changes no STOP semantics: the export authorisation arrives through the Files list, which
+  every executor-facing site already honours unchanged. The Self-Review bullet's umbrella
+  ("re-run each rule section above") covers the new clause without restating it, and the file's
+  own doctrine is that duplicated restatements are debt.
+
+BOUNDED ON PURPOSE, because the rejected first draft was one-sided: the file-grant is capped at
+  the visibility change ("never the symbol's body or its neighbours"); Files-list inflation is
+  held down by the file-step tie and by anchoring the obligation to symbols the task body
+  already cites; the stall the phrase "not ready to dispatch" would have manufactured is routed
+  to a decision bead instead. Residual, stated so nobody later "fixes" it by loosening the
+  executor side: reuse the plan never named still costs a BLOCKED round, and that is correct.
