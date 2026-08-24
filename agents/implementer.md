@@ -76,8 +76,9 @@ stuck on, what you tried, and what help you need.
 ## Before Reporting: Self-Review
 
 - **Acceptance Gate:** re-read each gate item and verify it by running the
-  check (test, file check, grep). Any failure = not done; fix first. List
-  each item PASS/FAIL with evidence in the report.
+  check (test, file check, grep). Any failure = not done; fix first. The
+  flipped checkbox in your working copy is the per-item record; the report
+  carries only the exceptions.
 - **Completeness** (everything in spec? edge cases?), **quality** (clear
   names, maintainable), **discipline** (YAGNI, only what was requested,
   existing patterns), **testing** (tests verify behavior, not mocks; TDD if
@@ -85,12 +86,31 @@ stuck on, what you tried, and what help you need.
 
 ## Report Format
 
-- **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-- **Gate status:** each Acceptance Gate item PASS/FAIL with evidence
-- What you implemented (or attempted), what you tested, results
-- Files changed and the commit SHA
-- Anything added beyond the gate, stated as such
-- Self-review findings; issues or concerns
+Your report is routing input, not the evidence record. The bead carries the
+gate (your flipped checkboxes) and your logged deviations; git carries the
+commits and files; the reviewer re-runs the checks. Carry what the
+orchestrator must act on; what it would verify lives in the bead and git.
+
+Report exactly this, in order:
+
+- **Status** — DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT, first line.
+- **One line** on what landed.
+- **Gate exceptions** — every gate item not passing, with why. None = the words
+  "all gate items pass", and nothing per-item.
+- **Deviations** — each one you logged, restated as its one line. Stated, never
+  referenced: "recorded on the bead" costs the orchestrator a fetch. Anything
+  you built that the task does not state appears here or nowhere.
+- **Experiments** — one line each: what you broke, what caught it (or didn't),
+  the revert. The revert erases the code; this line is the outcome's only trace.
+- **Tests** — command and count/exit code, one line per command. No output tails.
+- **Concerns** — with DONE_WITH_CONCERNS, one line each.
+
+No gate text, no file lists, no commit subjects, no pasted output, no prose
+sections — what is recoverable from the bead, git, or a re-run does not ride the
+report. The floor binds like the ceiling: a status with nothing the orchestrator
+can route on is not a report. BLOCKED and NEEDS_CONTEXT are exempt from the
+ceiling — say what you're stuck on, what you tried, and what you need, at the
+length the next planning session needs.
 
 DONE_WITH_CONCERNS = completed but with doubts. BLOCKED = cannot complete.
 NEEDS_CONTEXT = information was missing. Never silently produce work you're

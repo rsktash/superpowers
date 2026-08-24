@@ -7,6 +7,70 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.32] - 2026-08-24
+
+Net `skills/` word delta: **0** — the change lands entirely in `agents/`
+(`implementer.md` 756 → 973). The charter grows ~217 words once per dispatch
+and removes on the order of 10,000–15,000 controller-resident tokens per
+session.
+
+### Changed
+
+- **The implementer report is routing input, not the evidence record
+  (agents/implementer.md):** the old format asked for every gate item PASS/FAIL
+  with evidence, files, commit SHA and free prose — a verification-shaped format
+  on a routing-shaped channel. Nothing in any close path ever consumed it:
+  Termination closes on the reviewer's deterministic artifacts, the Invariants
+  already say "Treat an implementer's self-review as the review. Both happen",
+  and the controller cannot distinguish real pasted output from fabricated
+  pasted output anyway. The gate now lives in the bead as flipped checkboxes,
+  the commits and files in git, and the report carries status, gate exceptions,
+  deviations, experiment outcomes, test counts and concerns.
+
+  Bounded on both sides, because compaction has a measured mirror failure — two
+  thin reports each cost a full extra verification pass. The floor binds like
+  the ceiling ("a status with nothing the orchestrator can route on is not a
+  report"); deviations are **stated, never referenced**, because the second of
+  those failures said only that its deviations were "recorded on the bead" and
+  the fetch is what cost the pass; and BLOCKED / NEEDS_CONTEXT are exempt from
+  the ceiling entirely — a blocked report is the least recoverable artifact in
+  the system and one of them is why release 1.4.31's prefactoring task exists.
+
+  Experiment outcomes get a named slot for the first time — "mutation" appeared
+  nowhere in the charter, which is why controllers were hand-writing report
+  formats into dispatch prompts in violation of implementer-prompt.md's own
+  "Prompts restate neither". The wording deliberately echoes the task-reviewer
+  charter's formula: what you broke, what caught it (or didn't), the revert.
+
+- **The Self-Review gate bullet (agents/implementer.md), same commit:** "List
+  each item PASS/FAIL with evidence in the report" was the direct generator of
+  the recitation and would have contradicted the new section. It now reads that
+  the flipped checkbox is the per-item record. The verification obligation is
+  untouched — only the transmission changes.
+
+### Not changed, deliberately
+
+- **`agents/task-reviewer.md` and `agents/suite-gate.md` — excluded loudly.**
+  Their reports are the opposite pole by design: a verification agent's product
+  IS deterministic evidence toward the controller, because the controller closes
+  on it. Sweeping compaction into either would be the one-sided version of this
+  change.
+- `skills/subagent-driven-development/implementer-prompt.md` — its status-token
+  line delegates to the charter rather than restating it, and its header's
+  "Prompts restate neither" is the standing law that ends hand-written format
+  blocks now that the charter serves routing.
+- `subagent-driven-development/SKILL.md` — Implementer Status consumes the four
+  statuses, which are unchanged; Termination and the self-review Invariant are
+  *why* this compaction is safe and are cited above rather than edited.
+- `reviewer-prompt.md` — its "What Implementer Claims They Built" slot accepts
+  the compacted report, and "Do Not Trust the Report" is why no reviewer-side
+  compensation is needed.
+- `hybrid-execution/SKILL.md` and `references/hybrid-parallel.md` — status
+  vocabulary only; the latter contains no report or status mentions (verified).
+- `codex-execution/SKILL.md` — a different channel by design, already
+  compaction-shaped: the executor comments evidence on the bead and the
+  orchestrator re-runs every count. Precedent, not a change site.
+
 ## [1.4.31] - 2026-08-24
 
 Net `skills/` word delta: **+151** (`writing-plans` 4131 → 4282). Nothing
