@@ -80,18 +80,23 @@ wall-clock and violate the process ruling this skill inherits).
 
 Codex must stop when a gate can't be satisfied honestly. When it does:
 1. VERIFY the blocker yourself against code/live data — codex may be wrong.
-2. RULE the resolution as planner; append a `**PLANNER RULING**` section to the task
-   body (`bd update <id> --body-file`), and comment the ruling trail on the bead.
+2. RESOLVE from existing cited authority only — the spec, a convention (file:line), or
+   a verbatim owner ruling; comment the citation trail on the bead. When no existing
+   authority determines the answer, park the task and ask the owner — never amend the
+   body from the blocker.
 3. Re-dispatch as a RESUME: bead stays claimed; prompt says "your blocker is resolved
-   by the ruling — do not stop for it again; any OTHER blocker still stops."
+   by the cited authority — do not stop for it again; any OTHER blocker still stops."
 Never let codex resolve its own blocker (scope authority), never re-dispatch with a
-silently "corrected" prompt (the ruling must live on the bead, not in the prompt).
+silently "corrected" prompt (the resolution must live on the bead, not in the prompt).
 
 ## Plan end
 
 Full static gates (suite once, typecheck, build) + a FRESH-context whole-diff review
 over the entire plan range against the spec, every task's gates/detectors, and the
-architecture boundaries — findings fixed inline by the orchestrator, own commits.
+architecture boundaries — findings fixed inline by the orchestrator, own commits,
+each only past subagent-driven-development's Authority triage: a finding that cites
+no violated gate, spec line, convention, or verbatim owner ruling is a proposal —
+one backlog line, never an inline fix.
 **REQUIRED SUB-SKILL:** superpowers-beads:requesting-code-review for the reviewer dispatch shape.
 
 ## Common mistakes
