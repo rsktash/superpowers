@@ -7,6 +7,42 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.34] - 2026-08-25
+
+Net `skills/` word delta: **+141** (implementer-prompt +141). Nothing displaced.
+The candidate considered and rejected: step 4's Drift Detectors gloss, which
+reads as redundant with the charter until you notice the charter states the rule
+and the step states the *exception* — the in-contract test update. Removing it
+would have cost a real licence to buy an unrelated addition.
+
+### Changed
+
+- **The implementer reads the bead's COMMENTS, not just its body
+  (implementer-prompt, Get Your Contract):** step 2 called the body "your
+  complete contract AND your working copy". It is not the complete contract.
+  Owner rulings, review verdicts and BLOCKED reports land in comments, and no
+  step fetched them — `bd comment list` appeared zero times in the file. An
+  implementer dispatched by the template therefore never saw a single recorded
+  ruling.
+
+  Measured cost, on one bead (`solo-eb4.6.82.2`), all of it invisible to the
+  body: an owner ruling that a scheduled renewal charges only within grace and
+  never a suspended tenant; a reviewer's BLOCKED naming the exact extraction
+  signature and its six outcomes; three defects still unfixed behind a commit
+  that reads as complete; and an inherited fork explicitly marked unruled, which
+  an executor reading only the body would have closed by guessing. A sibling
+  bead recorded the same class: without its comment "the executor would have
+  landed a red suite and reported green."
+
+  Step 2 loses the "complete contract" phrasing that licensed the omission. A
+  new step 3 makes `bd comment list` required, fixes precedence (a recorded
+  ruling outranks the body it contradicts), fixes reading order (oldest to
+  newest, later supersedes earlier), and names the three things an implementer
+  must carry out: a ruling is settled and never re-litigated; an inherited open
+  fork is not the executor's to close and stops the turn as BLOCKED; and on a
+  RESUMED task the prior verdict, not the body, is the true state of the work —
+  the body describes the task, never its progress.
+
 ## [1.4.33] - 2026-08-24
 
 Net `skills/` word delta: **+204** (subagent-driven-development +149,

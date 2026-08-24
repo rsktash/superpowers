@@ -20,12 +20,24 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        if it exists — bead bodies are written in its vocabulary.
     2. From the repo root: `bd show <bead-id>` (metadata, deps, section index),
        then `bd get <bead-id> body > .bd/.scratch/progress-<bead-id>.md` and
-       **Read that file** — your complete contract AND your working copy: flip
-       each `- [ ]` to `- [x]` there as you complete it (Edit tool, local only),
+       **Read that file** — your working copy: flip each `- [ ]` to `- [x]`
+       there as you complete it (Edit tool, local only),
        then one `bd update <bead-id> --body-file .bd/.scratch/progress-<bead-id>.md`
        at the end. If the section index lists a `design` section, also read
        `bd show <bead-id> --section design`.
-    3. The body's directive sections govern you: **Context Anchor** (where this
+    3. `bd comment list <bead-id>` — REQUIRED, never skipped, however many
+       there are. The body is NOT the whole contract: owner rulings, review
+       verdicts and BLOCKED reports land here, and a recorded ruling OUTRANKS
+       the body it contradicts. Read oldest to newest — a later comment
+       supersedes an earlier one. Three things you must carry out of them:
+       - An **owner ruling** is settled. Implement it. Never re-litigate it,
+         never re-open it as a fork, never ask about it again.
+       - An **inherited open fork** marked unruled is NOT yours to close. If
+         your work reaches it, stop and report BLOCKED naming the fork.
+       - A **prior review verdict** tells you what is already fixed and what is
+         still owed. On a RESUMED task that verdict, not the body, is the true
+         state of the work — the body describes the task, not its progress.
+    4. The body's directive sections govern you: **Context Anchor** (where this
        task fits), **Acceptance Gate** (the ONLY criteria for "done" — do not add
        your own), **Drift Detectors** (editing files outside the Files list →
        STOP — except a test your in-contract change broke, which is in-contract
