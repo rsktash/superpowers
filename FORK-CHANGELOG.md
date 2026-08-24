@@ -7,6 +7,76 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.33] - 2026-08-24
+
+Net `skills/` word delta: **+204** (subagent-driven-development +149,
+hybrid-execution +34, reviewer-prompt +21). Nothing displaced — budget waived by
+the owner.
+
+### Changed
+
+- **A FAIL's re-review is tiered by the fix, not by the fact of the FAIL
+  (subagent-driven-development, Review Tier; hybrid-execution, FAIL-freeze):**
+  the corpus keyed re-review on the *verdict* — Fix Routing let a controller
+  apply and check a PASS-round fix inline, while the freeze clause demanded a
+  dispatched re-review for any FAIL-round fix however mechanical. Measured cost
+  of the coarse key: one 64K dispatched re-review for a fix that was a single
+  exported function plus one test, whose flipping check the finding had already
+  named.
+
+  A fix is now controller-clearable only when every open finding is fully
+  specified by the finding itself, each names the deterministic check that flips
+  it, and the fix diff stays inside the files those findings cite. The
+  controller then re-runs the reviewer's own checks — executing the verdict
+  condition rather than replacing the reviewer, since FAIL-freeze already
+  forbids rebasing reviewed commits, so everything else is byte-identical.
+
+  Bounded against salami-slicing — a controller decomposing a broad fix into
+  mechanical-looking pieces to self-clear past the reader a FAIL had just proven
+  necessary. The blast-radius test is a set comparison, not judgement; the
+  checks must be reviewer-authored, so a controller cannot invent a friendly
+  one; a second FAIL on the same task always dispatches; the tier declaration is
+  visible per Review Tier's standing norm; and the end-of-plan whole-diff review
+  reads every self-cleared commit regardless. Fix Routing's "fully specified"
+  boundary and this one are deliberately the same line — a fix the controller
+  may apply is a fix it may clear; a fix needing implementer knowledge needed
+  judgement, and judgement in the fix means judgement in the review.
+
+- **The reviewer prompt gains the `[exact commands]` slot the implementer prompt
+  already had (reviewer-prompt.md, Constraints):** the rule "run only this
+  task's targeted tests — NEVER the full suite" was already correct and already
+  there. What was missing was the slot, so "targeted" was left to the reviewer's
+  reading — and in a multi-workspace repo "the entire component suite" reads as
+  targeted while "the full suite" reads as project-wide. Five reviewers in one
+  session ran `npm ci` plus a whole workspace suite through that gap. The line
+  is a floor, not a ceiling: it explicitly preserves the reviewer's freedom to
+  add narrower checks and falsification experiments, which is where every one of
+  that session's outcome-changing findings came from.
+
+### Not changed, deliberately
+
+- **The review rate and the per-task review tier.** Five reviews in the measured
+  session cost ~28% of dispatch spend and three of them changed the outcome —
+  including one where every test passed, coverage was real and mutation controls
+  fired, while the feature did not exist because a computed header was never
+  read by any client. Release 1.4.32 made the implementer report evidentially
+  worthless by design, which leaves the reviewer as the only surface that can
+  catch that class. Thinning reviews would spend a margin that release had just
+  consolidated.
+- `agents/task-reviewer.md` — its charter already says targeted checks and
+  falsification experiments; correct as written.
+- The reviewer-prompt verdict wording ("flips only after the fix lands and its
+  check re-runs") — already compatible with tiering; editing it would restate
+  the rule in a second home.
+- `hybrid-execution/references/hybrid-parallel.md`'s merge-back run — it tests
+  *composition*, a different question from the reviewer's isolation run, and is
+  not redundant with it.
+- `agents/suite-gate.md` and `implementer-prompt.md` — already correct; the
+  implementer prompt's `[exact commands]` slot is the model this release copies.
+- Plan-side gate items that name workspace-wide commands would reopen the
+  loophole from above the prompt. That belongs to writing-plans' gate-lint and
+  is named here rather than swept here.
+
 ## [1.4.32] - 2026-08-24
 
 Net `skills/` word delta: **0** — the change lands entirely in `agents/`

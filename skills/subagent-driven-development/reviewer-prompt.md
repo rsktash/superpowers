@@ -105,8 +105,10 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
 
     ## Constraints
 
-    - Run only this task's targeted tests — NEVER the full suite (it is the
-      orchestrator's gate).
+    - Run only this task's targeted tests — the dispatch names them: [exact
+      commands, from the task's gate]. Add narrower checks and falsification
+      experiments freely; never a workspace, component, or full suite — those
+      are the orchestrator's gate.
     - Verify by reading code and running commands, not by trusting the report.
 
     ## Report format

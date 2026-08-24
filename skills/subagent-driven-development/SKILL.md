@@ -111,6 +111,8 @@ Right-size review per task, but make the decision visible and challengeable:
 
 State the tier and a one-line reason up front. **Why:** silently downgrading review reads identically to having reviewed — the problem isn't judging a task trivial, it's making that judgment invisible.
 
+**A FAIL's re-review is tiered by the fix, not by the fact of the FAIL.** A fix is **controller-clearable** only when ALL hold: every open finding is fully specified by the finding itself (Fix Routing's test); each names the deterministic check that flips it; and `git diff --name-only <reviewed-tip>..<fix-tip>` stays inside the files those findings cite. Then the controller re-runs each named check on the fix tip and flips the verdict, declaring the tier in one line — the reviewer authored the checks, so running them executes the verdict condition rather than replacing the reviewer. Any fix wider than the citations, any finding without a named check, or a **second FAIL on the same task** → dispatched re-review, package spanning the task's original BASE to the fix tip. A controller never clears a fix it had to design — Fix Routing's boundary and this one are the same line.
+
 ## Reviewer Prompt Bias
 
 **The reviewer decides severity, not you.** If the reviewer prompt you are writing contains "do not flag", "don't treat X as a defect", "at most Minor", or "the plan chose" — stop. Provide context (what the task asked for, what landed); never verdicts. Pre-briefing the desired outcome turns the review into an echo.
