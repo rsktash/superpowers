@@ -23,6 +23,14 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Mandatory step:** writing-plans is the mandatory step between an epic bead and ANY execution skill (hybrid-execution, subagent-driven-development, codex-execution). Executing an undecomposed epic — one with no child tasks — is a bypass, not a shortcut.
 
+**Venue: a dispatched planning agent, never the coordinator's session** — Verify Before You Cite opens every file cited, and in the coordinator that reading is resident to session end. Return a **receipt**: bead ids, per-task Files lists, `exec:` and `preflight:` labels, draft path, `plan-ready` marker. Nothing else.
+
+**Every pin cites its authority** — owner ruling, spec line, same-session code fact, or convention. A pin without one is an unreturned fork; pre-flight class 6 checks it.
+
+**`NEEDS_RULING` is a successful return, and partial:** task beads for the unforked region, decision beads dep-linked over the rest — stop decomposing that region, not the plan. Never resolve an owner-level fork to avoid returning empty. Prune first per Decision Beads' triage rule; only survivors return. One return, one message, but **separate rulings**, each on its own decision bead: one acceptance is one decision.
+
+**Persist the draft before returning** — partial contract and verified facts onto the beads and `.bd/.scratch`. Resume the same planner where the harness allows; either way it resumes from the draft, never from zero.
+
 ## Checklist
 
 You MUST create a task for each of these items and complete them in order. The last item is the step most often skipped — keep it on the list until it is genuinely done:
@@ -31,10 +39,10 @@ You MUST create a task for each of these items and complete them in order. The l
 2. **Map file structure** — which files are created/modified and what each is responsible for
 3. **Decompose into task beads** — bite-sized tasks, each with its directive sections
 4. **Self-review audit** — re-confirm every cited path/symbol and spec-coverage across all tasks
-5. **Present execution choice** — offer Subagent-Driven vs Hybrid vs Codex and get the user's pick
-6. **Invoke the chosen execution skill** — `Skill(superpowers-beads:subagent-driven-development)`, `Skill(superpowers-beads:hybrid-execution)`, or `Skill(superpowers-beads:codex-execution)`, passing the root bead ID, as your next action
+5. **Stamp each task** `preflight:required` or `preflight:light` — see Pre-Flight Plan Review (subagent-driven-development) for the trigger list. You hold the body; the controller never will.
+6. **Write the `plan-ready` marker on the root bead and STOP** — `bd comment add <root-id> "plan-ready: <short-sha> / tasks: <id> <id> …"`, then return the receipt.
 
-**Terminal step:** Item 6 is complete only when the execution skill has actually been invoked — not when you have "started executing" by running git/bd/worktree commands or dispatching implementers from memory. The only skills you invoke after writing-plans are subagent-driven-development, hybrid-execution, or codex-execution.
+**Terminal step:** planning ends at the marker. Do NOT invoke an execution skill — that welds authoring and execution into one session, which is the cost this venue split exists to remove. The execution mode (Subagent-Driven, Hybrid, Codex) is the owner's decision and is taken at the coordinator's pickup, against the receipt, not here; the execution skills' epic gate checks this marker, so a run that finds none routes back to planning.
 
 ## Scope Check
 
@@ -61,12 +69,14 @@ Default task shape: a **tracer bullet** — a narrow but complete path through e
 
 ## Bite-Sized Task Granularity
 
-**Each step is one action (2-5 minutes):**
+**Each step is one action.** The minute-count is advisory sizing guidance, not a target to split toward — but the skeleton below is **mandatory** and never collapses, however small the task:
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
+
+Fold "watch it fail" into the implement step and the executor never observes RED — which is how a test that asserts nothing passes.
 
 **Task Size:** one coherent concern, bounded above twice — by the Context Ceiling, and by the **reviewable-diff bound**: the expected diff must be verifiable as one piece by one reviewer. Tripwires: more than ~5 non-test files in Files, or an expected change beyond ~500 LOC — at either, the task is presumed a phase and splits along its file map; keeping it whole requires stating why at plan time, visibly. Within the bounds: a task bundling two concerns splits; a task split only to stay under some minutes-count merges — the unit is the largest single concern the bounds admit.
 
@@ -297,30 +307,19 @@ Then two checks only possible now that all tasks exist:
 
 Fix inline; no need to re-review.
 
-## Execution Handoff
+## Handoff
 
-After all task beads are created and linked, offer execution choice:
+Planning ends here. Write the marker on the root bead and stop:
 
-**"Plan complete — <N> task beads created under `<root-bead-id>`. Three execution options:**
+```bash
+bd comment add <root-id> "plan-ready: $(git rev-parse --short HEAD) / tasks: <id> <id> ..."
+```
 
-**1. Subagent-Driven** - I dispatch a fresh subagent per task, review between tasks
+Then return the receipt, plus any open decision beads and `NEEDS_RULING` if so. A receipt carrying
+prose reintroduces the residency this venue split removed.
 
-**2. Hybrid (recommended when the plan mixes trivial and complex tasks)** - Route each task by its Execution annotation: trivial tasks inline, everything else to a fresh subagent
+**Do not invoke an execution skill.** The execution mode is the owner's decision, taken at the
+coordinator's pickup against this receipt.
 
-**3. Codex Execution** - Task beads run via the codex CLI (zero-context executor); this session verifies each landing and runs the terminal whole-diff review
-
-**Which approach?"**
-
-Pass the root bead ID to the chosen execution skill. This completes the final checklist task — and that task is not done until you have actually invoked the execution skill below, not merely "started executing."
-
-**If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers-beads:subagent-driven-development
-- Fresh subagent per task + two-stage review
-
-**If Hybrid chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers-beads:hybrid-execution
-- Routes each task by its **Execution:** annotation; overrides must be stated
-
-**If Codex Execution chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers-beads:codex-execution
-- Sequential codex dispatch per task + per-landing verification + terminal whole-diff review
+**The marker's consumer is the execution skills' epic gate** — a run finding no current marker
+routes back to planning rather than improvising tasks from an epic body.
