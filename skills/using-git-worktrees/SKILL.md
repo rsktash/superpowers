@@ -119,15 +119,15 @@ if [ -f go.mod ]; then go mod download; fi
 
 ### 4. Verify Clean Baseline
 
-Run tests to ensure worktree starts clean:
+The baseline runs as a dispatched `superpowers-beads:suite-gate`, never in this session — the
+Finishing section below dispatches the suite for the same reason, and a coordinator that runs it
+here contradicts that. **Never compose the command from memory:** name the project's runbook
+(`docs/dispatch-env.md` or its equivalent) in the dispatch and let the gate agent read the command
+there. A project with several suites is where a remembered command silently runs the wrong one.
 
-```bash
-# Examples - use project-appropriate command
-npm test
-cargo test
-pytest
-go test ./...
-```
+Skip only on a green receipt from a dispatched gate in THIS worktree at THIS commit earlier in the
+session. A CI receipt never qualifies — it proves that commit was green in CI's environment, not
+in this worktree's.
 
 **If tests fail:** Report failures, ask whether to proceed or investigate.
 
