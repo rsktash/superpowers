@@ -29,6 +29,8 @@ Pre-flight is **state-triggered, not session-triggered**: its findings come from
 
 Either running path ends by writing a fresh marker. **A session's first claim requires a marker verified current or earned this session** — the check is one comment read plus one `git log`, so no entry mode is cheap enough to skip it.
 
+**A run that must pre-flight scopes it by label, never by opening a body.** The planner stamps each task `preflight:required` or `preflight:light` at plan time, when it holds the body: `required` where the task touches a public interface or type, schema, persistence, auth, money movement, concurrency, more than one package, or more than five non-test files; `light` otherwise. `required` runs every class; `light` runs classes 2, 4, 5 and 6 — with one open task, classes 1 and 3 have no second task to contradict or depend on. Risk lives in the body, so only the planner can read it; the controller reads the stamp. An unstamped task is `required`.
+
 Run the review as a READ-ONLY subagent: the in-scope plan enters that agent's context, never yours. Its prompt: read the epic and the in-scope open children, check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. Check for:
 
 1. **Tasks that contradict each other or the spec** — two tasks disagreeing on an interface, format, or decision, or a task drifting from what the spec says.
@@ -36,6 +38,7 @@ Run the review as a READ-ONLY subagent: the in-scope plan enters that agent's co
 3. **Missing dependency edges the task bodies imply** — a task that reads/consumes something a sibling task produces, with no dep link between them.
 4. **Gate items no step satisfies** — an Acceptance Gate checkbox nothing in the task's steps actually produces.
 5. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. Landed work invalidates the unexecuted remainder; this class is why a stale marker re-runs pre-flight.
+6. **Unreturned forks** — a pin whose cited authority does not exist, or exists and does not say that. Every pin in a contract carries its authority (an owner ruling, a spec line, a same-session code fact, a project convention); check each one against the thing it names. **Why this class exists:** a planner that resolves an owner-level fork itself, rather than returning it, produces a contract that is internally coherent and cites real files — the exact shape classes 1 and 2 pass. Provenance is the only handle on it, and it is the same fabricated-authority check the reviewer already runs on findings, moved to plan time.
 
 Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one. If the review turns up nothing, say so in one line and start.
 

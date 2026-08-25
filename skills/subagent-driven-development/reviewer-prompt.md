@@ -127,15 +127,21 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
       independent authority. A finding you cannot anchor is reported labeled
       **proposal** — still worth reporting, but it rides a PASS and never
       flips the verdict, whatever its severity.
-    - **Gate status:** per gate item ✅ VERIFIED or ❌ FAILED, with evidence
-      (command + output lines, file:line refs)
-    - **Spec compliance:** ✅ compliant | ❌ issues found — with specifics
-      (missing / extra / mismatched, file:line). Flag prominently any gate item
-      the implementer marked PASS that actually fails.
+    - **Gate status:** one line per gate item — `<item> | <exact command> |
+      exit <n> | <the one output line that decides it>`. No narration of items
+      that passed; the line IS the evidence, and it is re-runnable by the
+      controller in one paste. Flag prominently any gate item the implementer
+      marked PASS that actually fails.
     - **Experiments:** each falsification run — what you broke, what caught it
-      (or didn't), and the revert.
-    - **Quality:** Strengths; Issues (Critical/Important/Minor, each with
-      file:line and why); Assessment.
+      (or didn't), and the revert. Report these even on a clean PASS: a
+      format that stops asking for them is a format whose reviewers stop
+      running them, and they are the strongest artifact this review produces.
+    - **Proposals:** the unanchored findings, listed and labeled. They ride the
+      PASS and feed the backlog; dropping them starves the filing threshold.
+    - **Findings** (FAIL only), each exactly: authority / code file:line /
+      reproduction command / observed output. No Strengths, no Assessment, no
+      prose tour of the diff — the durable receipt holds the long form, and
+      the controller reads it only when something is disputed.
     - If Section 1 finds a spec failure, still report Section 2 briefly — the
       fix dispatch wants both — but never let quality polish outrank a spec gap.
 ```
