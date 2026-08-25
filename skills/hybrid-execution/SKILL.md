@@ -31,7 +31,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, mode from its `exec:` label (`bd label list <task-id>`): `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). Legacy plan without the label: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
 2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end. The one sanctioned read is the **scope glance** at claim time: the task's Files section only (`bd show <task-id> --section files`, ~10 lines) — enough to catch a task whose size or file overlap contradicts the route. Steps, gates, and context stay unread here.
 
-   **Source is read the same way: never upfront, always on a cited failure.** No survey of the files a task will touch before dispatching it — that reading is the planner's, paid once in a disposable window, and re-paying it here makes it resident for the rest of the session. On a concrete FAIL or BLOCKED, open the cited hunk and the minimal contract or ruling clause: Termination requires verifying a finding against the code and its authority before it becomes an obligation, and a controller that delegates THAT judgment makes the reviewer the product authority. Thin, not blind.
+   **Source reads the same way: never upfront, only on a cited failure.** No survey of a task's files before dispatch — that is the planner's read. On a concrete FAIL or BLOCKED, open the cited hunk and the minimal contract or ruling clause: Termination requires verifying a finding against code and authority before it becomes an obligation, and delegating THAT makes the reviewer the product authority. Thin, not blind.
 3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers) — "Task N → subagent/standard → Sonnet (<reason>)", inline routes "Task N → inline (<reason>)" — emitted **before** the claim command. Assignee values, Bash command descriptions, and dispatch parameters are actions, not the announcement. Every route gets its line, however routine.
 4. Execute by mode:
    - **inline** → follow the Inline Task Procedure (below) for this one task, start to close.
@@ -52,7 +52,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 After the last task: drain the pipeline — process every outstanding verdict, fix and re-review anything open. Then close out per subagent-driven-development: suite gate, final whole-diff review, and using-git-worktrees' Finishing: Merge Back and Clean Up.
 
-**The final whole-diff review is skipped when the run closed exactly one task** — at N=1 it spans the same BASE..HEAD the per-task reviewer already read, so that review IS the whole-diff review. The suite gate still runs. From N=2 the final review earns its place on the cross-task seams no per-task package contains.
+**Skip the final whole-diff review when the run closed exactly one task** — it spans the same BASE..HEAD the per-task reviewer already read. The suite gate still runs. From two tasks on it earns its place on cross-task seams.
 
 ## Hybrid Parallel (opt-in)
 
