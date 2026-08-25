@@ -7,6 +7,67 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.35] - 2026-08-26
+
+Net `skills/` word delta: **+582** (writing-plans +182, subagent-driven-development
++147, hybrid-execution +108, reviewer-prompt +94, using-git-worktrees +51).
+
+**What it failed to remove, and why.** writing-plans' Self-Review (297 words) was
+the largest deletion on the table and the one this release was argued for. It was
+rejected on evidence: both defects it caught in the session that prompted this
+release were semantic — a miscited API path and a missing drift detector — and
+neither is reachable by the structural lint proposed to replace it. Pre-flight's
+classes do not include per-citation re-verification, so deleting Self-Review
+would have left that class with no owner anywhere in the corpus. A deletion must
+name what now covers the deleted catch-class; nothing did.
+
+Also rejected: softening Drift Detectors (the template makes an omission
+*detectable*; it does not manufacture it), and skipping the worktree baseline on
+a CI receipt (a CI receipt proves that commit was green in CI's environment, a
+different proposition from this worktree — and the skip's key requires the
+controller to compute the affected gate set, which is the computation that
+produced the incident below).
+
+### Changed
+
+- **The planner is dispatched, not the coordinator (writing-plans, Venue):**
+  Verify Before You Cite opens every cited file, and in the coordinator that
+  reading is resident to session end. Measured on the session that prompted this
+  release, it was the largest single block of a planning turn's context. The
+  planner pays it once in a disposable window and returns a receipt.
+- **Planning ends at a `plan-ready` marker (writing-plans, Handoff):** the
+  checklist's terminal step invoked an execution skill directly, welding
+  authoring and execution into one window and taking the execution-mode decision
+  out of the owner's hands. The marker's consumer is the execution skills' epic
+  gate.
+- **Every pin cites its authority; pre-flight gains class 6 (writing-plans,
+  subagent-driven-development):** a planner that resolves an owner-level fork
+  instead of returning it writes a contract that is internally coherent and cites
+  real files — the shape classes 1 and 2 pass. Provenance is the only handle, and
+  it is the fabricated-authority check the reviewer already runs, moved to plan
+  time.
+- **Pre-flight scopes by a plan-time stamp (subagent-driven-development):** risk
+  is a fact about the body, and the controller may not open bodies. The planner
+  stamps `preflight:required` / `preflight:light`; the controller reads the
+  stamp. Unstamped is `required`.
+- **Reviews return receipts (reviewer-prompt, Report format):** per-item
+  narration, Strengths and Assessment are transmission cost. A gate line naming
+  its command and exit code is shorter and re-runnable. Experiments and the
+  proposal lane are kept explicitly against the shrinking pressure.
+- **Source reads are failure-triggered (hybrid-execution, Loop step 2):** the
+  Loop forbade opening a task *body* and said nothing about the source. Surveying
+  a task's files before dispatch makes that reading resident; the controller's
+  real need is the cited hunk after a FAIL or BLOCKED.
+- **No second whole-diff review at one task (hybrid-execution):** it spans the
+  same BASE..HEAD the per-task reviewer already read.
+- **The baseline is a dispatched gate, command sourced from the runbook
+  (using-git-worktrees, step 4):** step 4 told the coordinator to run the suite
+  directly, contradicting the dispatch doctrine its own Finishing section adopts.
+  The incident: a coordinator composed a baseline command from memory and ran a
+  web-app's `node:test` suite in place of its component suite. The wrong suite
+  went green and the file under change was never executed. The runbook was right;
+  the memory was not.
+
 ## [1.4.34] - 2026-08-25
 
 Net `skills/` word delta: **+141** (implementer-prompt +141). Nothing displaced.
