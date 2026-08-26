@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# PreToolUse hook: verify a task body's factual citations at the moment it
+# is committed to bd.
+#
+# writing-plans rules that every verbatim fact in a task body (cited path,
+# symbol, quoted string, locale key, commit claim) is machine-verified or
+# absent. A checklist rule decays under a fast pass; this hook fires
+# mechanically when `bd create`/`bd update` is about to land a --body-file
+# / --design-file, runs skills/writing-plans/scripts/lint-citations.mjs
+# over the file, and DENIES the command when a claim fails verification —
+# the failures are quoted back so the planner fixes or deletes each before
+# retrying. (Observed: a planned epic shipped a string "restored" from a
+# commit that never held it, a file cited 7x that does not exist, and gate
+# items quoting UI strings absent from the locale catalogue; each is a
+# one-command refutation this hook now runs up front.)
+#
+# Scope is deliberately narrow to keep false positives near zero:
+#   - only Bash commands invoking bd create/update with --body-file or
+#     --design-file
+#   - only task-shaped bodies: the file carries a ```citations block or an
+#     "Acceptance Gate" section (epic prose, comments, decision-bead bodies
+#     pass through untouched)
+#   - the repo root is the hook's working directory (bd runs from the
+#     repo root, so they agree)
+#
+# Fails OPEN: missing node/jq/script, unreadable file, lint usage error
+# (exit 2) -> exit 0 silently. Only a real lint failure (exit 1) denies.
+set -uo pipefail
+
+command -v jq >/dev/null 2>&1 || exit 0
+command -v node >/dev/null 2>&1 || exit 0
+input="$(cat)" || exit 0
+[ -n "$input" ] || exit 0
+
+event="$(printf '%s' "$input" | jq -r '.hook_event_name // empty' 2>/dev/null)" || exit 0
+tool="$(printf '%s' "$input" | jq -r '.tool_name // empty' 2>/dev/null)" || exit 0
+[ "$event" = "PreToolUse" ] && [ "$tool" = "Bash" ] || exit 0
+
+cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // ""' 2>/dev/null)"
+[ -n "$cmd" ] || exit 0
+
+printf '%s' "$cmd" | grep -Eq '(^|[;&|][[:space:]]*)bd (create|update)\b' || exit 0
+
+body_file="$(printf '%s' "$cmd" | grep -oE -- '--(body|design)-file[= ][^ ;&|]+' | head -1 | sed -E 's/--(body|design)-file[= ]//' | tr -d '"'"'")"
+[ -n "$body_file" ] && [ -r "$body_file" ] || exit 0
+
+grep -Eq '^```citations|[Aa]cceptance [Gg]ate' "$body_file" || exit 0
+
+script="$(dirname "$0")/../skills/writing-plans/scripts/lint-citations.mjs"
+[ -r "$script" ] || exit 0
+
+out="$(node "$script" "$body_file" 2>&1)"
+status=$?
+[ "$status" -eq 1 ] || exit 0
+
+reason="citation-lint: unverified claim(s) in ${body_file}:
+${out}
+Every verbatim fact in a task body is machine-verified or absent — fix the claim, delete it, or declare a created file with 'new:'. See writing-plans § What a Task Body May Claim."
+
+jq -cn --arg r "$reason" '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":$r}}'
+exit 0

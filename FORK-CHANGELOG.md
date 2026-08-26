@@ -7,6 +7,67 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.37] - 2026-08-26
+
+Net `skills/` word delta: **−2,917** (writing-plans −2,569, plan-document-reviewer-prompt
+−287 deleted, subagent-driven-development −72, using-git-worktrees −6, implementer-prompt
+−1, hybrid-execution +18). Outside `skills/`: `agents/suite-gate.md` deleted; two hooks
+(`citation-lint` new, `gate-lint` reference fix) and `skills/writing-plans/scripts/lint-citations.mjs` added.
+
+**The incident (session dae47986, solo repo).** The 4,559-word writing-plans doctrine
+planned an eleven-task epic; pre-flight invalidated nine. Eleven of ~25 findings were
+fabricated verbatim facts one command refutes — a string "restored" from a commit that
+never held it, a file cited 7×, gate items quoting UI strings absent from the locale
+catalogue, a prop absent from the interface, a CSS token that exists nowhere. On a sibling
+task the pinning doctrine injected a security defect: a pinned `paymentId: number` over a
+documented free-text column, no adapter named, and the executor obeyed the pin over the
+docstring beside it. Owner ruling: generation is the defect source, not detection —
+detail a planner never verified is defect injection with authority attached.
+
+**1.4.35's recorded objection is answered, not overridden.** Self-Review's deletion was
+rejected then because "the structural lint proposed to replace it" did not exist and no
+class owned per-citation re-verification. The lint now exists (`lint-citations.mjs` +
+the `citation-lint` hook, which denies a `bd create`/`bd update` landing a task body with
+an unverified citation), its test corpus is the eleven mechanical findings (fixtures for
+the missing-file, wrong-string, fabricated-commit and stale-line-pin classes fail it; the
+truthful body passes), and pre-flight class 5 keeps the semantic half (an authority that
+exists but does not say that).
+
+### Changed
+
+- **writing-plans rewritten thin (4,559 → 1,990 words):** a task body carries intent,
+  Files, gate, and scope fences; every verbatim fact is machine-verified via the
+  ```citations block or absent — the executor resolves specifics against the live tree
+  and logs deviations. Rendered-page facts are unplannable: visual gates name what to
+  verify in a browser, never the DOM the planner imagines. Self-Review deleted;
+  `preflight:required/light` stamps deleted; Drift Detectors, the Attention Map, the TDD
+  skeleton, Decision Beads triage, the Execution Annotation rubric (eval-guarded), and
+  the gate doctrine's three load-bearing ideas (observable outcome, failure-regime
+  fixture, preservation item) all survive, compressed.
+- **Pre-flight is the semantic residue (subagent-driven-development):** one read-only
+  reader per epic, five classes a script cannot reach; the stamp scoping paragraph is
+  gone. The epic gate now checks the `plan-ready:` marker (also in hybrid-execution) —
+  the marker previously had no consumer anywhere in the corpus.
+- **The suite gate runs in the coordinator's shell** (using-git-worktrees baseline and
+  finishing, sdd, hybrid-execution, implementer-prompt; `agents/suite-gate.md` deleted):
+  the dispatched gate burned a context window to report ten zeros and three
+  cold-worktree BLOCKEDs. Runbook-sourced commands stay mandatory — that clause's
+  incident was about provenance, not venue. The warm peer gate-runner survives as the
+  listed exception. Mirrored in the owner's `rules/orchestration.md` the same day.
+- **plan-document-reviewer-prompt.md deleted:** orphaned — zero live references
+  corpus-wide.
+- **[1.4.36] backfilled below:** its release commit carried the entry content but this
+  file was never updated.
+
+## [1.4.36] - 2026-08-26
+
+Net `skills/` word delta: **+95** (writing-plans +95). From the release commit, entry
+backfilled by 1.4.37: measured on an 11-task planning run, 52% of session wall time was
+composing task bodies averaging 2,288 words against a 347-word template, because one
+behavior rendered three times per bead. Added the Single Statement rule (a behavior is
+pinned once; gates and steps cite the pin); `hooks/gate-lint` stopped rejecting
+outcome-phrased items that merely contain a mechanism word.
+
 ## [1.4.35] - 2026-08-26
 
 Net `skills/` word delta: **+582** (writing-plans +182, subagent-driven-development

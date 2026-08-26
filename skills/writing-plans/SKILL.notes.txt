@@ -66,3 +66,42 @@ BOUNDED ON PURPOSE, because the rejected first draft was one-sided: the file-gra
   already cites; the stall the phrase "not ready to dispatch" would have manufactured is routed
   to a decision bead instead. Residual, stated so nobody later "fixes" it by loosening the
   executor side: reuse the plan never named still costs a BLOCKED round, and that is correct.
+
+### (2026-08-26) The skill is rewritten thin: unverified pins are forbidden, the citation lint replaces Self-Review, preflight stamps die.
+RULE CHANGE: a task body carries intent, Files, gate, and scope fences; every verbatim fact
+  (path, symbol, quoted string, locale key, commit claim) must pass scripts/lint-citations.mjs
+  before bd create or must not be written — the executor resolves specifics against the live
+  tree and logs deviations. Rendered-page facts are unplannable: visual gates name what to
+  verify in a browser, never the DOM/CSS the planner imagines. Self-Review is deleted (author-
+  blind; its catch-class is now the lint plus pre-flight's semantic residue). preflight:
+  required/light stamps are deleted (sdd pre-flight runs one reader per epic, semantic classes
+  only). The plan-ready marker gains its real consumer: sdd's epic gate now checks it.
+  Word delta: SKILL.md 4559 -> 1990; plan-document-reviewer-prompt.md (287w, orphaned — zero
+  live references corpus-wide) deleted.
+
+INCIDENT (session dae47986, 2026-08-26, solo repo): the 4559-word doctrine planned epic
+  solo-eb4.6.118 — eleven beads, of which pre-flight invalidated NINE. Defect census: eleven of
+  ~25 findings were fabricated verbatim facts a one-command check refutes (a string "restored"
+  from a commit that never held it; a file cited 7x that does not exist; gate items quoting UI
+  strings absent from the locale catalogue; a prop absent from the component's interface; a CSS
+  token that exists nowhere). On sibling task solo-eb4.6.111.18 the pinning doctrine itself
+  injected a security defect: the plan pinned `paymentId: number` verbatim over a column three
+  docs call free text, named no adapter, and the executor obeyed the pin over the docstring
+  beside it — Number("1e3") redirecting a tenant to another tenant's fiscal receipt. Layout
+  beads asserted DOM facts for pages never rendered (a pane React never mounts "always shown"
+  via display:none). Owner ruling: detection was never the problem — generation is; cutting
+  checks ships the same defects later. Verify Before You Cite failed structurally: it was
+  enforced by the author's own re-read ("I already checked that"), so the check left the author
+  for a script. The eleven mechanical findings are the lint's test corpus; fixtures reproducing
+  the missing-file, wrong-string, fabricated-commit and stale-line-pin classes fail it, and the
+  truthful body passes.
+
+NOT CHANGED, deliberately: Drift Detectors and the Attention Map (scope fences, not code
+  claims — consumed by implementer-prompt, codex dispatch, hybrid-parallel eligibility);
+  Execution Annotation's rubric with tier-orthogonal-to-scheduling and never-name-a-model
+  (guarded by tests/skill-evals/writing-plans); the TDD skeleton; Decision Beads triage; the
+  gate doctrine's three load-bearing ideas (observable outcome, failure-regime fixture,
+  preservation item) — last night's review used all three — compressed from four paragraphs
+  to one; the dispatched-planner venue and receipt. The STOP-on-unlisted-files law and the
+  export-is-prefactoring rule survive: D1 was exactly an executor duplicating an exported
+  reader, and the rewrite keeps reuse-is-cited-never-reimplemented as a body-level law.

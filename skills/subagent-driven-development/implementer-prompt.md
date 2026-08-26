@@ -57,7 +57,7 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
     ## Test Scope
 
     Run ONLY this task's targeted tests: [exact commands]. Never the full suite —
-    the suite gate runs once, as the controller's own dispatch.
+    the suite gate runs once, in the controller's session.
 
     Report per your charter (your system prompt). Status is one of:
     DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT

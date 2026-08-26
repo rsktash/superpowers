@@ -3,325 +3,158 @@ name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
 ---
 
-# Writing Plans — budget 4000 words
+# Writing Plans — budget 2000 words
 
 ## Overview
 
-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+Write implementation plans assuming a skilled engineer with zero context for our codebase: which files each task touches, what each change is for, how to verify it. Bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
 
-Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+A plan is a contract of intent, not a transcript of the code to come. The planner owns the decomposition, the file map, the gates, and the scope fences. The executor stands in the live tree and owns the specifics — names, signatures, wiring — and logs deviations on the bead. A plan that dictates specifics it never verified is worse than one that stays abstract: the executor is bound to obey it, and it lies.
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+**Input:** a root epic bead (from brainstorming) holding the spec. Tasks are created as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`. Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` before any bd command.
 
-**Input:** Receives a root bead ID from the brainstorming skill. All tasks are created as beads under this root.
+**Mandatory step:** writing-plans is the step between an epic and ANY execution skill. Executing an undecomposed epic is a bypass, not a shortcut.
 
-**Storage:** Task beads are created via `bd create --parent <root-id> --json`, which gives them hierarchical IDs (e.g., `bd-a3f8.1`). Sequential task ordering uses `bd dep add` (default `blocks` type).
+**Venue: a dispatched planning agent, never the coordinator's session** — verifying citations opens every cited file, and in the coordinator that reading is resident to session end. Return a **receipt**: bead ids, per-task Files lists, `exec:` labels, `plan-ready` marker. Nothing else.
 
-**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
-
-**Mandatory step:** writing-plans is the mandatory step between an epic bead and ANY execution skill (hybrid-execution, subagent-driven-development, codex-execution). Executing an undecomposed epic — one with no child tasks — is a bypass, not a shortcut.
-
-**Venue: a dispatched planning agent, never the coordinator's session** — Verify Before You Cite opens every file cited, and in the coordinator that reading is resident to session end. Return a **receipt**: bead ids, per-task Files lists, `exec:` and `preflight:` labels, draft path, `plan-ready` marker. Nothing else.
-
-**Every pin cites its authority** — owner ruling, spec line, same-session code fact, or convention. A pin without one is an unreturned fork; pre-flight class 6 checks it.
-
-**`NEEDS_RULING` is a successful return, and partial:** task beads for the unforked region, decision beads dep-linked over the rest — stop decomposing that region, not the plan. Never resolve an owner-level fork to avoid returning empty. Prune first per Decision Beads' triage rule; only survivors return. One return, one message, but **separate rulings**, each on its own decision bead: one acceptance is one decision.
-
-**Persist the draft before returning** — partial contract and verified facts onto the beads and `.bd/.scratch`. Resume the same planner where the harness allows; either way it resumes from the draft, never from zero.
+**`NEEDS_RULING` is a successful, partial return:** task beads for the unforked region, decision beads over the rest. Never resolve an owner-level fork to avoid returning empty. Persist the draft to the beads and `.bd/.scratch` before returning, so any resumer starts from the draft, never zero.
 
 ## Checklist
 
-You MUST complete these items in order. The last item is the step most often skipped — keep it on the list until it is genuinely done:
+Complete in order:
 
-1. **Scope check** — confirm the spec is a single coherent project (decompose if not) with no unresolved design fork (decision bead if it has one — see Decision Beads)
-2. **Map file structure** — which files are created/modified and what each is responsible for
-3. **Decompose into task beads** — bite-sized tasks, each with its directive sections
-4. **Self-review audit** — re-confirm every cited path/symbol and spec-coverage across all tasks
-5. **Stamp each task** `preflight:required` or `preflight:light` — see Pre-Flight Plan Review (subagent-driven-development) for the trigger list. You hold the body; the controller never will.
-6. **Write the `plan-ready` marker on the root bead and STOP** — `bd comment add <root-id> "plan-ready: <short-sha> / tasks: <id> <id> …"`, then return the receipt.
+1. **Scope check** — one coherent project, no unresolved design fork
+2. **Map file structure** — what is created/modified, each file's responsibility
+3. **Decompose into task beads** — thin directive bodies per Task Structure
+4. **Lint every body** — `node <skill-dir>/scripts/lint-citations.mjs <body-file> --repo <root>` must exit 0 before its `bd create`. A body that fails the lint is not created; fix or delete the claim.
+5. **Attention Map** onto the root epic body
+6. **Write the `plan-ready` marker and STOP** — `bd comment add <root-id> "plan-ready: <short-sha> / tasks: <id> <id> …"`, return the receipt.
 
-**Terminal step:** planning ends at the marker. Do NOT invoke an execution skill — that welds authoring and execution into one session, which is the cost this venue split exists to remove. The execution mode (Subagent-Driven, Hybrid, Codex) is the owner's decision and is taken at the coordinator's pickup, against the receipt, not here; the execution skills' epic gate checks this marker, so a run that finds none routes back to planning.
+**Terminal step:** planning ends at the marker. Do NOT invoke an execution skill — the execution mode is the owner's decision, taken at the coordinator's pickup against the receipt. The execution skills' epic gate checks this marker.
 
 ## Scope Check
 
-If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
+If the spec covers multiple independent subsystems, it should have been split during brainstorming. If it wasn't, suggest separate plans — each producing working, testable software on its own.
 
 ## File Structure
 
-Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
-
-- Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
-- You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much.
-- Files that change together should live together. Split by responsibility, not by technical layer.
-- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure - but if a file you're modifying has grown unwieldy, including a split in the plan is reasonable.
-
-This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
+Before defining tasks, map which files are created or modified and what each is responsible for — this locks in the decomposition. Clear boundaries, one responsibility per file; prefer focused files you can hold in context; files that change together live together; follow the codebase's existing patterns.
 
 ## Vertical Slices
 
-Default task shape: a **tracer bullet** — a narrow but complete path through every layer the feature touches (schema → logic → surface → tests), demoable or verifiable on its own. Prefer this over horizontal layer-slices ("Task 1: types, Task 2: middleware, Task 3: wiring"): horizontal tasks are the ones that entangle — they need Consumes-From edges and Drift Detectors to referee every seam, and nothing is verifiable until the last slice lands. A vertical slice carries its own proof. Any prefactoring ("make the change easy, then make the easy change") is its own task, first.
+Default task shape: a **tracer bullet** — a narrow, complete path through every layer the feature touches (schema → logic → surface → tests), verifiable on its own. Horizontal layer-slices entangle: every seam needs refereeing and nothing is verifiable until the last slice lands. Prefactoring is its own task, first.
 
-**The named exception — wide refactors — sequence as expand–contract.** A wide refactor is one mechanical change (rename a column, retype a shared symbol) whose blast radius fans across the codebase, so no vertical slice can land green. Expand: add the new form beside the old. Migrate: move call sites in batches sized by blast radius (per package, per directory), each batch a task blocked by the expand, CI green throughout because the old form survives. Contract: delete the old form in a final task blocked by every batch.
+The exception — wide mechanical refactors — sequence as **expand–contract**: add the new form beside the old; migrate call sites in batches sized by blast radius, each batch a task, CI green throughout; delete the old form last. (Both rules adapted from mattpocock/skills `to-tickets`, MIT.)
 
-(Vertical-slice and expand–contract rules adapted from mattpocock/skills `to-tickets`, MIT.)
+## Task Granularity
 
-## Bite-Sized Task Granularity
+**The TDD skeleton is mandatory and never collapses:** write the failing test → run it and observe RED → implement → run GREEN → commit. Fold "watch it fail" into implement and the executor never observes RED — which is how a test that asserts nothing passes.
 
-**Each step is one action.** The minute-count is advisory sizing guidance, not a target to split toward — but the skeleton below is **mandatory** and never collapses, however small the task:
-- "Write the failing test" - step
-- "Run it to make sure it fails" - step
-- "Implement the minimal code to make the test pass" - step
-- "Run the tests and make sure they pass" - step
-- "Commit" - step
-
-Fold "watch it fail" into the implement step and the executor never observes RED — which is how a test that asserts nothing passes.
-
-**Task Size:** one coherent concern, bounded above twice — by the Context Ceiling, and by the **reviewable-diff bound**: the expected diff must be verifiable as one piece by one reviewer. Tripwires: more than ~5 non-test files in Files, or an expected change beyond ~500 LOC — at either, the task is presumed a phase and splits along its file map; keeping it whole requires stating why at plan time, visibly. Within the bounds: a task bundling two concerns splits; a task split only to stay under some minutes-count merges — the unit is the largest single concern the bounds admit.
-
-**The Context Ceiling:** estimate what the executor must hold — every file in Files, everything under Before-you-start, test output across its run. If that plausibly exceeds ~150K tokens, it is two tasks, split at the same seams as any other split. **Why:** an executor re-pays its whole accumulated context on every turn, so cost grows with the square of task length — and an executor near its ceiling degrades exactly when the work gets hard. The fattest tenth of dispatched executors dominates fleet spend.
-
-**Single Responsibility:** Task titles must not contain "and." A task like "Update types and implement middleware" has two concerns — the executor will lose focus on one. Split it into "Task 1: Update types" and "Task 2: Implement middleware."
+**Size:** one coherent concern. Tripwires — more than ~5 non-test files, or an expected diff beyond ~500 LOC, or an executor context estimate past ~150K tokens (executors re-pay accumulated context every turn; cost grows with the square of task length) — presume a split along the file map. Titles must not contain "and": two concerns, two tasks.
 
 ## Decision Beads
 
-A plan is never written over an unresolved design fork. If the spec — or your file-structure mapping — surfaces a genuine open decision (two viable architectures, an unvalidated external dependency, a data shape only research or a prototype can settle), STOP decomposing that region. Create a **decision bead**: a child task whose deliverable is the ruling, not code — `bd create "Decide: <fork>" --parent <root-id>` — blocking every task bead that depends on the outcome (`bd dep add <task> <decision>`). Resolve it (research, prototype, or a question to your human partner), record the ruling with `bd comment add`, close it, then write the tasks it was blocking. Task beads written over an open fork encode a guess as a contract — the executor will build the guess.
+A plan is never written over an unresolved design fork. A genuine open decision (two viable architectures, an unvalidated dependency, a shape only a prototype can settle) stops decomposition of that region: `bd create "Decide: <fork>" --parent <root-id>`, dep-linked to block every task that depends on the outcome. Triage before parking: a line colliding with a ruling, the code, or the spec is a plan defect — rewrite it; repo-answered questions and one-safe-answer defaults are pruned; unverified factual claims are researched, not asked. Only survivors return, each ruled separately. Forks outnumbering tasks → route to superpowers-beads:wayfinder.
 
-Park a fork ONLY as a decision bead with dep-links — an agenda line has no owner and never gates dispatch (deps and labels do). Triage first, under precedence: a line colliding with a ruling, the code, or the spec it derives from is a plan defect — rewrite the text, don't escalate; so are repo-answered questions, one-safe-answer defaults, self-contradictions, sequencing and Files errors. Unverified factual claims: research or prototype, not a question. Re-reading an inherited fork list re-runs this triage; escalate each survivor once.
+## What a Task Body May Claim
 
-For efforts where the forks outnumber the tasks — fog too thick to plan through — route to superpowers-beads:wayfinder instead of forcing a plan.
+The section the linter enforces. A body carries intent, Files, the gate, and scope fences — and as few verbatim facts as those need.
 
-## Plan Structure in Beads
+**Every verbatim fact is machine-verified or absent.** A cited path, symbol, quoted string, locale key, or commit claim goes into the body's fenced ```citations block (`file:`, `symbol: <name> @ <path>`, `string: "<text>" @ <path>`, `key: <dot.path> @ <file.json>`, `commit-contains: <sha> <text>`, `new: <path>` for files this task creates), and the lint proves each against the tree before `bd create`. A fact you cannot write as a passing citation line does not go in the body — name the file and the intent, and let the executor resolve the specifics. Prefer symbols over line numbers; line pins rot.
 
-The root epic bead (created by brainstorming) already contains the spec. Plan tasks are created as child beads:
+**Reuse is cited, never re-implemented.** A symbol the task reuses gets a `symbol:` citation, and while confirming it, confirm its visibility: a private symbol means the export is prefactoring — its own task, first — or a BLOCKED report, never a second copy. An executor facing a private symbol with no export step will retype it, and the copy passes every gate while it drifts.
 
-For each task, write the body to a scratch file, then create the bead:
-```bash
-# Write task body to scratch file (Edit tool shows diff for user review)
-# → .bd/.scratch/task-N.md
-# Create bead from file — the exec: label mirrors the body's **Execution:** line
-# so the router reads labels, never bodies:
-bd create "Task N: <name>" -p 1 --parent <root-bead-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" --json
-# Clean up:
-rm .bd/.scratch/task-N.md
-```
+**Rendered truth is not plannable.** For visual work the planner writes what to verify in a real browser — never what the page will look like, which DOM will exist, or how CSS will resolve. A planner that has not rendered the page describes a DOM it never saw, and its own two tests can assert opposite facts about it.
 
-This produces hierarchical IDs (e.g., `superpowers-a3f8.1`, `.2`, `.3`).
+**No placeholders.** "TBD", "add appropriate error handling", "write tests for the above", "similar to Task N" are plan failures. Every step is executable without guessing. **The fork test decides how much detail:** if two competent implementers could satisfy the gate with observably different behavior, the step hides a decision — pin it with a verified citation, state "either is acceptable", or extract a decision bead. Behavior the gate already pins fully is the executor's job — no block needed. A decision settled upstream (spec, ruling) that this task implements appears in this body — cited by bead and section, not reproduced.
 
-For sequential dependencies between tasks:
-```bash
-bd dep add <task-2-id> <task-1-id>
-```
-
-Parse JSON output from `bd create --json` to extract the new bead ID.
-
-**Important:** Use `--parent` to create the parent-child relationship. Do NOT use `bd dep add --type related` — that creates a dependency link but not a parent-child relationship, which breaks `bd children`, `bd epic status`, and the epics view in beads-ui.
-
-## Multi-Phase Epics
-
-Some epics can't be fully decomposed up front — later phases depend on what earlier phases actually land, so their tasks don't exist yet. When an epic is executed in phases like this, the **last task of phase N is "Plan phase N+1"**, with acceptance gate "phase N+1 task beads exist and are dep-linked." Write this task at the END of phase N, once you know what phase N actually landed — not as a placeholder guessed at plan time. The planning session executing that task starts by reading `bd comment list <id> --tag next-phase` across the epic and phase-N beads — the durable half of the phase-gate session handoff (phase close = session close).
-
-**Why:** `bd close` auto-closes a parent when its last open child closes; the "Plan phase N+1" task keeps a bead open until the next phase's beads exist, so the epic can't close under an unfinished plan.
-
-Single-phase, fully-decomposed plans — where all the work is known now — don't need this; only add it when a later phase is genuinely not decomposable yet.
-
-## Attention Map
-
-After creating all task beads, add an Attention Map to the root epic body. This is a topological narrative that tells each executor their primary concern and what is NOT their concern.
-
-Update the epic bead:
-```bash
-# Read current epic body, append Attention Map, write to scratch file
-# → .bd/.scratch/<root-id>-body.md
-bd update <root-id> --body-file .bd/.scratch/<root-id>-body.md
-rm .bd/.scratch/<root-id>-body.md
-```
-
-Format:
-
-```markdown
-## Attention Map
-
-| Task | Primary Concern | Consumes From | NOT Your Concern |
-|------|----------------|---------------|------------------|
-| 1: Create-item slice | Create path end-to-end (schema, API, form, tests) | — | Do NOT touch edit/delete flows |
-| 2: Edit slice | Edit path end-to-end | Task 1 schema | Do NOT restructure the create form |
-| 3: Delete slice | Delete path + list empty state | Task 1 schema | Do NOT add bulk operations |
-```
-
-Each row must have a specific "NOT Your Concern" — not generic advice, but the specific sibling task that handles what would be tempting to touch. This prevents cross-task scope creep.
+**Each behavior is stated once** — as the pin, the gate item, or the step — and referenced elsewhere, never restated.
 
 ## Task Structure
 
-The task content below is what gets written to `.bd/.scratch/task-N.md` and created via `bd create --body-file`. The markdown formatting is preserved in the bead body for readability in beads-ui.
-
-**Markdown conventions for beads-ui:**
-- Reference other issues with `#issue-id` (e.g., `#yuklar-985`) — auto-linked in the UI
-- Deep link to sections using markdown links: `[label](/detail/issue-id#fragment)` where fragment is one of: `description`, `acceptance-criteria`, `notes`, `design`, or any content heading slug
-- Example: `[see route visualization](/detail/yuklar-985#misjudgments)`
-- If the spec bead contains image references (mockups, screenshots), carry relevant references into task beads so the executing agent can view them without navigating back to the spec
+Write each body to `.bd/.scratch/task-N.md`, lint it, create the bead, delete the scratch file. Carry image references from the spec into task beads that need them.
 
 ````markdown
-### Task N: [Component Name]
+### Task N: [Name]
 
 **Context Anchor:**
-Parent: [epic title] — [one-line purpose of the whole feature]
-This task: [what this task does and WHY it matters to the plan]
-Depends on: [what prior tasks produced that this one consumes, or "—" if first task]
+Parent: [epic title] — [one-line purpose of the feature]
+This task: [what it does and WHY it matters to the plan]
+Depends on: [what prior tasks produced that this consumes, or "—"]
 
 **Execution:** [inline | subagent/cheap | subagent/standard | subagent/capable] — [one-line reason]
 
-**Acceptance Gate — this task is DONE when ALL pass:**
-- [ ] [observable signal: file exists, export present, test passes]
-- [ ] [observable signal: specific behavior verified]
-- [ ] [constraint: only Files modified, plus any test the change broke]
+**Acceptance Gate — DONE when ALL pass:**
+- [ ] [observable outcome]
+- [ ] [the same outcome on the regime that can fail it]
+- [ ] [what the change must leave intact]
+- [ ] Only Files modified, plus any test this change broke
 
 **Drift Detectors:**
-- DO NOT [thing another task handles] — that is Task N's job
-- DO NOT [tempting adjacent improvement]
+- DO NOT [specific thing a named sibling task handles]
 - Editing a file not in Files → STOP — unless it is a test this change broke
 
 **Files:**
-- Create: `exact/path/to/file.py`
-- Modify: `exact/path/to/existing.py:123-145`
-- Test: `tests/exact/path/to/test.py`
+- Create: `exact/path`
+- Modify: `exact/path` — [the intent of the change]
+- Test: `exact/path`
 
 **Before you start:**
-- Read: `exact/path/to/existing.py` — understand current interface, callers, and return types
-- Read: `exact/path/to/related_dependency.py` — dependency this task relies on
-- Rules: `.claude/rules/relevant.md` — project rules for the area being changed (if they exist)
+- Read: [the files whose current behavior this task changes or consumes]
+- Rules: [the `.claude/rules/` file governing this area, if one exists]
 
-- [ ] **Step 1: Write the failing test** → gate: [which acceptance gate item this satisfies]
+**Steps:** the TDD skeleton, one action each, naming every behavior each test asserts.
 
-`test_specific_behavior` asserts: [every behavior, named — "returns X for input Y", "raises Z on empty input". Test code inline only when the exact assertion text is the spec.]
-
-- [ ] **Step 2: Run test to verify it fails** → gate: [same item]
-
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: FAIL with "function not defined"
-
-- [ ] **Step 3: Implement `function(input)`** → gate: [same item]
-
-[Behavior, precisely: inputs, outputs, edge cases. A code block ONLY where the exact code is the spec — e.g. the regex, the signature a sibling consumes:]
-
-```python
-def function(input: list[str]) -> Shape:  # signature consumed by Task 4
-```
-
-- [ ] **Step 4: Run test to verify it passes** → gate: [same item]
-
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature (<bead-id>)"
+```citations
+file: exact/path/that/must/exist.ts
+symbol: reusedThing @ its/home.ts
 ```
 ````
 
-## Writing Directive Tasks
+## Writing the Gate
 
-Tasks are prompts, not documentation. When you create a task for a future executor (yourself, a subagent, or a different session), you are performing prompt engineering. Task quality directly determines execution quality. If the project has `docs/CONTEXT.md` (the domain glossary brainstorming maintains), write task bodies in its vocabulary — a glossary term replaces a twenty-word description and keeps naming consistent across tasks.
+Every gate item is an outcome you observe, machine-verifiable — "test_validate_jwt_expired passes", never "works correctly" — and falsifiable against under-doing: write it so under-coverage fails ("every variant has its own assertion"), because a fluent executor will satisfy the literal minimum convincingly. Gates collectively exercise the regime the artifact exists to survive — the second page, the full buffer — never only the one-of-everything case; and at least one item names what must stay intact, checked on that same regime. Mechanisms ("flag X is set", "Y is called") belong in steps, not gates. Visual work's gate names what the owner verifies against pixels.
 
-**Context Anchor:** Explain WHY, not just WHAT. "Implement the middleware" is documentation. "This middleware is the security boundary between public routes and authenticated endpoints — Task 3 wires it in, Task 4 tests it" is a directive. The executor needs to understand the task's role in the plan to make correct judgment calls.
+## Attention Map
 
-**Acceptance Gate:** Every item must be machine-verifiable. Bad: "works correctly." Good: "test_validate_jwt_expired passes." Bad: "handles errors." Good: "invalid token returns 401 with ErrorResponse body." If you can't write a command that checks it, it's not a gate item.
+After creating all task beads, append to the root epic body a table telling each executor its concern and its non-concern — the record hybrid-parallel reads for wave eligibility:
 
-A gate item must also be falsifiable against *under-doing*, not just not-doing — name what would make a passing result still wrong. "Tests pass" is satisfied by a test that exercises one of nine fields. Write the gate so that under-coverage fails it: "a typo in any mapped field fails a test; every variant has its own assertion." **Why:** a fluent executor will satisfy the literal minimum convincingly — a loose gate certifies slop.
+```markdown
+| Task | Primary Concern | Consumes From | NOT Your Concern |
+|------|-----------------|---------------|------------------|
+| 1: Create slice | Create path end-to-end | — | Do NOT touch edit/delete flows |
+| 2: Edit slice | Edit path end-to-end | Task 1 schema | Do NOT restructure the create form |
+```
 
-A gate's numbers and factual premises are claims too: derive each from a same-session measurement and check it doesn't contradict evidence already gathered, the spec text it derives from, or a standing ruling.
-
-A gate item names an outcome you observe, never the mechanism that promises it. If you can tick the item without producing and observing the artifact, it is a step, not a gate — "flag X is set", "the handler is wired", "Y is called" belong in steps. A gate written as mechanism-plus-intent ("X is set so Y never happens") certifies the mechanism and takes the intent on faith. And the plan's gates must collectively exercise the regime the artifact exists to survive — the second page, the full buffer, the many-items case — never only the one-of-everything case: an outcome gate run on a fixture too small to violate it passes vacuously. A gate that cannot fail on the small fixture names the fixture that can fail it.
-
-A gate certifies arrival AND non-destruction. At least one item names what the change must leave intact — phrased observably and checked on the same overflow fixture ("pages before the split point render byte-identical", "no page's content height drops below its pre-change value"). A gate that only sets floors invites a mechanism that clears them by degrading everything the gate doesn't mention; the preservation item is what makes the wrong mechanism fail.
-
-**Drift Detectors:** You know all sibling tasks. Use that knowledge. If Task 3 handles integration and Task 4 handles error responses, then Task 2's drift detectors should say "DO NOT wire into server — that is Task 3's job" and "DO NOT define error response format — that is Task 4's job." Generic warnings like "stay focused" are useless.
-
-One exception, yours to grant, never the executor's to take: a test broken solely by an in-contract change is in-contract to update. A test encoding a structural ban — import guards, dependency direction — still stops the turn: a design conflict, not a pin.
-
-**Single Statement:** A behavior is pinned once in the body — as a table, a code block, or an enumeration. Gate items and steps then cite that pin instead of restating its content: "every entry in the row-menu table renders and reports" is a complete gate item. Stating one behavior as prose, again as a gate item, and again in the step that implements it triples the body without adding contract. The pin stays inside the bead, so the task remains self-contained.
-
-**Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.
+Each "NOT Your Concern" names the specific sibling that owns it — never generic advice.
 
 ## Execution Annotation
 
-Every task body carries one `**Execution:**` line — the mode a hybrid executor should use for the task, with a one-line reason. You know every task's file count and spec completeness; decide at plan time so the choice is visible at plan review, not improvised at execution time. Mirror the mode as a bead label at create time (`-l "exec:subagent/standard"`; on a legacy plan, `bd label add <id> "exec:<mode>"`) — the router routes from the ready list plus this label and never opens a body.
+Every body carries one `**Execution:**` line, mirrored as the create-time label — the router routes from labels and never opens a body.
 
-- `inline` — 1 file, complete spec, gate verifiable in one command, no judgment (config bump, rename, doc edit)
+- `inline` — 1 file, complete spec, gate verifiable in one command, no judgment
 - `subagent/cheap` — 1–2 files, complete spec, real implementation work
 - `subagent/standard` — multi-file integration
 - `subagent/capable` — design judgment or broad codebase understanding
 
-Default to `subagent/*`. `inline` is the exception — only when dispatch overhead clearly exceeds the work itself. Tiers are abstract — the executor maps them to its harness's models; never name a concrete model in the annotation.
+Default to `subagent/*`; `inline` only when dispatch overhead clearly exceeds the work. Tiers are abstract — never name a concrete model. A task whose steps leave a genuine fork to the executor is `subagent/capable` regardless of file count — economize on the contract or on the executor, never both. Tier measures the judgment the task demands, nothing else: scheduling never moves it — a task doesn't become `capable` by joining a wave of `capable` siblings; concurrency belongs to the dependency graph. A reason that says "mechanical" or "follows a template" argues for `standard` at most — fix the tier, not the reason.
 
-Down-routing presumes a pinned contract: a task whose steps leave a mechanism or design fork to the executor (the fork test, No Placeholders) is `subagent/capable` regardless of file count. Economize on the contract or on the executor — never both in one task.
+## Multi-Phase Epics
 
-Tier measures the judgment a task demands — nothing else. Scheduling never moves it: a task doesn't become `capable` by joining a parallel wave of `capable` siblings; which tasks run concurrently is the dependency graph's property, not the tier's. If the reason you're writing says the work is mechanical, a mirror, or follows an existing template, it is arguing for `standard` at most — fix the tier, not the reason.
-
-Subagent-Driven execution ignores this line harmlessly; hybrid-execution routes on it.
-
-## Verify Before You Cite
-
-Every file path, function, signature, regex, or line range you name in a task body must be opened and confirmed before it lands. Plans that cite symbols without reading them are fabrications.
-
-Before writing a task step like `Modify <file>:<lines>`, `grep for <pattern>`, or `Call <function>(<args>)` (angle brackets are placeholders for whatever you're citing):
-- Open the file and confirm the path
-- Confirm the signature matches what you're about to cite
-- Confirm the regex matches what the codebase actually uses — the canonical name may differ from how callers reference it (local aliases, re-exports, wrapper functions)
-- Prefer symbol names over line ranges — line numbers rot on the next refactor
-
-**Why:** every uncited reference is a lie the plan tells a future executor.
-
-A Files list is an absence claim symbol grep cannot verify: it finds callers, never constrainers (a test pinning old behaviour through a public function; a stub matching SQL text). Seal one only after adding, per touched module, its test files (by module path or by running them, never by grep) and any import-ban or dependency-direction config governing them.
-
-The list also under-claims from the other side: it is sealed from the files the task will edit, never from the symbols it must call. While confirming a cited symbol's signature, confirm its visibility: a behaviour the task reuses rather than writes must be exported, or its home file joins Files carrying the export as its step — and that listing licenses exactly the visibility change, never the symbol's body or its neighbours. Several tasks reusing one private symbol: the export is prefactoring — its own task, first. An export that is itself contested (the privacy is a design boundary; an import-ban blocks the direction) is a decision bead, never a dispatch. Already-exported reuse adds nothing — the check rides the citation pass. **Why:** an executor facing a private symbol has two legal moves, retype or BLOCKED; both cost a round, and the retyped copy passes every gate while it drifts.
+When later phases depend on what earlier phases actually land, the last task of phase N is "Plan phase N+1" — written at the END of phase N, gated on "phase N+1 task beads exist and are dep-linked". It keeps a bead open so `bd close` can't auto-close the epic under an unfinished plan. That planning session starts from `bd comment list <id> --tag next-phase` across the epic and phase-N beads. Fully-decomposed single-phase plans skip this.
 
 ## Plan Review Lenses (conditional)
 
-If any task changes schema, persisted data, rollout order, cross-layer contracts, or a public type's shape or representation, read `references/plan-review-lenses.md` and apply its three lenses — Deploy Sequence and Rollout Safety, Cross-Layer Consistency, Semantic Regression Sweep — to those tasks. Plans touching none of those skip this file entirely.
-
-## No Placeholders
-
-Every step must be executable without guessing. These are **plan failures** — never write them:
-- "TBD", "TODO", "implement later", "fill in details"
-- "Add appropriate error handling" / "add validation" / "handle edge cases"
-- "Write tests for the above" (name every behavior each test asserts; test code itself is optional)
-- "Similar to Task N" (repeat the spec — the engineer may be reading tasks out of order)
-- Steps whose expected behavior isn't stated precisely. A step is behavior + its gate link. **The fork test decides how much detail:** if two competent implementers could both satisfy the gate with observably different behavior, the step is hiding a decision — pin it (code block, exact enumeration, table, or an explicit "either is acceptable") or extract it as a decision bead. Ordinary code whose every observable outcome the gate already pins is the executor's job — no block needed. And any behavior settled in the spec, a ruling, or brainstorming that this task implements must appear in THIS task's body as a pin — the executor reads one bead, so a decision that lives only upstream is unspecified here. Narrative around that decision — quoted rulings, epic framing, design prose — is cited by bead and section, not reproduced.
-- References to types, functions, or methods not defined in any task
-- Tasks that modify existing files without a "Before you start" section
-
-## Self-Review
-
-After all task beads exist, run one audit pass over them yourself (not a subagent dispatch). This is deliberately separate from the rules above: those guide writing each task; this catches what only surfaces once the whole plan is on the page — and it forces you to *re-confirm* claims you made while authoring rather than trust that you did. (Re-confirming, not trusting, is the point: "I already verified that" while authoring is exactly the assertion this pass exists to test.)
-
-Read the beads (`bd show id1 id2 id3 --full`) and re-run each rule section above against every task:
-- **No Placeholders**, and **Verify Before You Cite** — re-open and confirm every cited path/symbol; citation drift is fabrication, fix or remove it.
-- the **Writing Directive Tasks** bars — Context Anchor explains WHY; every gate item machine-verifiable *and* falsifiable against under-doing; no gate item is tickable without observing the artifact, every gate carries a preservation item, and the plan's gates name the overflow-regime fixture they run on; Drift Detectors name specific sibling tasks; every step has a `→ gate:` link and no gate item is orphaned; no title contains "and"; every task carries an **Execution:** line with a reason whose value matches the rubric.
-- **Before you start** present on every task that modifies existing files; rule-governed areas reference the relevant `.claude/rules/` file.
-
-Then two checks only possible now that all tasks exist:
-- **Spec coverage:** every requirement in the root spec (`bd show <root-id> --full`) maps to a task bead. Add a bead for any gap.
-- **Type consistency:** names, signatures, and shapes used in later tasks match what earlier tasks defined — `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
-
-Fix inline; no need to re-review.
+If any task changes schema, persisted data, rollout order, cross-layer contracts, or a public type's shape, read `references/plan-review-lenses.md` and apply its three lenses to those tasks. Otherwise skip the file.
 
 ## Handoff
 
-Planning ends here. Write the marker on the root bead and stop:
+Write the marker on the root bead and stop:
 
 ```bash
 bd comment add <root-id> "plan-ready: $(git rev-parse --short HEAD) / tasks: <id> <id> ..."
 ```
 
-Then return the receipt, plus any open decision beads and `NEEDS_RULING` if so. A receipt carrying
-prose reintroduces the residency this venue split removed.
-
-**Do not invoke an execution skill.** The execution mode is the owner's decision, taken at the
-coordinator's pickup against this receipt.
-
-**The marker's consumer is the execution skills' epic gate** — a run finding no current marker
-routes back to planning rather than improvising tasks from an epic body.
+Return the receipt, plus any open decision beads and `NEEDS_RULING` if so. A receipt carrying prose reintroduces the residency the venue split removed. The marker's consumer is the execution skills' epic gate — a run finding none routes back to planning.

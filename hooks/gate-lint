@@ -52,7 +52,7 @@ hits="$(awk '
 
 reason="gate-lint: mechanism-phrased Acceptance Gate item(s) in ${body_file}:
 ${hits}
-A gate item names an outcome you observe, never the mechanism that promises it — \"X is set / wired / called\" belongs in steps. Rewrite each flagged item as the observable result (and name the fixture big enough to violate it), then re-run this command. See writing-plans § Writing Directive Tasks."
+A gate item names an outcome you observe, never the mechanism that promises it — \"X is set / wired / called\" belongs in steps. Rewrite each flagged item as the observable result (and name the fixture big enough to violate it), then re-run this command. See writing-plans § Writing the Gate."
 
 jq -cn --arg r "$reason" '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":$r}}'
 exit 0

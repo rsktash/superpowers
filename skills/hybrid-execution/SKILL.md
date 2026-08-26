@@ -18,7 +18,7 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children is a spec, not a plan — STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
+**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` comment on the root (`bd comment list <root-id> --last 5`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
 
 **Before the first routed task:** set up the Session Task List display mirror per subagent-driven-development — inline and dispatched tasks alike.
 
@@ -116,7 +116,7 @@ In addition, **never:**
 - Point a reviewer at the live working tree, or dispatch new work past an unresolved FAIL verdict.
 - Execute a `subagent/capable` task inline. If it needs design judgment, it needs dispatch — or escalate to your human partner.
 - Blend procedures: an inline task gets the Inline Task Procedure's gate verification; a dispatched task gets subagent-driven-development's combined review. No task gets a mixture, and no task gets neither.
-- Let a dispatched implementer run the full test suite — targeted tests only; the suite gate runs once, via the suite-gate dispatch. A dispatched implementer that backgrounds a job must finish it before ending its turn.
+- Let a dispatched implementer run the full test suite — targeted tests only; the suite gate runs once, in this session. A dispatched implementer that backgrounds a job must finish it before ending its turn.
 
 ## Red Flags — STOP
 

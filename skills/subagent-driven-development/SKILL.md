@@ -13,11 +13,11 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children is a spec, not a plan — STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
+**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` comment on the root (`bd comment list <root-id> --last 5`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
 
 ## Pre-Flight Plan Review
 
-Pre-flight is **state-triggered, not session-triggered**: its findings come from landed work invalidating the unexecuted remainder and from author fabrications no author re-read can catch. writing-plans' Self-Review does not substitute — that is the author re-reading its own work, and author-blind (a fabricated gate premise survives it); pre-flight is a fresh context, which is what catches fabrications.
+Pre-flight is **state-triggered, not session-triggered**: its findings come from landed work invalidating the unexecuted remainder and from semantic defects no lint can reach. Mechanical citation truth is not its job — writing-plans' citation lint proved every cited path, symbol, string, and commit claim at `bd create` time; pre-flight re-runs that lint only on bodies rewritten since their creation, and spends its reader on what a script cannot check.
 
 **Marker.** A completed pre-flight (findings resolved) is recorded on the root bead: `bd comment add <root-id> "pre-flight: <short-sha> / open: <id> <id> …"` — the commit it certified and the open beads it covered.
 
@@ -29,16 +29,13 @@ Pre-flight is **state-triggered, not session-triggered**: its findings come from
 
 Either running path ends by writing a fresh marker. **A session's first claim requires a marker verified current or earned this session** — the check is one comment read plus one `git log`, so no entry mode is cheap enough to skip it.
 
-**Scope a running pre-flight by label, never by opening a body.** The planner stamps each task at plan time: `preflight:required` where it touches a public interface or type, schema, persistence, auth, money movement, concurrency, more than one package, or more than five non-test files; `preflight:light` otherwise. `required` runs every class; `light` runs 2, 4, 5, 6 — at one open task, 1 and 3 have no sibling to contradict or depend on. Unstamped is `required`.
-
-Run the review as a READ-ONLY subagent: the in-scope plan enters that agent's context, never yours. Its prompt: read the epic and the in-scope open children, check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. Check for:
+Run the review as ONE READ-ONLY subagent per epic: the in-scope plan enters that agent's context, never yours. Its prompt: read the epic and the in-scope open children, check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. These are the semantic residue a script cannot reach:
 
 1. **Tasks that contradict each other or the spec** — two tasks disagreeing on an interface, format, or decision, or a task drifting from what the spec says.
-2. **Anything a task ASKS FOR that a reviewer would flag as a defect** — the plan mandating a bug (e.g. a task whose steps produce the exact anti-pattern review would catch).
+2. **Anything a task ASKS FOR that a reviewer would flag as a defect** — the plan mandating a bug (e.g. a pinned target type over a documented source with no adapter named between them).
 3. **Missing dependency edges the task bodies imply** — a task that reads/consumes something a sibling task produces, with no dep link between them.
-4. **Gate items no step satisfies** — an Acceptance Gate checkbox nothing in the task's steps actually produces.
-5. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. Landed work invalidates the unexecuted remainder; this class is why a stale marker re-runs pre-flight.
-6. **Unreturned forks** — a pin whose cited authority does not exist, or does not say that. Check each pin against the ruling, spec line, code fact or convention it names. A fork the planner resolved instead of returning yields a contract that is coherent and cites real files, so classes 1 and 2 pass it; provenance is the only handle. Same fabricated-authority check the reviewer runs on findings, at plan time.
+4. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. Landed work invalidates the unexecuted remainder; this class is why a stale marker re-runs pre-flight.
+5. **Unreturned forks** — a pin whose cited authority exists but does not say that, or a fork the planner resolved by analogy instead of returning. The citation lint proves existence; only a reader can check that the authority actually rules what the pin claims.
 
 Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one. If the review turns up nothing, say so in one line and start.
 
@@ -58,7 +55,7 @@ For each task, in order:
 2. Answer any questions the implementer asks *before* it proceeds.
 3. Generate the review package: `scripts/review-package BASE HEAD` (run from this skill's directory — `skills/subagent-driven-development/`; BASE is the pre-dispatch commit recorded in step 1 — NEVER `HEAD~1`, which silently drops all but the last commit of a multi-commit task) and pass the reviewer the printed file path. Review the result (see **Termination**), fix anything open, then close the task (todo → completed). Once the verdict is processed, delete the review file (`.bd/.scratch` hygiene).
 
-After the last task, run the full test suite once — dispatched to `superpowers-beads:suite-gate` (the gate stays this session's decision: accept only deterministic evidence — commands, exit codes, output tails; warm-environment projects use their peer gate-runner instead). Then dispatch one final review of the whole diff, and finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
+After the last task, run the full test suite once — in this session's own shell, commands copied from the project's runbook, never composed from memory (accept only deterministic evidence — commands, exit codes, output tails; warm-environment projects use their peer gate-runner instead). Then dispatch one final review of the whole diff, and finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
 
 ## Termination — what counts as "reviewed"
 
@@ -153,7 +150,7 @@ Down-routing presumes a pinned contract: a task whose steps leave a mechanism or
 - Paste task bodies into dispatch prompts, or open them in this session at all — the dispatch names the bead id and the implementer fetches its own contract (`bd get <id> body`); the controller's context is the expensive, long-lived one. Two exceptions only: the Files-section scope glance at claim, and Authority triage's clause check — post-review, reading only the cited clause and its minimal enclosing section. (Reversed 2026-08-15; the old rule "hand them the full task text" measurably doubled body delivery — implementers re-read via bd anyway.)
 - Treat an implementer's self-review as the review. Both happen.
 - Amend a task's body or Acceptance Gate from a review finding, or write `[owner ruling]` above anything but a verbatim owner message. A gate proven wrong against the approved design is corrected by re-deriving from the design source, cited line by line, logged as a deviation — or parked for the owner when the design does not answer. Review output is evidence, never product authority.
-- Let an implementer run the full test suite — targeted tests only; the suite gate runs once, via the suite-gate dispatch. An implementer that backgrounds a job must finish it before ending its turn.
+- Let an implementer run the full test suite — targeted tests only; the suite gate runs once, in this session. An implementer that backgrounds a job must finish it before ending its turn.
 
 ## Integration
 

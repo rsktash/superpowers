@@ -119,11 +119,12 @@ if [ -f go.mod ]; then go mod download; fi
 
 ### 4. Verify Clean Baseline
 
-Dispatch `superpowers-beads:suite-gate`, as the Finishing section below does — never run it here.
-**Never compose the command from memory:** name the project's runbook (`docs/dispatch-env.md` or
-equivalent) in the dispatch and let the gate agent read the command there.
+Run the full suite here, in your own shell. **Never compose the command from memory:** copy it
+from the project's runbook (`docs/dispatch-env.md` or equivalent) — the incident behind this
+rule was a memory-composed command running the wrong suite green while the file under change
+never executed.
 
-Skip only on a green receipt from a dispatched gate in THIS worktree at THIS commit, this session.
+Skip only on a green run in THIS worktree at THIS commit, this session.
 A CI receipt never qualifies — it proves that commit was green in CI's environment, not this
 worktree's.
 
@@ -210,12 +211,12 @@ Once implementation is complete in the worktree, close it out and merge back. Th
 
 ### 1. Full Test Suite
 
-Run the full suite in the worktree — dispatched once to `superpowers-beads:suite-gate` (lean read-only agent; the suite output stays out of this session's context). The gate is still THIS session's decision: accept the verdict only on deterministic evidence — exact commands, exit codes, output tails. Warm-environment projects (emulator/device gates) use their peer gate-runner session instead.
-
-```
-Task tool (subagent_type: superpowers-beads:suite-gate, model: sonnet):
-  prompt: run `npm test` (or cargo test / pytest / go test ./...) in <worktree>; report each command, exit code, last ~30 lines
-```
+Run the full suite in the worktree, in your own shell, with commands copied from the project's
+runbook (`docs/dispatch-env.md` or equivalent) — never composed from memory. Deterministic
+commands need a shell, not an agent: a dispatched gate burns a context window to report exit
+codes, and a disposable worktree without the runbook's setup reports BLOCKED instead of
+evidence. Record exact commands, exit codes, and output tails. Warm-environment projects
+(emulator/device gates) use their peer gate-runner session instead.
 
 **If tests fail:** stop, fix, re-run. Don't proceed to step 2 until green.
 
