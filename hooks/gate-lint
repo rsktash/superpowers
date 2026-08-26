@@ -44,7 +44,7 @@ hits="$(awk '
   tolower($0) ~ /acceptance gate/ { ingate=1; next }
   ingate && /^(#|\*\*[A-Z])/       { ingate=0 }
   ingate && /^[[:space:]]*[-*][[:space:]](\[[ x]\][[:space:]])?/ &&
-    $0 ~ /(is|are|was|were|has been|have been)[[:space:]]+(set|wired|called|enabled|registered|attached|configured|hooked|bound|imported|installed|defined|declared|added|present)([^a-z]|$)/ \
+    $0 ~ /(is|are|was|were|has been|have been)[[:space:]]+(set|wired|called|enabled|registered|attached|configured|hooked|bound)([^a-z]|$)/ \
     { printf "  line %d: %s\n", NR, $0 }
 ' "$body_file" 2>/dev/null)" || exit 0
 

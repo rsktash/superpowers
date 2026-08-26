@@ -33,7 +33,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 ## Checklist
 
-You MUST create a task for each of these items and complete them in order. The last item is the step most often skipped — keep it on the list until it is genuinely done:
+You MUST complete these items in order. The last item is the step most often skipped — keep it on the list until it is genuinely done:
 
 1. **Scope check** — confirm the spec is a single coherent project (decompose if not) with no unresolved design fork (decision bead if it has one — see Decision Beads)
 2. **Map file structure** — which files are created/modified and what each is responsible for
@@ -242,6 +242,8 @@ A gate certifies arrival AND non-destruction. At least one item names what the c
 
 One exception, yours to grant, never the executor's to take: a test broken solely by an in-contract change is in-contract to update. A test encoding a structural ban — import guards, dependency direction — still stops the turn: a design conflict, not a pin.
 
+**Single Statement:** A behavior is pinned once in the body — as a table, a code block, or an enumeration. Gate items and steps then cite that pin instead of restating its content: "every entry in the row-menu table renders and reports" is a complete gate item. Stating one behavior as prose, again as a gate item, and again in the step that implements it triples the body without adding contract. The pin stays inside the bead, so the task remains self-contained.
+
 **Step-Gate Links:** Each step notes which acceptance gate item it satisfies (via `→ gate: [item]`). This prevents orphan steps that don't contribute to completion, and prevents gate items with no steps that satisfy them.
 
 ## Execution Annotation
@@ -288,7 +290,7 @@ Every step must be executable without guessing. These are **plan failures** — 
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (name every behavior each test asserts; test code itself is optional)
 - "Similar to Task N" (repeat the spec — the engineer may be reading tasks out of order)
-- Steps whose expected behavior isn't stated precisely. A step is behavior + its gate link. **The fork test decides how much detail:** if two competent implementers could both satisfy the gate with observably different behavior, the step is hiding a decision — pin it (code block, exact enumeration, table, or an explicit "either is acceptable") or extract it as a decision bead. Ordinary code whose every observable outcome the gate already pins is the executor's job — no block needed. And any behavior settled in the spec, a ruling, or brainstorming that this task implements must appear in THIS task's body — the executor reads one bead, never the epic; a decision that lives only upstream is unspecified here.
+- Steps whose expected behavior isn't stated precisely. A step is behavior + its gate link. **The fork test decides how much detail:** if two competent implementers could both satisfy the gate with observably different behavior, the step is hiding a decision — pin it (code block, exact enumeration, table, or an explicit "either is acceptable") or extract it as a decision bead. Ordinary code whose every observable outcome the gate already pins is the executor's job — no block needed. And any behavior settled in the spec, a ruling, or brainstorming that this task implements must appear in THIS task's body as a pin — the executor reads one bead, so a decision that lives only upstream is unspecified here. Narrative around that decision — quoted rulings, epic framing, design prose — is cited by bead and section, not reproduced.
 - References to types, functions, or methods not defined in any task
 - Tasks that modify existing files without a "Before you start" section
 
