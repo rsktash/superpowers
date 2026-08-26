@@ -9,7 +9,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 Write implementation plans assuming a skilled engineer with zero context for our codebase: which files each task touches, what each change is for, how to verify it. Bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
 
-A plan is a contract of intent, not a transcript of the code to come. The planner owns the decomposition, the file map, the gates, and the scope fences. The executor stands in the live tree and owns the specifics — names, signatures, wiring — and logs deviations on the bead. A plan that dictates specifics it never verified is worse than one that stays abstract: the executor is bound to obey it, and it lies.
+A plan is a contract of intent, not a transcript of the code to come. The planner owns the decomposition, the file map, the gates, and the scope fences. The executor stands in the live tree and owns the specifics — names, signatures, wiring, which tests break — and logs deviations on the bead. A plan that dictates specifics it never verified is worse than one that stays abstract: the executor is bound to obey it, and it lies.
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 

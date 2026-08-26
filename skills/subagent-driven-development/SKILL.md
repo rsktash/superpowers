@@ -37,6 +37,8 @@ Run the review as ONE READ-ONLY subagent per epic: the in-scope plan enters that
 4. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. Landed work invalidates the unexecuted remainder; this class is why a stale marker re-runs pre-flight.
 5. **Unreturned forks** — a pin whose cited authority exists but does not say that, or a fork the planner resolved by analogy instead of returning. The citation lint proves existence; only a reader can check that the authority actually rules what the pin claims.
 
+A finding may not itself rest on a prediction of rendered behavior: its reading-checkable part — a real contradiction with the spec or design record — returns under the classes above; what only a browser can settle returns as a proposed browser-gate item, never as a NEEDS FIX with a prescribed repair.
+
 Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one. If the review turns up nothing, say so in one line and start.
 
 A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; it goes through writing-plans (or a decision bead) before it can be claimed.
