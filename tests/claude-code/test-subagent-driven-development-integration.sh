@@ -205,17 +205,6 @@ else
 fi
 echo ""
 
-# Test 3: TodoWrite was used for tracking
-echo "Test 3: Task tracking..."
-todo_count=$(grep -c '"name":"TodoWrite"' "$SESSION_FILE" || echo "0")
-if [ "$todo_count" -ge 1 ]; then
-    echo "  [PASS] TodoWrite used $todo_count time(s) for task tracking"
-else
-    echo "  [FAIL] TodoWrite not used"
-    FAILED=$((FAILED + 1))
-fi
-echo ""
-
 # Test 6: Implementation actually works
 echo "Test 6: Implementation verification..."
 if [ -f "$TEST_PROJECT/src/math.js" ]; then
