@@ -7,6 +7,31 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.40] - 2026-08-28
+
+Net `skills/` word delta: **+419** (shared/bd-defaults +166, hybrid-execution +79,
+codex dispatch-prompt +60, writing-plans +48, sdd implementer-prompt +33,
+codex-execution +19, sdd SKILL +14). Outside `skills/`: `agents/implementer.md`
+(deviations → findings, question filing, BD_ACTOR identity). The growth displaces
+only the implementer-prompt's comment-ruling semantics; the typed-record reference
+in bd-defaults is new doctrine with no prose predecessor to remove.
+
+**Typed decision records.** bd now ships ruling/question/finding record types, and the
+corpus adopts them: rulings are read via `bd rulings <id>` (inheritance-resolved — a
+parent-epic ruling binds the child and is invisible on the child alone), executor
+deviations file as findings, unresolved forks file as questions that remove the bead
+from `bd ready`, and every executor shell exports `BD_ACTOR=executor` (bd refuses
+`bd ruling add` from it — fail-open gate, so the preamble must set it). Comments are
+demoted to narrative, status, and evidence.
+
+**The incident (zanjir, 2026-08-27/28 rulings audit).** 448 comments across 230 beads
+held 281 prose rulings and zero typed ones. Comment-skipping recurred despite two
+2026-08-26 rule tightenings — the label "comment" carries a skippable prior no
+instruction overrides — and the audit's one false finding (zanjir-4dly.1.21) was
+exactly the case no comment discipline can fix: the ruling was amended on the parent
+bead, invisible to every child-bead reader. All gate mechanics verified live against
+bd this session: refusal message, ready-queue removal, resolver output.
+
 ## [1.4.37] - 2026-08-26
 
 Net `skills/` word delta: **−2,917** (writing-plans −2,569, plan-document-reviewer-prompt

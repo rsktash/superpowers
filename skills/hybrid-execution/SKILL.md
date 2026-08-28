@@ -63,9 +63,13 @@ Follow this procedure for any task routed `inline`.
 1. Get the contract and claim — never `--claim`:
    ```bash
    bd show <task-id>
+   bd rulings <task-id>
    bd get <task-id> body > .bd/.scratch/progress.md
    bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
    ```
+   The rulings output is part of the contract: it is inheritance-resolved, so
+   a ruling filed on the parent epic binds this task and no read of the task
+   alone surfaces it. A ruling outranks the body it contradicts.
    Read `.bd/.scratch/progress.md` — it is your complete contract AND your working copy; the body enters context once, as the file you'll work in. If `bd show`'s section index lists `design`, also read `bd show <task-id> --section design`. Example assignee: "Alex / Claude Opus 4.6".
 2. Extract the **Acceptance Gate** from the working copy — the machine-verifiable completion criteria (`- [ ]` lines under "Acceptance Gate"). Keep these visible; you re-read them between steps and verify them before closing.
 3. If the task body references images, resolve them to local files and view them before implementing.
@@ -85,7 +89,7 @@ Follow this procedure for any task routed `inline`.
 
 **When a step fails:** do not retry the same edit. Read the full error output, then use superpowers-beads:systematic-debugging to diagnose before touching the file again — the next edit must fix a diagnosed cause, not adjust the previous guess.
 
-**When a finding changes the plan:** if execution surfaces something that alters the plan — scope shift, different approach, new dependency, an acceptance-criteria adjustment — record it via `bd comment add <task-id> "<what changed and why>"` before continuing. Don't log routine observations, only deviations that change what the plan says.
+**When a finding changes the plan:** if execution surfaces something that alters the plan — scope shift, different approach, new dependency, an acceptance-criteria adjustment — record it via `bd finding add <task-id> "<what changed and why>" --evidence "<file:line or command>"` before continuing. Don't log routine observations, only deviations that change what the plan says. A genuine design fork the plan left open is not yours to resolve inline: file `bd question add <task-id> "<the fork>"` and stop — the task leaves `bd ready` until a ruling answers it.
 
 ## Overriding an Annotation
 

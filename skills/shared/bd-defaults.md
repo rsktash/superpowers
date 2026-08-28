@@ -27,6 +27,17 @@ These defaults cause subtle bugs if you assume otherwise.
 
 `bd get` field names: `id, title, status, priority, type, assignee, owner, description, design, accept, notes, parent, deps, rdeps, labels, comments-count, created_at, updated_at, closed_at, close_reason`. Note `accept` (not `acceptance_criteria`) and `comments-count` (count only — for comment bodies use `bd comments <id>` or `bd show <id> --include comments`).
 
+## Typed decision records — rulings, questions, findings
+
+Decisions live as typed records; comments carry narrative, status, and evidence only — nothing binding.
+
+- `bd rulings <id>` — every active ruling binding a bead, resolved through its parents: a ruling filed on the epic binds the child, and no read of the child's own body or comments surfaces it. Run it before recommending from, claiming, or executing a bead.
+- `bd ruling add [<id>] "<text>"` — file a ruling (`--answers <question-id>` closes a question; `--supersedes <ruling-id>` amends; `--close`/`--defer`/`--park` update the bead atomically with the ruling). Actor-gated: `BD_ACTOR=executor` is refused — executors file findings or questions; the coordinator transcribes owner decisions.
+- `bd question add <id> "<text>"` — an unresolved decision. The bead leaves `bd ready` until a ruling answers it. Open to all actors.
+- `bd finding add <id> "<text>" [--evidence "<refs>"]` — an evidence-backed observation or deviation. Open to all actors.
+
+Executors export `BD_ACTOR=executor` before any bd write; coordinators set `coordinator` or leave it unset.
+
 ## Other defaults to remember
 
 - **`bd list`** shows **open issues only** by default. Use `--all` to include closed, or `--status=closed` for closed only.

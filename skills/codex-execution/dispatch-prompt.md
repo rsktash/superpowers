@@ -14,7 +14,12 @@ Read AGENTS.md first (project rules)[, and <dir>/AGENTS.md for scoped rules when
 task works in a rule-carrying subdirectory]. Tracker reference: `bd prime`.
 
 Protocol:
-1. `bd show [task-id] --full` — this is your complete task directive.
+1. `export BD_ACTOR=executor` (your bd writes are findings, questions, comments and
+   status; `bd ruling add` is refused to you).
+   `bd show [task-id] --full` — your task directive — then `bd rulings [task-id]`:
+   every typed ruling binding this task, inheritance-resolved (a ruling filed on the
+   parent epic binds you and is invisible on the task alone). A ruling OUTRANKS the
+   body it contradicts.
    [Context: landed sibling commits this task consumes — cite shas and one line each.
    QUOTE any cross-task contract a prior executor stated that this task must satisfy.]
 2. Claim it: `bd update [task-id] --status=in_progress --assignee "[user] / [codex-model]"`.
@@ -28,7 +33,8 @@ Protocol:
    include the bead id), then `bd comment add [task-id] "<one line: what landed,
    commit sha, test counts>"` and `bd close [task-id]`.
 6. If a gate item cannot be satisfied honestly, or the code contradicts the task's
-   citations: STOP, post the blocker as a bd comment on the task, do NOT close it,
+   citations: STOP, file the blocker with `bd question add [task-id] "<the blocker>"`
+   (the task leaves the ready queue until a ruling answers it), do NOT close it,
    and end with a clear FAILURE report. Never weaken a test or gate to pass.
 
 Your final output: a terse report — what changed (files), gate-by-gate evidence
@@ -46,8 +52,9 @@ You are RESUMING a task you (a previous codex run) blocked on, in this repositor
 Read AGENTS.md first. Tracker reference: `bd prime`.
 
 Protocol:
-1. `bd show [task-id] --full` — the task now ENDS with a "PLANNER RULING" section
-   that resolves your blocker. Read the whole body again, then the ruling.
+1. `export BD_ACTOR=executor`. `bd show [task-id] --full`, then
+   `bd rulings [task-id]` — a ruling now resolves your blocker. Read the whole
+   body again, then the ruling.
 2. The bead is already claimed (in_progress). Do not re-claim.
 3. Resume from your red state per the ruling. Your prior blocker is RESOLVED — do not
    stop for it again. [Name the specific satisfied drift detector if the ruling

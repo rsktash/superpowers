@@ -56,7 +56,7 @@ The exception — wide mechanical refactors — sequence as **expand–contract*
 
 ## Decision Beads
 
-A plan is never written over an unresolved design fork. A genuine open decision (two viable architectures, an unvalidated dependency, a shape only a prototype can settle) stops decomposition of that region: `bd create "Decide: <fork>" --parent <root-id>`, dep-linked to block every task that depends on the outcome. Triage before parking: a line colliding with a ruling, the code, or the spec is a plan defect — rewrite it; repo-answered questions and one-safe-answer defaults are pruned; unverified factual claims are researched, not asked. Only survivors return, each ruled separately. Forks outnumbering tasks → route to superpowers-beads:wayfinder.
+A plan is never written over an unresolved design fork. A genuine open decision (two viable architectures, an unvalidated dependency, a shape only a prototype can settle) stops decomposition of that region: `bd create "Decide: <fork>" --parent <root-id>`, dep-linked to block every task that depends on the outcome. Triage before parking: a line colliding with a ruling, the code, or the spec is a plan defect — rewrite it; repo-answered questions and one-safe-answer defaults are pruned; unverified factual claims are researched, not asked. Only survivors return, each ruled separately. A fork surfacing on an already-created task additionally files `bd question add <task-id> "<the fork>"` — the task leaves `bd ready` until a ruling answers it, so the block is enforced by the tracker, not by a reader noticing. The answer lands as `bd ruling add --answers <question-id>`. Forks outnumbering tasks → route to superpowers-beads:wayfinder.
 
 ## What a Task Body May Claim
 

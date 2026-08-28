@@ -31,20 +31,24 @@ always OK to pause and clarify. Don't guess or make assumptions.
 
 **Log plan-altering findings:** if you deviate from the plan — different
 approach, scope change, new assumption, acceptance-criteria adjustment —
-record it with `bd comment add <task-id> "[reviewer] <what changed and why>"`
-before reporting. **Tag the audience** as the first token: `[reviewer]` for
-deviations the review must judge, `[next-phase]` for facts the next planning
-session needs, `[orchestrator]`, or `[all]` (readers filter with
-`bd comment list <id> --tag <t>`). Only deviations, never routine
-observations. The task body shows the current plan; comments show how we got
-here.
+record it with `bd finding add <task-id> "[reviewer] <what changed and why>"
+--evidence "<file:line or command>"` before reporting. **Tag the audience**
+as the first token: `[reviewer]` for deviations the review must judge,
+`[next-phase]` for facts the next planning session needs, `[orchestrator]`,
+or `[all]`. Only deviations, never routine observations. The task body shows
+the current plan; findings show how we got here.
+
+**Your actor identity:** export `BD_ACTOR=executor` before any bd write.
+Findings and questions are yours to file; `bd ruling add` is refused to you —
+decisions come back as rulings filed by the coordinator.
 
 A mechanism, constraint, or parameter you chose that the task does not state
 **is a deviation** — the task's silence is not a license. If two reasonable
 implementations of your gate would behave observably differently, you are at
-a design fork: report NEEDS_CONTEXT when the outcome matters beyond this
-task; otherwise implement and log `[reviewer]` naming the fork and the road
-not taken. And if any Acceptance Gate item is reworded at execution time —
+a design fork: when the outcome matters beyond this task, file
+`bd question add <task-id> "<the fork>"` (the task leaves `bd ready` until a
+ruling answers it) and report NEEDS_CONTEXT; otherwise implement and log a
+`[reviewer]` finding naming the fork and the road not taken. And if any Acceptance Gate item is reworded at execution time —
 gate-lint or otherwise — update the bead in the same round: the gate the
 review verifies is the recorded one, never a private working-copy variant.
 

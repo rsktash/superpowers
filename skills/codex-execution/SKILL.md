@@ -81,9 +81,11 @@ wall-clock and violate the process ruling this skill inherits).
 Codex must stop when a gate can't be satisfied honestly. When it does:
 1. VERIFY the blocker yourself against code/live data — codex may be wrong.
 2. RESOLVE from existing cited authority only — the spec, a convention (file:line), or
-   a verbatim owner ruling; comment the citation trail on the bead. When no existing
-   authority determines the answer, park the task and ask the owner — never amend the
-   body from the blocker.
+   a recorded ruling (`bd rulings <task-id>`); file the resolution as
+   `bd ruling add <task-id> "<resolution + citation>" --answers <question-id>`
+   (coordinator actor — never from an executor shell). When no existing authority
+   determines the answer, the open question already parks the task — ask the owner;
+   never amend the body from the blocker.
 3. Re-dispatch as a RESUME: bead stays claimed; prompt says "your blocker is resolved
    by the cited authority — do not stop for it again; any OTHER blocker still stops."
 Never let codex resolve its own blocker (scope authority), never re-dispatch with a

@@ -18,22 +18,27 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
     1. Read `docs/dispatch-env.md` at the repo root (repo layout, bd invocation,
        test commands, worktree rules), and `docs/CONTEXT.md` (domain glossary)
        if it exists — bead bodies are written in its vocabulary.
-    2. From the repo root: `bd show <bead-id>` (metadata, deps, section index),
+    2. `export BD_ACTOR=executor` (your bd writes are findings and questions;
+       rulings are refused to you).
+       From the repo root: `bd show <bead-id>` (metadata, deps, section index),
        then `bd get <bead-id> body > .bd/.scratch/progress-<bead-id>.md` and
        **Read that file** — your working copy: flip each `- [ ]` to `- [x]`
        there as you complete it (Edit tool, local only),
        then one `bd update <bead-id> --body-file .bd/.scratch/progress-<bead-id>.md`
        at the end. If the section index lists a `design` section, also read
        `bd show <bead-id> --section design`.
-    3. `bd comment list <bead-id>` — REQUIRED, never skipped, however many
-       there are. The body is NOT the whole contract: owner rulings, review
-       verdicts and BLOCKED reports land here, and a recorded ruling OUTRANKS
-       the body it contradicts. Read oldest to newest — a later comment
-       supersedes an earlier one. Three things you must carry out of them:
-       - An **owner ruling** is settled. Implement it. Never re-litigate it,
-         never re-open it as a fork, never ask about it again.
-       - An **inherited open fork** marked unruled is NOT yours to close. If
-         your work reaches it, stop and report BLOCKED naming the fork.
+    3. `bd rulings <bead-id>` — REQUIRED, never skipped. The body is NOT the
+       whole contract: this returns every ruling binding your task,
+       inheritance-resolved — a ruling filed on the parent epic binds you and
+       is invisible on your bead alone. A ruling OUTRANKS the body it
+       contradicts and is settled: implement it, never re-litigate it, never
+       re-open it as a fork, never ask about it again.
+       Then `bd comment list <bead-id>` — narrative and evidence: review
+       verdicts and BLOCKED reports land here, oldest to newest. Two things
+       you must carry out of them:
+       - An **open question** on the bead, or an inherited fork marked
+         unruled, is NOT yours to close. If your work reaches it, stop and
+         report BLOCKED naming the fork.
        - A **prior review verdict** tells you what is already fixed and what is
          still owed. On a RESUMED task that verdict, not the body, is the true
          state of the work — the body describes the task, not its progress.
