@@ -7,6 +7,18 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.41] - 2026-08-28
+
+Net `skills/` word delta: **+75** (shared/bd-defaults +62, sdd implementer-prompt +13).
+Doctrine addition with no predecessor prose to displace.
+
+**Question closure.** bd epic beads-9gn (same day) gave questions their missing exits:
+`answer --finding` (a verifiable fact resolved it — forks still end only in rulings),
+`close --reason moot|duplicate|superseded --note`, and `question list` as the read-only
+blocked frontier. Answer and close refuse `BD_ACTOR=executor`, so an executor cannot
+unblock its own bead — probed live (three refusals, ready restored on both coordinator
+paths, close-without-note refused without mutating) before this entry was written.
+
 ## [1.4.40] - 2026-08-28
 
 Net `skills/` word delta: **+419** (shared/bd-defaults +166, hybrid-execution +79,

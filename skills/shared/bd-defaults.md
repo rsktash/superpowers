@@ -33,7 +33,8 @@ Decisions live as typed records; comments carry narrative, status, and evidence 
 
 - `bd rulings <id>` — every active ruling binding a bead, resolved through its parents: a ruling filed on the epic binds the child, and no read of the child's own body or comments surfaces it. Run it before recommending from, claiming, or executing a bead.
 - `bd ruling add [<id>] "<text>"` — file a ruling (`--answers <question-id>` closes a question; `--supersedes <ruling-id>` amends; `--close`/`--defer`/`--park` update the bead atomically with the ruling). Actor-gated: `BD_ACTOR=executor` is refused — executors file findings or questions; the coordinator transcribes owner decisions.
-- `bd question add <id> "<text>"` — an unresolved decision. The bead leaves `bd ready` until a ruling answers it. Open to all actors.
+- `bd question add <id> "<text>"` — an unresolved decision. The bead leaves `bd ready` until the question ends: `bd question answer <q-id> --ruling <id>|--finding <id>` (mutually exclusive, kind-checked; a finding answers a question a verifiable fact resolved — forks end only in rulings) or `bd question close <q-id> --reason moot|duplicate|superseded --note "<why>"`. Filing is open to all actors; answer and close refuse `BD_ACTOR=executor` — an executor cannot unblock its own bead.
+- `bd question list` — the open blocked frontier, read-only, open to all actors.
 - `bd finding add <id> "<text>" [--evidence "<refs>"]` — an evidence-backed observation or deviation. Open to all actors.
 
 Executors export `BD_ACTOR=executor` before any bd write; coordinators set `coordinator` or leave it unset.

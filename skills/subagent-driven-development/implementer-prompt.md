@@ -37,8 +37,9 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        verdicts and BLOCKED reports land here, oldest to newest. Two things
        you must carry out of them:
        - An **open question** on the bead, or an inherited fork marked
-         unruled, is NOT yours to close. If your work reaches it, stop and
-         report BLOCKED naming the fork.
+         unruled, is NOT yours to close (`bd question answer`/`close` refuse
+         your actor; `bd question list` shows what blocks you). If your work
+         reaches it, stop and report BLOCKED naming the fork.
        - A **prior review verdict** tells you what is already fixed and what is
          still owed. On a RESUMED task that verdict, not the body, is the true
          state of the work — the body describes the task, not its progress.
