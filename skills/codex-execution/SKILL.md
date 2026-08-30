@@ -23,7 +23,7 @@ Files, TDD steps). Codex cannot compensate for a vague bead.
 
 ## Preconditions (check BEFORE the first dispatch)
 
-- **Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children is a spec, not a plan — STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
+- **Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` label on the root (`bd label list <root-id>`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
 - **Pre-Flight Plan Review:** resolve the marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before the first dispatch. A ready bead labeled `needs-plan` is not dispatchable.
 - **Codex-fatal lint, each task body before its dispatch:** sandbox-impossible commands, gate commands that cannot run as written, unresolved placeholders — any hit labels the bead `needs-plan` instead of dispatching. Codex halts on these mid-run at a full round-trip each; the lint pays once, up front.
 - **AGENTS.md parity:** codex reads `AGENTS.md`, never `CLAUDE.md`. EVERY directory
@@ -81,9 +81,11 @@ wall-clock and violate the process ruling this skill inherits).
 Codex must stop when a gate can't be satisfied honestly. When it does:
 1. VERIFY the blocker yourself against code/live data — codex may be wrong.
 2. RESOLVE from existing cited authority only — the spec, a convention (file:line), or
-   a recorded ruling (`bd rulings <task-id>`); file the resolution as
-   `bd ruling add <task-id> "<resolution + citation>" --answers <question-id>`
-   (coordinator actor — never from an executor shell). When no existing authority
+   a recorded ruling (`bd rulings <task-id>`); file the resolution as a finding, then close the question with it:
+   `bd finding add <task-id> "<resolution + citation>" -j` (capture the id), then
+   `bd question answer <question-id> --finding <finding-id>` (coordinator actor —
+   never from an executor shell). A spec-derived resolution is a verified fact, not
+   an owner decision: `bd ruling add` stays reserved for transcribing the owner. When no existing authority
    determines the answer, the open question already parks the task — ask the owner;
    never amend the body from the blocker.
 3. Re-dispatch as a RESUME: bead stays claimed; prompt says "your blocker is resolved

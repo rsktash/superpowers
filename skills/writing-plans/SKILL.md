@@ -30,7 +30,7 @@ Complete in order:
 3. **Decompose into task beads** — thin directive bodies per Task Structure
 4. **Lint every body** — `node <skill-dir>/scripts/lint-citations.mjs <body-file> --repo <root>` must exit 0 before its `bd create`. A body that fails the lint is not created; fix or delete the claim.
 5. **Attention Map** onto the root epic body
-6. **Write the `plan-ready` marker and STOP** — `bd comment add <root-id> "plan-ready: <short-sha> / tasks: <id> <id> …"`, return the receipt.
+6. **Write the `plan-ready` marker and STOP** — `bd label rm <root-id> plan-ready:<prior-sha>` if re-planning, then `bd label add <root-id> plan-ready:<short-sha>` (`bd children` is the task record). Return the receipt.
 
 **Terminal step:** planning ends at the marker. Do NOT invoke an execution skill — the execution mode is the owner's decision, taken at the coordinator's pickup against the receipt. The execution skills' epic gate checks this marker.
 
@@ -143,7 +143,7 @@ Default to `subagent/*`; `inline` only when dispatch overhead clearly exceeds th
 
 ## Multi-Phase Epics
 
-When later phases depend on what earlier phases actually land, the last task of phase N is "Plan phase N+1" — written at the END of phase N, gated on "phase N+1 task beads exist and are dep-linked". It keeps a bead open so `bd close` can't auto-close the epic under an unfinished plan. That planning session starts from `bd comment list <id> --tag next-phase` across the epic and phase-N beads. Fully-decomposed single-phase plans skip this.
+When later phases depend on what earlier phases actually land, the last task of phase N is "Plan phase N+1" — written at the END of phase N, gated on "phase N+1 task beads exist and are dep-linked". It keeps a bead open so `bd close` can't auto-close the epic under an unfinished plan. That planning session starts from `bd children <epic-id>` plus the epic body. Fully-decomposed single-phase plans skip this.
 
 ## Plan Review Lenses (conditional)
 
@@ -154,7 +154,7 @@ If any task changes schema, persisted data, rollout order, cross-layer contracts
 Write the marker on the root bead and stop:
 
 ```bash
-bd comment add <root-id> "plan-ready: $(git rev-parse --short HEAD) / tasks: <id> <id> ..."
+bd label add <root-id> plan-ready:$(git rev-parse --short HEAD)
 ```
 
 Return the receipt, plus any open decision beads and `NEEDS_RULING` if so. A receipt carrying prose reintroduces the residency the venue split removed. The marker's consumer is the execution skills' epic gate — a run finding none routes back to planning.

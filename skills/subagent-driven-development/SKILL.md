@@ -13,15 +13,15 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` comment on the root (`bd comment list <root-id> --last 5`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
+**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` label on the root (`bd label list <root-id>`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
 
 ## Pre-Flight Plan Review
 
 Pre-flight is **state-triggered, not session-triggered**: its findings come from landed work invalidating the unexecuted remainder and from semantic defects no lint can reach. Mechanical citation truth is not its job — writing-plans' citation lint proved every cited path, symbol, string, and commit claim at `bd create` time; pre-flight re-runs that lint only on bodies rewritten since their creation, and spends its reader on what a script cannot check.
 
-**Marker.** A completed pre-flight (findings resolved) is recorded on the root bead: `bd comment add <root-id> "pre-flight: <short-sha> / open: <id> <id> …"` — the commit it certified and the open beads it covered.
+**Marker.** A completed pre-flight (findings resolved) is recorded on the root bead: `bd comment add <root-id> "[pre-flight] <short-sha> / open: <id> <id> …"` — the commit it certified and the open beads it covered.
 
-**At every execution entry** — fresh session, mid-loop continuation, or same-session handoff from writing-plans alike — resolve the marker before the session's first claim (newest `pre-flight:` comment on the root bead, `bd comment list <root-id> --last 5`):
+**At every execution entry** — fresh session, mid-loop continuation, or same-session handoff from writing-plans alike — resolve the marker before the session's first claim (newest `[pre-flight]` comment on the root bead, `bd comment list <root-id> --tag pre-flight --last 1` — tag filtering is applied before `--last`, so the marker cannot scroll out of view):
 
 - **No marker** → run the full review below over the epic spec plus ALL open beads.
 - **Marker current** — `git log <sha>..HEAD` is empty AND no open child's `updated_at` (`bd show <id> --json`) is newer than the marker comment → skip: one line citing the marker, then start. A multi-round epic pays nothing at round N+1 when nothing changed between rounds.

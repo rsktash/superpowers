@@ -207,8 +207,8 @@ You MUST complete each phase before proceeding to the next.
 4. **If Fix Doesn't Work**
    - STOP
    - Count: How many fixes have you tried?
-   - If < 3: Return to Phase 1, re-analyze with new information
-   - **If ≥ 3: STOP and question the architecture (step 5 below)**
+   - If < 2: Return to Phase 1, re-analyze with new information
+   - **If ≥ 2: STOP and question the architecture (step 5 below)** — two failed attempts of one fix class is the bound; there is no third variation
    - DON'T attempt Fix #4 without architectural discussion
 
 5. **If 3+ Fixes Failed: Question Architecture**

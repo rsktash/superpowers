@@ -12,7 +12,7 @@ Dispatch superpowers-beads:code-reviewer subagent to catch issues before they ca
 ## When to Request Review
 
 **Mandatory:**
-- After each task in subagent-driven development
+- After each task in subagent-driven development, at the tier that task's diff earns
 - After completing major feature
 - Before merge to main
 
@@ -25,7 +25,8 @@ Dispatch superpowers-beads:code-reviewer subagent to catch issues before they ca
 
 **1. Get git SHAs:**
 ```bash
-BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
+BASE_SHA=<the commit the work under review started from — recorded before the work began>
+# NEVER HEAD~1: it silently drops all but the last commit of a multi-commit task
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
@@ -40,10 +41,9 @@ Use Task tool with superpowers-beads:code-reviewer type, fill template at `code-
 - `{HEAD_SHA}` - Ending commit
 - `{DESCRIPTION}` - Brief summary
 
-**3. Act on feedback:**
-- Fix Critical issues immediately
-- Fix Important issues before proceeding
-- Note Minor issues for later
+**3. Act on feedback — triage by authority first:**
+- A finding is a **defect** only if it cites the authority it violates: a gate item, a normative task clause, an explicit convention, or a recorded owner ruling. Severity ranks defects; it never converts a proposal into round content.
+- Defects: one fix round carrying all of them. Proposals: one line on the backlog bead.
 - Push back if reviewer is wrong (with reasoning)
 
 ## Example
@@ -81,9 +81,8 @@ You: [Fix progress indicators]
 - Catch issues before they compound
 - Fix before moving to next task
 
-**Executing Plans:**
-- Review after each batch (3 tasks)
-- Get feedback, apply, continue
+**Plan execution (subagent-driven-development / hybrid-execution / codex-execution):**
+- Review per task at its own tier; the whole-diff review runs once at the end
 
 **Ad-Hoc Development:**
 - Review before merge
@@ -92,7 +91,7 @@ You: [Fix progress indicators]
 ## Red Flags
 
 **Never:**
-- Skip review because "it's simple"
+- Skip a review the tier table calls for (a tier is chosen from the diff, never from a feeling that it's simple)
 - Ignore Critical issues
 - Proceed with unfixed Important issues
 - Argue with valid technical feedback

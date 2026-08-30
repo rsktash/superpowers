@@ -7,6 +7,53 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.42] - 2026-08-30
+
+Net `skills/` word delta: **+181** (requesting-code-review +100, codex-execution +54,
+systematic-debugging +16, subagent-driven-development +15, using-git-worktrees +1,
+hybrid-execution -2, writing-plans -3). What it failed to remove: `requesting-code-review`
+was rewritten in place where the audit's own reviewer offered "reduce it to a thin pointer"
+as the alternative. Rewriting kept ~100 words that a pointer to
+subagent-driven-development's BASE and triage discipline would have deleted outright. That
+displacement is deferred, named here so it is not lost.
+
+**Binding state and authority move inside the typed system.** `plan-ready` becomes a label
+(`bd label add <root> plan-ready:<sha>`) read by all three execution gates — comments are
+narrative, and on a busy root the marker scrolled out of the gate's `--last 5` window and
+the gate then reported a finished plan unplanned. `codex-execution`'s epic gate had never
+checked the marker at all, so a half-written plan was dispatchable on that path alone.
+`pre-flight` stays a comment — it needs a timestamp and no typed bd surface carries one
+(findings are write-only: `bd finding` has only `add`, there is no findings field, and
+`bd show --include` takes only comments/labels/deps) — but it gains the `[pre-flight]` tag
+and its gate reads `--tag pre-flight --last 1`, which removes the scroll-out failure
+without inventing a mechanism. `codex-execution`'s blocker loop filed agent-derived
+resolutions as `bd ruling add`, minting owner-grade authority that then bound every future
+claim through `bd rulings`; it now files a finding and closes the question with it.
+
+**A live wrong-answer defect.** `requesting-code-review` was an unconverted upstream
+remnant and `codex-execution` requires it for the terminal whole-diff review. It instructed
+`BASE_SHA=$(git rev-parse HEAD~1)` — the command subagent-driven-development forbids by
+name — so the final review of an entire plan silently saw only the last commit of each
+multi-commit task. Its severity-driven fix order ("Fix Critical immediately") also
+re-opened the authority-conversion loop that burned nine rounds on one bead; it now triages
+by authority first. Two further defects in the same file: it cited an "Executing Plans"
+workflow that does not exist in this fork, and both its mandatory-review line and its
+"never skip because it's simple" red flag collided with the trivial-deterministic tier.
+
+**Smaller corrections.** `writing-plans` phase-N+1 planning read
+`bd comment list --tag next-phase`; the tag filter exists but nothing has ever written that
+tag — a reader with no writer, now `bd children`. `systematic-debugging` licensed a third
+fix attempt where the global rule stops at two. `using-git-worktrees` listed suite commands
+from memory forty lines after its own instruction never to compose them from memory, at the
+last gate before main. Re-planning now removes the prior `plan-ready` label before writing
+the new one.
+
+**Provenance.** A two-project token audit (211 Claude Code sessions) diagnosed the
+workflow, then a skills defect hunt found these; every citation was verified against the
+live fork and the live bd CLI before this entry was written. The migration labels for the
+two epics in flight at release time (`solo-7hfl`, `solo-jxoi`) were written before the
+gates flipped, so no in-flight plan was stranded.
+
 ## [1.4.41] - 2026-08-28
 
 Net `skills/` word delta: **+75** (shared/bd-defaults +62, sdd implementer-prompt +13).

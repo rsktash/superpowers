@@ -18,7 +18,7 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` comment on the root (`bd comment list <root-id> --last 5`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
+**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` label on the root (`bd label list <root-id>`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
 
 ## The Loop
 

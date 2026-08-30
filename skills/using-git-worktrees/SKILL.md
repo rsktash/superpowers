@@ -240,7 +240,7 @@ git pull            # if <base> can move from elsewhere — keep it current befo
 git merge <feature-branch>
 
 # Re-run the suite on the merged result — the worktree run above doesn't cover the merge itself
-npm test / cargo test / pytest / go test ./...
+<the suite command from the project runbook — see Finishing step 1>
 ```
 
 ### 4. Remove the Worktree
