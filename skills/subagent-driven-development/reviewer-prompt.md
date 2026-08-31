@@ -23,7 +23,9 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     Task bead: <bead-id>. Fetch the contract yourself from the repo root:
     `bd get <bead-id> body` — its requirements and its **Acceptance Gate** are
     what you review against. [Never paste the task body into this prompt — the
-    reviewer fetches it; the controller's context never carries it.]
+    reviewer fetches it; the controller's context never carries it.] Need a bd
+    command this prompt does not name? `bd prime` prints the full reference —
+    never discover syntax via `--help`, the binary, or the database.
 
     ## What Implementer Claims They Built
 
@@ -106,8 +108,9 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     ## Constraints
 
     - Run only this task's targeted tests — the dispatch names them: [exact
-      commands, from the task's gate]. Add narrower checks and falsification
-      experiments freely; never a workspace, component, or full suite — those
+      commands, from the task's gate]. Add narrower checks freely, and
+      falsification experiments within the charter's budget — five, each a
+      pre-stated claim; never a workspace, component, or full suite — those
       are the orchestrator's gate.
     - Verify by reading code and running commands, not by trusting the report.
 

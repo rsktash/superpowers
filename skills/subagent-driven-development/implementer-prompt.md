@@ -19,7 +19,9 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        test commands, worktree rules), and `docs/CONTEXT.md` (domain glossary)
        if it exists — bead bodies are written in its vocabulary.
     2. `export BD_ACTOR=executor` (your bd writes are findings and questions;
-       rulings are refused to you).
+       rulings are refused to you). Need a bd command this prompt does not
+       name? `bd prime` prints the full reference — never discover syntax via
+       `--help`, the binary, or the database.
        From the repo root: `bd show <bead-id>` (metadata, deps, section index),
        then `bd get <bead-id> body > .bd/.scratch/progress-<bead-id>.md` and
        **Read that file** — your working copy: flip each `- [ ]` to `- [x]`

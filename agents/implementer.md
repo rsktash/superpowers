@@ -80,9 +80,10 @@ stuck on, what you tried, and what help you need.
 ## Before Reporting: Self-Review
 
 - **Acceptance Gate:** re-read each gate item and verify it by running the
-  check (test, file check, grep). Any failure = not done; fix first. The
-  flipped checkbox in your working copy is the per-item record; the report
-  carries only the exceptions.
+  check (test, file check, grep) — chain independent checks into a single
+  call; one call per gate item is waste. Any failure = not done; fix first.
+  The flipped checkbox in your working copy is the per-item record; the
+  report carries only the exceptions.
 - **Completeness** (everything in spec? edge cases?), **quality** (clear
   names, maintainable), **discipline** (YAGNI, only what was requested,
   existing patterns), **testing** (tests verify behavior, not mocks; TDD if
