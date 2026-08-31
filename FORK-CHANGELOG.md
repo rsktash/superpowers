@@ -7,6 +7,33 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.44] - 2026-08-31
+
+Net `skills/` word delta: **+66** (writing-plans +66). The growth is the run-model reframe,
+not new doctrine: the frontmatter flag, the rewritten Venue line, and an Input line naming the
+argument. Nothing removed — the procedure (checklist, task structure, gate, decision beads) is
+untouched.
+
+**writing-plans runs forked (`context: fork`).** The skill was being invoked twice — once in the
+coordinator and once in the dispatched planner — because the "dispatch a planner, never the
+coordinator's session" instruction lived inside the body and could only be read by invoking the
+skill, which loaded the whole ~2000-word procedure into the very session the Venue rule exists to
+keep clean. `context: fork` makes the harness fork on invocation: the body becomes the subagent's
+prompt, never enters the coordinator, and returns only the receipt. It fixes every entry point at
+once — the brainstorming handoff and a fresh "go with writing-plans" — with no upstream routing
+rule, because the isolation is now a property of the skill. The Venue line changes from "a
+dispatched planning agent" to "you ARE the forked agent" so the planner does not re-dispatch, and
+Input names `$ARGUMENTS` as the root bead id since a fork carries no conversation history. Verified
+no manual planner dispatch existed elsewhere to remove (brainstorming only "invokes", which now
+auto-forks).
+
+## [1.4.43] - 2026-08-30
+
+Net `skills/` word delta: **+105** (subagent-driven-development reviewer-prompt + implementer-prompt,
+hybrid-execution). Turn-axis discipline for dispatched agents: experiment budget, chained checks,
+prose cap, bd prime pointer. Backfilled 2026-08-31 — the 1.4.43 release commit shipped without a
+fork-changelog entry.
+
 ## [1.4.42] - 2026-08-30
 
 Net `skills/` word delta: **+181** (requesting-code-review +100, codex-execution +54,

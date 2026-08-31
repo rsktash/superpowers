@@ -1,6 +1,7 @@
 ---
 name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
+context: fork
 ---
 
 # Writing Plans — budget 2000 words
@@ -13,11 +14,11 @@ A plan is a contract of intent, not a transcript of the code to come. The planne
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Input:** a root epic bead (from brainstorming) holding the spec. Tasks are created as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`. Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` before any bd command.
+**Input:** the root epic bead id, passed as the skill argument (`$ARGUMENTS`), holding the spec. This skill runs forked (see Venue) with no conversation history — read the spec from that bead and the repo, never from a caller's context. Tasks are created as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`. Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` before any bd command.
 
 **Mandatory step:** writing-plans is the step between an epic and ANY execution skill. Executing an undecomposed epic is a bypass, not a shortcut.
 
-**Venue: a dispatched planning agent, never the coordinator's session** — verifying citations opens every cited file, and in the coordinator that reading is resident to session end. Return a **receipt**: bead ids, per-task Files lists, `exec:` labels, `plan-ready` marker. Nothing else.
+**Venue: you are the forked planning agent (`context: fork`).** This skill runs in an isolated subagent, so invoking it never loads this procedure into the coordinator's session, and you do not dispatch a further planner — you ARE it. Verify citations freely: opening every cited file here costs the coordinator nothing, because none of that reading lands in its session. Return a **receipt** and nothing else: bead ids, per-task Files lists, `exec:` labels, `plan-ready` marker.
 
 **`NEEDS_RULING` is a successful, partial return:** task beads for the unforked region, decision beads over the rest. Never resolve an owner-level fork to avoid returning empty. Persist the draft to the beads and `.bd/.scratch` before returning, so any resumer starts from the draft, never zero.
 
