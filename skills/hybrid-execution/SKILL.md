@@ -112,7 +112,7 @@ A tier names the **judgment a task demands, not model cost.** `cheap` and `stand
 
 All invariants of the Inline Task Procedure and of subagent-driven-development apply unchanged — with one scoping note. Same-worktree implementer concurrency is forbidden everywhere, always; separate-worktree implementer concurrency is allowed ONLY under Hybrid Parallel, on your human partner's literal "hybrid parallel". Reviewer-vs-implementer overlap is always allowed (frozen package + read-only review worktree, per Pipeline safety rules).
 
-Chat prose is routing only — the route announcement line and one line per action. Status, reasoning, and narrative live in bead comments, never in turn output.
+Chat prose is routing only — the mandated announcement and justification lines, one line per action, and whatever your human partner must see (decision points, blockers, reports). Status narrative lives in bead comments, never in turn output.
 
 In addition, **never:**
 - Dispatch an implementer while uncommitted inline edits exist in the worktree — commit or revert first. Pipelining does not loosen this: task N's commits exist before N's package is generated, and the live tree is clean of uncommitted inline edits before N+1's implementer starts.
