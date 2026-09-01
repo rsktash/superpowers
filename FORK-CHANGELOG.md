@@ -7,6 +7,29 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.45] - 2026-09-02
+
+Net `skills/` word delta: **−12** (subagent-driven-development −61, hybrid-execution +26,
+codex-execution +23). The two callers grew because each now states the one-time rule inline
+instead of pointing at a three-branch resolution table.
+
+**Pre-flight runs once per plan and never re-runs on a stale marker.** The marker used to be a
+freshness key: `git log <sha>..HEAD` non-empty, or any open child touched since, re-ran the review
+scoped to whatever had moved. On 2026-09-02 in the solo project that fired over three epics — main
+had run 10 commits / 15 files past the marker because the previous session landed tasks without
+re-marking — and cost ~363K Sonnet tokens and five minutes to return exactly one finding, which
+`bd rulings` precedence (rulings outrank bodies) already covered. The re-run is redundant in this
+workflow: landed work invalidating a body is caught downstream anyway, because executors read
+`bd rulings` before the body and re-read every cited file under "Before you start", and Drift
+Detectors stop a task whose premises moved. So the marker's sha becomes a record of WHEN the review
+happened rather than a freshness key — "Marker current" / "Marker stale" and the scoped re-run are
+deleted, along with the "a session's first claim requires a marker verified current or earned this
+session" sentence; present → skip with one line citing it, absent → run the full review once over
+the epic spec plus ALL open beads and write the marker. The five semantic classes, the one
+read-only subagent per epic, and the single batched question are unchanged. A body rewritten after
+the marker is the rewriter's job — writing-plans' citation lint runs at write time — not a trigger
+for a second pre-flight.
+
 ## [1.4.44] - 2026-08-31
 
 Net `skills/` word delta: **+66** (writing-plans +66). The growth is the run-model reframe,

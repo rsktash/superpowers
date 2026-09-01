@@ -24,7 +24,7 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
-**Step 0 — pre-flight gate:** resolve the pre-flight marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before this session's first claim, every entry mode alike.
+**Step 0 — pre-flight gate:** resolve the root's pre-flight marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before this session's first claim. Marker present → skip, one line citing it; no marker → run the review once, then write it. Pre-flight runs once per plan and is never re-checked for freshness.
 
 1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, mode from its `exec:` label (`bd label list <task-id>`): `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). Legacy plan without the label: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
 2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end. The one sanctioned read is the **scope glance** at claim time: the task's Files section only (`bd show <task-id> --section files`, ~10 lines) — enough to catch a task whose size or file overlap contradicts the route. Steps, gates, and context stay unread here.

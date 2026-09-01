@@ -17,33 +17,32 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 ## Pre-Flight Plan Review
 
-Pre-flight is **state-triggered, not session-triggered**: its findings come from landed work invalidating the unexecuted remainder and from semantic defects no lint can reach. Mechanical citation truth is not its job — writing-plans' citation lint proved every cited path, symbol, string, and commit claim at `bd create` time; pre-flight re-runs that lint only on bodies rewritten since their creation, and spends its reader on what a script cannot check.
+**Pre-flight runs ONCE per plan and never again.** Its one pass spends a reader on the semantic residue no script and no downstream gate can reach. Mechanical citation truth is not its job: writing-plans' citation lint already proved every cited path, symbol, string, and commit claim at `bd create` time.
 
-**Marker.** A completed pre-flight (findings resolved) is recorded on the root bead: `bd comment add <root-id> "[pre-flight] <short-sha> / open: <id> <id> …"` — the commit it certified and the open beads it covered.
+**Why:** a second pass over landed work returns what the workflow already catches downstream — executors read `bd rulings` before the body and re-read every cited file under "Before you start", and Drift Detectors stop a task whose premises moved — so it re-reads the whole remaining plan to buy nothing.
 
-**At every execution entry** — fresh session, mid-loop continuation, or same-session handoff from writing-plans alike — resolve the marker before the session's first claim (newest `[pre-flight]` comment on the root bead, `bd comment list <root-id> --tag pre-flight --last 1` — tag filtering is applied before `--last`, so the marker cannot scroll out of view):
+**Marker.** A completed pre-flight (findings resolved) is recorded on the root bead: `bd comment add <root-id> "[pre-flight] <short-sha> / open: <id> <id> …"` — the commit it certified and the open beads it covered. The sha is a record of WHEN the review happened, never a freshness key: there is no stale state and no scoped re-run.
 
-- **No marker** → run the full review below over the epic spec plus ALL open beads.
-- **Marker current** — `git log <sha>..HEAD` is empty AND no open child's `updated_at` (`bd show <id> --json`) is newer than the marker comment → skip: one line citing the marker, then start. A multi-round epic pays nothing at round N+1 when nothing changed between rounds.
-- **Marker stale** → run the review scoped to what invalidated it: open beads whose Files lists intersect `git diff --name-only <sha>..HEAD`, plus beads created or rewritten since the marker — never the untouched remainder, never closed tasks.
+**At execution entry**, resolve the root's newest marker — `bd comment list <root-id> --tag pre-flight --last 1` (tag filtering is applied before `--last`, so the marker cannot scroll out of view):
 
-Either running path ends by writing a fresh marker. **A session's first claim requires a marker verified current or earned this session** — the check is one comment read plus one `git log`, so no entry mode is cheap enough to skip it.
+- **No marker** → run the full review below over the epic spec plus ALL open beads, then write the marker.
+- **Marker present** → skip: one line citing it, then start. Whatever has landed since does not matter.
+
+A body rewritten after the marker is the rewriter's job — writing-plans' citation lint runs at write time — never a trigger for a second pre-flight.
 
 Run the review as ONE READ-ONLY subagent per epic: the in-scope plan enters that agent's context, never yours. Its prompt: read the epic and the in-scope open children, check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. These are the semantic residue a script cannot reach:
 
 1. **Tasks that contradict each other or the spec** — two tasks disagreeing on an interface, format, or decision, or a task drifting from what the spec says.
 2. **Anything a task ASKS FOR that a reviewer would flag as a defect** — the plan mandating a bug (e.g. a pinned target type over a documented source with no adapter named between them).
 3. **Missing dependency edges the task bodies imply** — a task that reads/consumes something a sibling task produces, with no dep link between them.
-4. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. Landed work invalidates the unexecuted remainder; this class is why a stale marker re-runs pre-flight.
+4. **Stale premises** — a task body the current tree already contradicts: a "watch it fail" step that is already green, a cited symbol a landed task changed, a resource two writers now own. This is the one pass where the plan is read against the tree it will actually run on.
 5. **Unreturned forks** — a pin whose cited authority exists but does not say that, or a fork the planner resolved by analogy instead of returning. The citation lint proves existence; only a reader can check that the authority actually rules what the pin claims.
 
 A finding may not itself rest on a prediction of rendered behavior: its reading-checkable part — a real contradiction with the spec or design record — returns under the classes above; what only a browser can settle returns as a proposed browser-gate item, never as a NEEDS FIX with a prescribed repair.
 
-Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one. If the review turns up nothing, say so in one line and start.
+Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one: one batched question costs one interruption instead of five. If the review turns up nothing, say so in one line and start.
 
 A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; it goes through writing-plans (or a decision bead) before it can be claimed.
-
-**Why:** unwinding tasks built on a stale assumption is expensive; one re-read per state change is cheap, and one batched question costs one interruption instead of five.
 
 ## The Loop
 

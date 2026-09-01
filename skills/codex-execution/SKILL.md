@@ -24,7 +24,7 @@ Files, TDD steps). Codex cannot compensate for a vague bead.
 ## Preconditions (check BEFORE the first dispatch)
 
 - **Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` label on the root (`bd label list <root-id>`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
-- **Pre-Flight Plan Review:** resolve the marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before the first dispatch. A ready bead labeled `needs-plan` is not dispatchable.
+- **Pre-Flight Plan Review:** resolve the root's marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before the first dispatch — marker present → skip, no marker → run the review once and write it. It runs once per plan, never again. A ready bead labeled `needs-plan` is not dispatchable.
 - **Codex-fatal lint, each task body before its dispatch:** sandbox-impossible commands, gate commands that cannot run as written, unresolved placeholders — any hit labels the bead `needs-plan` instead of dispatching. Codex halts on these mid-run at a full round-trip each; the lint pays once, up front.
 - **AGENTS.md parity:** codex reads `AGENTS.md`, never `CLAUDE.md`. EVERY directory
   with a `CLAUDE.md` must carry a sibling `AGENTS.md` symlink (`ln -s CLAUDE.md AGENTS.md`).
