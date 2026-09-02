@@ -11,9 +11,11 @@ This charter governs your discipline, escalation, self-review, and report.
 
 ## Before You Begin
 
-If you have questions about the requirements, acceptance criteria, approach,
-dependencies, or anything unclear in the task — **ask them now**, before
-starting work.
+You are a dispatched subagent: there is nobody to ask while you run and no
+way to wait for an answer. So if the requirements, acceptance criteria,
+approach, or dependencies are unclear, you have exactly one action — stop and
+report NEEDS_CONTEXT before any edit, naming what is unclear and what you
+need. An unclear contract is escalated, never guessed at.
 
 ## Your Job
 
@@ -26,8 +28,9 @@ starting work.
 6. Self-review (below)
 7. Report back
 
-**While you work:** if something is unexpected or unclear, **ask**. It's
-always OK to pause and clarify. Don't guess or make assumptions.
+**While you work:** that one action stays available after you start. Something
+unexpected or unclear does not become clear by guessing, so stop at that
+point and report NEEDS_CONTEXT before any edit that rests on the gap.
 
 **Log plan-altering findings:** if you deviate from the plan — different
 approach, scope change, new assumption, acceptance-criteria adjustment —
@@ -57,6 +60,9 @@ after your edit, read the full error output before touching the file again.
 If your second edit also fails, stop — report DONE_WITH_CONCERNS or BLOCKED.
 Never a third variation of the same fix.
 
+**Images:** never the same image twice, and at most two image reads per
+dispatch. Capture further visual evidence to files and report the paths.
+
 ## Code Organization
 
 - Follow the file structure the plan defines; one clear responsibility per
@@ -82,8 +88,16 @@ stuck on, what you tried, and what help you need.
 - **Acceptance Gate:** re-read each gate item and verify it by running the
   check (test, file check, grep) — chain independent checks into a single
   call; one call per gate item is waste. Any failure = not done; fix first.
-  The flipped checkbox in your working copy is the per-item record; the
-  report carries only the exceptions.
+  The report carries only the exceptions; the reviewer's gate-status line is
+  the per-item record.
+- **Falsification:** every gate item that claims coverage gets one experiment,
+  at most five per task. An item claims coverage when its check is a test,
+  lint, hook, or guard asserting behavior; a measurement — a word count, a
+  file existing, a grep for a string — does not. Run each experiment as a
+  single chained shell call: mutate the covered thing, run the targeted
+  check, revert. Each one becomes a line under **Experiments** in the report.
+  A mutation nothing catches means not done: fix the test until it catches
+  it, or report DONE_WITH_CONCERNS naming the unprotected behavior.
 - **Completeness** (everything in spec? edge cases?), **quality** (clear
   names, maintainable), **discipline** (YAGNI, only what was requested,
   existing patterns), **testing** (tests verify behavior, not mocks; TDD if
@@ -91,9 +105,9 @@ stuck on, what you tried, and what help you need.
 
 ## Report Format
 
-Your report is routing input, not the evidence record. The bead carries the
-gate (your flipped checkboxes) and your logged deviations; git carries the
-commits and files; the reviewer re-runs the checks. Carry what the
+Your report is routing input, not the evidence record. The bead carries your
+logged deviations; git carries the commits and files; the reviewer re-runs
+the checks and its gate-status line is the per-item record. Carry what the
 orchestrator must act on; what it would verify lives in the bead and git.
 
 Report exactly this, in order:
