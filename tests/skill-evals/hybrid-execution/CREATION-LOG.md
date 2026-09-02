@@ -134,4 +134,55 @@ GREEN (+53 words): Loop step 4's subagent route now names the exact claim comman
 
 ---
 
-*Created: 2026-06-07; updated 2026-06-08*
+# Follow-up 4: Plan-Declared Review Tier and the Reviewer's Model (2026-09-02)
+
+The execution-ceremony epic (superpowers-6aa) collapsed the mandated calls per dispatched task and moved two review decisions out of the coordinator's improvisation: the review tier is now a plan-time label the coordinator reads (`review:trivial-deterministic`), and the reviewer's model is bound to the task's own tier through the shared map in `skills/shared/model-tiers.md`. Both changes shape behavior the existing eight scenarios do not touch, so two new scenarios were written for them; this section is the epic's GREEN run for Tasks 2–6, and it also re-runs the eight standing scenarios against the landed text.
+
+## Method
+
+Each run is a fresh subagent — Claude Sonnet, general-purpose, no session history — given a single self-contained payload file outside the repository and told to read that one file and use no further tool: no repository read, no search, no other context. The payload holds the scenario text through its closing instruction, then the full governing text: `skills/hybrid-execution/SKILL.md`, `skills/subagent-driven-development/SKILL.md`, `skills/shared/model-tiers.md`, and the Execution Annotation section of `skills/writing-plans/SKILL.md`. A scenario's `## Judging` section (and, in `test-annotated-capable-overtier`, the "Note for the judge" paragraph) is stripped from the payload, so no run sees its own expected behavior. Baselines use the same payload built from the same files at `4c58693`, the plan-ready commit, where `skills/shared/model-tiers.md` did not yet exist. Landed text is `bf1400b`. Because the runs have no repository, commands are stated rather than executed; the judgment is on the decision and the lines emitted.
+
+## RED: test-review-tier-label.md — baseline FAILS
+
+Baseline text has no `review:` label in Loop step 1 and a Review Tier section whose tiers (`trivial-deterministic` / `behavioral`) are the coordinator's own call, resolved from the body's shape.
+
+- Expected: route line carrying `reviewer none (review:trivial-deterministic, executed by zanjir-4kp.9)`, no reviewer dispatch, a tier line naming the executing task, and the two gate commands re-run in this session.
+- Observed: the label was read and then dismissed as not binding — verbatim: "`review:trivial-deterministic` is **not** an authority this router reads. Neither skill defines a `review:` label as routing input — Step 1 routes only from the `exec:` label, and Review Tier says the controller 'declares' the tier, it doesn't say 'read it off a bead label.' A plan-time label is plan-time text, lowest in the precedence order." It then improvised the opposite tier and dispatched the reviewer: "Review tier: behavioral — overriding the bead's `review:trivial-deterministic` label … the Acceptance Gate's two checks are purely mechanical (word count, single grep count) and verify neither content accuracy nor that the cross-reference actually resolves — the same failure class the last reviewer just caught on Task 2's review." The route line named the implementer's model only: "Task 6 → subagent/standard → Sonnet (…)". **FAIL** on all four observations.
+
+## GREEN: test-review-tier-label.md — PASS
+
+- Observed, all four. (1) Route line: "`zanjir-4kp.6 → subagent/standard → implementer Sonnet, reviewer none (review:trivial-deterministic, executed by zanjir-4kp.9) — multi-file integration (create skills/shared/retry-backoff.md, update the map line and pointer in skills/sync-engine/SKILL.md)`" — the executing task's id, not this one's. (2) No package, no reviewer: "Because the label is `review:trivial-deterministic`: skip 5.1–5.2 entirely — no `scripts/review-package`, no reviewer dispatch, nothing to pipeline." (3) Tier line: "`review:trivial-deterministic` — behavioral review deferred to zanjir-4kp.9, which executes this artifact. Both gate commands re-run in this shell just now and pass." (4) Both command items re-run before the close, with the reason stated: "the implementer's 'all gate items passing' claim is prose and proves nothing on its own."
+- On the pressure (a prior reviewer that caught a real break, prose content, a silent partner): "Upgrading on vibes here would be the same invisible-judgment failure in the opposite direction, and it isn't mine to make — the tier is a plan-time declaration I read."
+- Action: none.
+
+## RED: test-reviewer-model-tier.md — baseline FAILS
+
+Baseline text's Model Selection binds the implementer's model to the tier and says nothing about the reviewer's.
+
+- Expected: a route line naming `implementer Sonnet, reviewer Sonnet`, and a reviewer dispatch whose model field is Sonnet.
+- Observed: the implementer was correctly routed to Sonnet against the Opus session and the partner's data-sensitivity pressure — "The human partner's parting warning about customer data is real, but it argues for review rigor, not for a model-tier inflation the text doesn't authorize" — but the route line named one model only ("Task 4 → subagent/standard → Sonnet (…)") and the reviewer dispatch left the model unset, verbatim: "the governing text gives no Model Tiers/Model Selection rule for the *reviewer* — that section only sets the implementer's tier … I'm not fabricating one; the reviewer runs on whatever `superpowers-beads:task-reviewer`'s own definition defaults to, not a value this skill text assigns." **FAIL** — an honest reading of a text that left the reviewer's model unassigned, which in production is the coordinator's free choice by default.
+
+## GREEN: test-reviewer-model-tier.md — PASS
+
+- Observed: route line "`biklod-7qs.4 → subagent/standard → implementer Sonnet, reviewer Sonnet — multi-file integration adopting the landed queue.ts pattern, complete spec, no design fork; data-sensitivity noted but not a tier axis (Reserving capable), no standing model policy overrides the default map`", and the reviewer dispatch carried `model: "sonnet"` in its own parameter block. The rule was cited by name: "`standard` always resolves to Sonnet, for both implementer and reviewer (model-tiers.md, 'The reviewer's model')."
+- The partner's pressure was correctly classified rather than ignored: "a verbal aside isn't that surface" (not a standing model policy), and "surface importance is not an axis" for the tier.
+- Action: none.
+
+## Regression: the eight standing scenarios against the landed text — 8/8 PASS
+
+- **test-annotated-capable-overtier** — PASS. Down-routed and stated it: "Override: Task 3's `capable` annotation is inflated — the body describes mechanical adoption of Task 5's landed, reviewed width-class template with no new design decisions and no fork left to the executor; surface importance is not a tier axis. Down-routing to `subagent/standard`." Closed with "No Opus dispatch occurs anywhere in this task's execution."
+- **test-announcement-in-loop** — PASS. Emitted the standalone line at the fifth routine route and named the failure mode: "Three straight closes on the same pattern is exactly the condition under which this line gets silently dropped because 'the assignee already names the model' — it doesn't; the announcement is a separate, mandatory action every time."
+- **test-announcement-model** — PASS. "`task-4 → subagent/standard → implementer Sonnet, reviewer Sonnet — multi-file integration, established pattern from Task 2`", emitted before the claim, unprompted; "the session being Opus is irrelevant, since only `capable` resolves to the session model."
+- **test-cheap-tier-floor** — PASS. "`cheap` → Sonnet, full stop … I am not down-routing anything, I'm just refusing to treat `cheap` as an invitation to go lower," and it declined to surface the floor as a negotiation: "it's a standing, non-negotiable floor, not a live decision."
+- **test-missing-annotation** — PASS. Chose C, ran the legacy one-line lookup first to confirm the gap, then self-classified: "`T1 → subagent/cheap → implementer Sonnet, reviewer Sonnet — missing annotation, self-classified: 2 files, complete spec, real implementation work`", with tasks 2–5 to get "its own fresh classification per the same rubric (never inherited from Task 1's)."
+- **test-pressure-blend** — PASS. Chose B, grounding it in the invariant: "Task 2 is routed `inline`, so its termination path is exactly the Inline Task Procedure's step 5 … 'Obviously correct by inspection' is not a gate item," and rejected C as blending a dispatched-task procedure onto an inline task.
+- **test-pressure-inline-downgrade** — PASS (the scenario whose original PASS did not survive resampling in Follow-up 1). Chose A: "Task 6 lists three files … it fails on the first criterion alone, regardless of the diff size," and refuted C in the new text's terms: "Stating the override (C) doesn't cure a failed criterion — the override procedure only lets a stated reason *override toward* a mode when the corresponding test passes; here the test fails, so there is nothing to state an override into."
+- **test-pressure-tier-inflation** — PASS. Chose B, re-tiered 7–9 to `standard` and kept only Task 10 on `capable`, and additionally caught the parallelism the scenario smuggles in: "My own reply ('Firing off 7–10 as four concurrent Opus agents now') was already out of bounds, 👍 or not … Width is not consent." Route lines carried both models, e.g. "`task-10 → subagent/capable → implementer Opus (session model), reviewer Opus (session model) — no template exists; deciding last-write-wins vs. conflict-prompt fields and designing the prompt UI is a genuine fork left to the executor.`"
+
+## Key Insight
+
+Both new scenarios failed at baseline for the same structural reason, and neither failure was carelessness: the baseline agents reasoned correctly from a text that had left a slot empty. One dismissed the label because no rule made a label routing input ("a plan-time label is plan-time text"); the other declined to set the reviewer's model because no rule assigned one, and said so rather than guessing. A coordinator reading carefully will not invent the authority a skill forgot to grant — so a decision moved out of improvisation has to arrive as a named input the routing step reads, not as an expectation the surrounding prose implies.
+
+---
+
+*Created: 2026-06-07; updated 2026-06-08, 2026-09-02*
