@@ -1,0 +1,286 @@
+<title>Ceremony Map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F5F7; --ink:#1B2430; --ink2:#4B5563; --mute:#8A94A0; --line:#C9D0D8; --panel:#FFFFFF;
+  --acc:#D9581E; --acc-soft:#FBE9DF; --ok:#2E7D5B; --ok-soft:#E1F0E9; --rm:#B14A3A; --rm-soft:#F4E4E1; --keep:#E8EBEF;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141A21; --ink:#E6EBF0; --ink2:#B7C0CA; --mute:#7C8794; --line:#2E3742; --panel:#1C232C;
+    --acc:#F0783A; --acc-soft:#3A2418; --ok:#4FB58A; --ok-soft:#173226; --rm:#D9705F; --rm-soft:#3A2220; --keep:#242C36;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141A21; --ink:#E6EBF0; --ink2:#B7C0CA; --mute:#7C8794; --line:#2E3742; --panel:#1C232C;
+  --acc:#F0783A; --acc-soft:#3A2418; --ok:#4FB58A; --ok-soft:#173226; --rm:#D9705F; --rm-soft:#3A2220; --keep:#242C36;
+}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5;margin:0}
+main{max-width:1180px;margin:0 auto;padding:40px 28px 64px}
+h1{font-size:30px;font-weight:600;letter-spacing:-0.01em;margin:0 0 6px;text-wrap:balance}
+h2{font-size:18px;font-weight:600;margin:40px 0 10px}
+.lede{color:var(--ink2);max-width:66ch;margin:0 0 8px}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+figure{margin:18px 0 0}
+.scroll{overflow-x:auto;border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:14px 12px}
+svg{display:block;max-width:100%;height:auto;min-width:900px;color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif}
+figcaption{color:var(--ink2);font-size:13.5px;margin:10px 2px 0;max-width:80ch}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin:12px 2px 0;font-size:13px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:22px;height:13px;border:1.5px solid var(--line);background:var(--keep);display:inline-block;border-radius:2px}
+.sw.chg{border-color:var(--acc);background:var(--panel)}
+.sw.add{border-color:var(--acc);background:var(--acc-soft)}
+.sw.rm{border-color:var(--rm);background:var(--rm-soft);position:relative}
+.sw.rm::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;border-top:1.5px solid var(--rm)}
+.sw.ok{border-color:var(--ok);background:var(--ok-soft)}
+/* budget strip */
+.bars{display:grid;grid-template-columns:230px 1fr 92px;gap:8px 14px;align-items:center;margin-top:12px;max-width:900px}
+.bars .lab{font-size:13.5px}
+.bars .lab small{display:block;color:var(--mute);font-size:12px}
+.track{position:relative;height:16px;background:var(--keep);border-radius:2px;overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;background:var(--mute);border-radius:2px}
+.fill.acc{background:var(--acc)}
+.fill.ok{background:var(--ok)}
+.fill.ghost{background:transparent;border:1.5px dashed var(--rm);box-sizing:border-box}
+.num{font-family:"IBM Plex Mono",monospace;font-size:13px;font-variant-numeric:tabular-nums;text-align:right;color:var(--ink2)}
+/* table */
+table{border-collapse:collapse;width:100%;font-size:14px;margin-top:12px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);font-weight:500}
+td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.rank{font-family:"IBM Plex Mono",monospace;color:var(--mute);width:28px}
+.pill{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:10px;border:1px solid var(--line);white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.pill.acc{background:var(--acc-soft);color:var(--acc);border-color:transparent}
+.pill.rm{background:var(--rm-soft);color:var(--rm);border-color:transparent}
+.pill.mute{color:var(--mute)}
+.wrap{overflow-x:auto}
+.note{color:var(--ink2);font-size:13.5px;max-width:78ch;margin-top:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<main>
+  <div class="eyebrow">superpowers-beads · execution loop · 2026-09-02</div>
+  <h1>Ceremony Map</h1>
+  <p class="lede">One task's lifecycle through the three roles, with every mandated call drawn as a node. Marks show what the proposals remove, change, or add, and the numbers behind each come from 14 days of solo and zanjir transcripts.</p>
+
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 1210 600" role="img" aria-label="Swimlane diagram of one task through coordinator, implementer, and reviewer. Three implementer reads collapse into one bd workfile call; a mutation check is added before DONE; the reviewer's falsification becomes required and the reviewer is skipped when a GREEN-run task follows.">
+      <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="arw-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--acc)"/>
+        </marker>
+      </defs>
+
+      <!-- lanes -->
+      <rect x="120" y="40" width="1080" height="170" fill="var(--keep)" opacity="0.45" rx="3"/>
+      <rect x="120" y="230" width="1080" height="170" fill="var(--keep)" opacity="0.45" rx="3"/>
+      <rect x="120" y="420" width="1080" height="170" fill="var(--keep)" opacity="0.45" rx="3"/>
+      <text x="14" y="70" font-size="12" font-weight="600" fill="currentColor">COORDINATOR</text>
+      <text x="14" y="86" font-size="11" fill="var(--mute)">19 calls · 44K/task</text>
+      <text x="14" y="260" font-size="12" font-weight="600" fill="currentColor">IMPLEMENTER</text>
+      <text x="14" y="276" font-size="11" fill="var(--mute)">30 calls before</text>
+      <text x="14" y="290" font-size="11" fill="var(--mute)">first edit · 78K</text>
+      <text x="14" y="450" font-size="12" font-weight="600" fill="currentColor">REVIEWER</text>
+      <text x="14" y="466" font-size="11" fill="var(--mute)">44 calls · 78K</text>
+      <text x="14" y="480" font-size="11" fill="var(--mute)">0.54× implementer</text>
+
+      <!-- ===== coordinator nodes (y 103..147) ===== -->
+      <rect x="130" y="103" width="100" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="180" y="129" font-size="12" text-anchor="middle" fill="currentColor">bd ready · route</text>
+
+      <rect x="245" y="103" width="105" height="44" rx="3" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.6"/>
+      <text x="297" y="129" font-size="12" text-anchor="middle" fill="currentColor">scope glance</text>
+      <text x="297" y="163" font-size="10.5" text-anchor="middle" fill="var(--acc)">errors today: fix</text>
+
+      <rect x="365" y="103" width="70" height="44" rx="3" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.6"/>
+      <text x="400" y="129" font-size="12" text-anchor="middle" fill="currentColor">claim</text>
+      <text x="400" y="163" font-size="10.5" text-anchor="middle" fill="var(--acc)">hook: ids only (D2)</text>
+
+      <rect x="450" y="103" width="130" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="515" y="124" font-size="12" text-anchor="middle" fill="currentColor">dispatch</text>
+      <text x="515" y="138" font-size="12" text-anchor="middle" fill="currentColor">implementer</text>
+
+      <rect x="600" y="103" width="120" height="44" rx="3" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.6"/>
+      <text x="660" y="129" font-size="12" text-anchor="middle" fill="currentColor">review-package</text>
+      <text x="660" y="163" font-size="10.5" text-anchor="middle" fill="var(--acc)">+ pinned worktree</text>
+
+      <rect x="805" y="103" width="120" height="44" rx="3" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.6"/>
+      <text x="865" y="124" font-size="12" text-anchor="middle" fill="currentColor">dispatch</text>
+      <text x="865" y="138" font-size="12" text-anchor="middle" fill="currentColor">reviewer</text>
+      <text x="865" y="163" font-size="10.5" text-anchor="middle" fill="var(--acc)">model = tier (D5)</text>
+
+      <rect x="945" y="103" width="110" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="1000" y="129" font-size="12" text-anchor="middle" fill="currentColor">verdict · close</text>
+
+      <rect x="1075" y="103" width="110" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="1130" y="124" font-size="12" text-anchor="middle" fill="currentColor">fix width →</text>
+      <text x="1130" y="138" font-size="12" text-anchor="middle" fill="currentColor">re-review</text>
+      <text x="1130" y="163" font-size="10.5" text-anchor="middle" fill="var(--mute)">unchanged (D4)</text>
+
+      <!-- coordinator arrows -->
+      <line x1="230" y1="125" x2="243" y2="125" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="350" y1="125" x2="363" y2="125" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="435" y1="125" x2="448" y2="125" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="580" y1="125" x2="598" y2="125" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="720" y1="125" x2="803" y2="125" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="925" y1="125" x2="943" y2="125" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="1055" y1="125" x2="1073" y2="125" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+
+      <!-- dispatch implementer: dogleg down to i1 -->
+      <path d="M515 147 V215 H205 V291" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <text x="360" y="209" font-size="10.5" text-anchor="middle" fill="var(--mute)">prompt carries the bead id only</text>
+
+      <!-- DONE back up to review-package -->
+      <path d="M1070 293 V222 H660 V149" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <text x="880" y="238" font-size="10.5" text-anchor="middle" fill="var(--mute)">DONE + commits</text>
+
+      <!-- dispatch reviewer: straight down, with the D3 skip -->
+      <path d="M865 147 V481" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arw-acc)"/>
+      <rect x="872" y="360" width="118" height="30" rx="3" fill="var(--acc-soft)" stroke="var(--acc)" stroke-width="1"/>
+      <text x="931" y="373" font-size="10.5" text-anchor="middle" fill="var(--acc)">skipped when a GREEN</text>
+      <text x="931" y="385" font-size="10.5" text-anchor="middle" fill="var(--acc)">run task follows (D3)</text>
+
+      <!-- verdict up to close -->
+      <path d="M1137 483 V170 H1000 V149" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+
+      <!-- ===== implementer nodes (y 293..337) ===== -->
+      <rect x="130" y="293" width="150" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="205" y="314" font-size="12" text-anchor="middle" fill="currentColor">dispatch-env ·</text>
+      <text x="205" y="328" font-size="12" text-anchor="middle" fill="currentColor">CONTEXT.md</text>
+      <text x="205" y="353" font-size="10.5" text-anchor="middle" fill="var(--mute)">keep · 4.5K</text>
+
+      <!-- removed trio -->
+      <rect x="300" y="293" width="80" height="44" rx="3" fill="var(--rm-soft)" stroke="var(--rm)" stroke-width="1.2"/>
+      <text x="340" y="319" font-size="12" text-anchor="middle" fill="currentColor">bd show</text>
+      <line x1="304" y1="315" x2="376" y2="315" stroke="var(--rm)" stroke-width="1.4"/>
+
+      <rect x="395" y="293" width="90" height="44" rx="3" fill="var(--rm-soft)" stroke="var(--rm)" stroke-width="1.2"/>
+      <text x="440" y="319" font-size="12" text-anchor="middle" fill="currentColor">bd get body</text>
+      <line x1="399" y1="315" x2="481" y2="315" stroke="var(--rm)" stroke-width="1.4"/>
+
+      <rect x="500" y="293" width="85" height="44" rx="3" fill="var(--rm-soft)" stroke="var(--rm)" stroke-width="1.2"/>
+      <text x="542" y="319" font-size="12" text-anchor="middle" fill="currentColor">bd rulings</text>
+      <line x1="504" y1="315" x2="581" y2="315" stroke="var(--rm)" stroke-width="1.4"/>
+      <text x="542" y="283" font-size="10.5" text-anchor="middle" fill="var(--rm)">rulings printed twice · 12K · 98% skip it</text>
+
+      <!-- replacement -->
+      <rect x="300" y="350" width="285" height="30" rx="3" fill="var(--acc-soft)" stroke="var(--acc)" stroke-width="1.6"/>
+      <text x="442" y="369" font-size="12" text-anchor="middle" fill="currentColor">bd workfile · 1 call replaces 3 · −12K (D1)</text>
+      <path d="M340 337 V348" stroke="var(--acc)" stroke-width="1.2" marker-end="url(#arw-acc)"/>
+      <path d="M440 337 V348" stroke="var(--acc)" stroke-width="1.2" marker-end="url(#arw-acc)"/>
+      <path d="M542 337 V348" stroke="var(--acc)" stroke-width="1.2" marker-end="url(#arw-acc)"/>
+
+      <rect x="600" y="293" width="95" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="647" y="319" font-size="12" text-anchor="middle" fill="currentColor">comment list</text>
+
+      <rect x="710" y="293" width="95" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="757" y="319" font-size="12" text-anchor="middle" fill="currentColor">RED → GREEN</text>
+
+      <rect x="905" y="293" width="110" height="44" rx="3" fill="var(--acc-soft)" stroke="var(--acc)" stroke-width="1.6"/>
+      <text x="960" y="314" font-size="12" text-anchor="middle" fill="currentColor">mutation check</text>
+      <text x="960" y="328" font-size="11" text-anchor="middle" fill="var(--acc)">new, before DONE</text>
+      <text x="960" y="353" font-size="10.5" text-anchor="middle" fill="var(--acc)">targets 70% of review FAILs</text>
+
+      <rect x="1035" y="293" width="70" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="1070" y="319" font-size="12" text-anchor="middle" fill="currentColor">DONE</text>
+
+      <!-- implementer arrows -->
+      <line x1="280" y1="315" x2="298" y2="315" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="380" y1="315" x2="393" y2="315" stroke="var(--rm)" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="485" y1="315" x2="498" y2="315" stroke="var(--rm)" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="585" y1="315" x2="598" y2="315" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="695" y1="315" x2="708" y2="315" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="805" y1="315" x2="903" y2="315" stroke="var(--acc)" stroke-width="1.6" marker-end="url(#arw-acc)"/>
+      <line x1="1015" y1="315" x2="1033" y2="315" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+
+      <!-- ===== reviewer nodes (y 483..527) ===== -->
+      <rect x="790" y="483" width="150" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="865" y="504" font-size="12" text-anchor="middle" fill="currentColor">body · package ·</text>
+      <text x="865" y="518" font-size="12" text-anchor="middle" fill="currentColor">comments</text>
+      <text x="865" y="543" font-size="10.5" text-anchor="middle" fill="var(--mute)">keep · no duplication</text>
+
+      <rect x="960" y="483" width="110" height="44" rx="3" fill="var(--panel)" stroke="var(--acc)" stroke-width="1.6"/>
+      <text x="1015" y="509" font-size="12" text-anchor="middle" fill="currentColor">falsification</text>
+      <text x="1015" y="543" font-size="10.5" text-anchor="middle" fill="var(--acc)">required, not encouraged</text>
+      <text x="1015" y="556" font-size="10.5" text-anchor="middle" fill="var(--acc)">image cap on the dispatch</text>
+
+      <rect x="1090" y="483" width="95" height="44" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="1137" y="509" font-size="12" text-anchor="middle" fill="currentColor">PASS / FAIL</text>
+      <text x="1137" y="543" font-size="10.5" text-anchor="middle" fill="var(--mute)">17.7% FAIL today</text>
+
+      <line x1="940" y1="505" x2="958" y2="505" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+      <line x1="1070" y1="505" x2="1088" y2="505" stroke="currentColor" stroke-width="1.2" marker-end="url(#arw)"/>
+
+      <!-- the session boundary: shipped -->
+      <rect x="130" y="483" width="300" height="44" rx="3" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+      <text x="280" y="504" font-size="12" text-anchor="middle" fill="currentColor">session boundary → handoff skill (shipped 1.4.46)</text>
+      <text x="280" y="518" font-size="11" text-anchor="middle" fill="var(--ok)">replaces the transcript read that drove 500K–800K peaks</text>
+      <text x="280" y="546" font-size="10.5" text-anchor="middle" fill="var(--mute)">outside the task loop: fires at 400K, ~250 turns, or the owner's words</text>
+    </svg>
+    </div>
+    <div class="legend">
+      <span><i class="sw"></i>unchanged</span>
+      <span><i class="sw chg"></i>changed</span>
+      <span><i class="sw add"></i>added</span>
+      <span><i class="sw rm"></i>removed</span>
+      <span><i class="sw ok"></i>shipped</span>
+    </div>
+    <figcaption>One dispatched task, left to right in each lane. The implementer's three contract reads collapse into one call, a mutation check lands before DONE, and the reviewer's experiment becomes mandatory or the reviewer is skipped entirely when a later plan task executes the artifact. Lane figures are 14-day medians from 181 implementer, 157 reviewer, and 165 coordinator windows.</figcaption>
+  </figure>
+
+  <h2>Where a session's tokens go</h2>
+  <p class="lede">Per-unit costs measured this week. The dashed outline is the part a proposal removes.</p>
+  <div class="bars">
+    <div class="lab">Session start, before any work<small>rules, catalog, MCP instructions</small></div>
+    <div class="track"><div class="fill" style="width:46%"></div></div>
+    <div class="num">37K</div>
+
+    <div class="lab">Implementer contract read<small>per dispatched task</small></div>
+    <div class="track"><div class="fill" style="width:40%"></div><div class="fill ghost" style="left:25%;width:15%"></div></div>
+    <div class="num">32K → 20K</div>
+
+    <div class="lab">Coordinator, claim to close<small>per task, mostly outputs it never uses</small></div>
+    <div class="track"><div class="fill" style="width:55%"></div></div>
+    <div class="num">44K</div>
+
+    <div class="lab">Reviewer, whole run<small>per task; skipped for GREEN-tested tasks</small></div>
+    <div class="track"><div class="fill acc" style="width:98%"></div></div>
+    <div class="num">78K</div>
+
+    <div class="lab">Resume by reading the transcript<small>per read, 39 of 93 solo sessions</small></div>
+    <div class="track"><div class="fill ghost" style="width:18%"></div></div>
+    <div class="num">~14K · gone</div>
+  </div>
+  <p class="note">Scale: 80K tokens is the full track. The transcript figure is 58K characters at four characters per token, per read; the real cost was that those sessions ran to 500K to 800K peaks, and the handoff skill removes the read.</p>
+
+  <h2>Changes, ranked by what they save or catch</h2>
+  <div class="wrap">
+  <table>
+    <thead><tr><th></th><th>Change</th><th>Where it lands</th><th>Measured basis</th><th>Effect</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="rank">1</td><td>Handoff skill: close, resume, night briefs</td><td class="mono">skills/handoff</td><td>39/93 and 19/31 sessions resumed by transcript; peaks 500K–800K</td><td>Removes the read; sessions end at the 400K rule</td><td><span class="pill ok">shipped 1.4.46</span></td></tr>
+      <tr><td class="rank">2</td><td>Mutation check moves into the implementer, before DONE</td><td class="mono">agents/implementer.md</td><td>51 of 73 review findings were a green test proving nothing</td><td>Turns reviewer catches into self-catches; shrinks the 31% re-review share</td><td><span class="pill acc">proposed</span></td></tr>
+      <tr><td class="rank">3</td><td>No reviewer on tasks a later GREEN run executes; all-command gates run themselves</td><td class="mono">SDD Review Tier</td><td>2 of 41 FAILs were gate commands; skill tasks: 0 findings, 6 proposals</td><td>−1 dispatch, ~44 calls, ~78K per such task</td><td><span class="pill ok">approved D3</span></td></tr>
+      <tr><td class="rank">4</td><td><code>bd workfile</code> replaces show, body export, and rulings</td><td class="mono">implementer-prompt.md · hybrid inline</td><td>rulings block 12K, printed twice; 98% of implementers skip the second</td><td>−2 calls, −12K per executor</td><td><span class="pill ok">approved D1</span></td></tr>
+      <tr><td class="rank">5</td><td>Image cap on implementer and reviewer dispatches</td><td class="mono">agents/*.md</td><td>20% of subagent bytes are images; single reviewers 49% to 84.5%</td><td>Bounds the heaviest subagent transcripts</td><td><span class="pill acc">proposed</span></td></tr>
+      <tr><td class="rank">6</td><td>Reviewer model bound to the task's tier</td><td class="mono">SDD Model Selection</td><td>No rule sets it today; Opus chosen ad hoc for a skill review</td><td>Visible, challengeable, no capable model on standard work</td><td><span class="pill ok">approved D5</span></td></tr>
+      <tr><td class="rank">7</td><td>Falsification required for every gate item claiming coverage</td><td class="mono">agents/task-reviewer.md</td><td>Charter says "encouraged"; 70% of catches came from it</td><td>Reviewer confirms the implementer's experiment instead of discovering the gap</td><td><span class="pill acc">proposed</span></td></tr>
+      <tr><td class="rank">8</td><td>Claim hook prints ruling ids only</td><td class="mono">claim-rulings-guard</td><td>≤4K per claim, ~9 claims per session, never read on dispatch claims</td><td>~1K per claim</td><td><span class="pill ok">approved D2</span></td></tr>
+      <tr><td class="rank">9</td><td>Review package script creates the pinned worktree</td><td class="mono">scripts/review-package</td><td>90% of reviewers ran mutations; 27% of tasks had a pinned worktree</td><td>Invariant, not a saving: experiments stop running on the live tree</td><td><span class="pill acc">proposed</span></td></tr>
+      <tr><td class="rank">10</td><td>Scope glance reads the Files label</td><td class="mono">hybrid-execution step 2</td><td>Errors on every bead; plans write a bold label, not a heading</td><td>A dead rule starts working</td><td><span class="pill acc">proposed</span></td></tr>
+      <tr><td class="rank">11</td><td>Invariant line aligned with the tier skip</td><td class="mono">hybrid-execution Invariants</td><td>"Every dispatched task gets the review" contradicts step 5's skip</td><td>Removes the collision that forced task 1's reviewer</td><td><span class="pill acc">proposed</span></td></tr>
+      <tr><td class="rank">12</td><td>Session-start audit with context-slimming</td><td class="mono">rules · catalog · MCP</td><td>33K to 43K on the first turn, every session</td><td>Unknown until measured by component</td><td><span class="pill mute">separate work</span></td></tr>
+      <tr><td class="rank">13</td><td>Stale tests: prose word order, full-task-text assertions</td><td class="mono">tests/claude-code</td><td>Documented runner red on main; tracked in superpowers-625</td><td>Runner goes green</td><td><span class="pill mute">separate work</span></td></tr>
+      <tr><td class="rank">—</td><td>Changelog exemption from the fix-width rule</td><td class="mono">SDD fix routing</td><td>Superpowers-specific: this repo's changelog widens every fix</td><td>Not applied to other projects</td><td><span class="pill rm">rejected D4</span></td></tr>
+      <tr><td class="rank">—</td><td>Per-epic review replacing per-task review</td><td class="mono">SDD The Loop</td><td>39 of 41 FAILs needed a reader; whole-diff caught 3/14 on seams</td><td>Would find the same defects later, built upon</td><td><span class="pill rm">rejected</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Everything above is recorded on bead <code>superpowers-6aa</code>: both analyses in the body, the FAIL classification as Measurement C, rulings D1 to D5 and the per-epic decision as typed records, and the remaining proposals as a coordinator comment. Nothing in the plugin changes until the brainstorm on that bead runs.</p>
+</main>
