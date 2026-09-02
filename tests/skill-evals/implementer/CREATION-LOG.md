@@ -6,6 +6,8 @@ Pressure-test evidence for `agents/implementer.md`, the system prompt every disp
 
 Each scenario is dispatched to a fresh subagent — Claude Sonnet, general-purpose, no session history — as a single self-contained payload file outside the repository. The payload holds the scenario text through its closing instruction plus the full charter text under test, and instructs the agent to read that one file and use no further tool: no repository read, no search, no other context. The scenario's `## Judging` section is stripped from the payload, so the run never sees the expected behavior. Responses are judged against the Judging section.
 
+The runs have no repository, so commands in a response are stated, not executed: the quoted mutation outcome below is the run's own account of the chained call it wrote, and the judgment is on the decision and the lines emitted.
+
 Runs executed 2026-09-02 in the session that ran the epic's eval task.
 
 ## Baseline: test-green-without-falsification.md — FAIL (RED)
