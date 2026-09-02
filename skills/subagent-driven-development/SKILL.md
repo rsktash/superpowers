@@ -9,7 +9,7 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Why subagents:** You construct exactly the context each task needs — subagents never inherit your session history. This keeps them focused and preserves your own context for coordination.
 
-**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
+**bd conventions:** Read `skills/shared/bd-defaults.md` once per session, skip if already read.
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 

@@ -14,7 +14,7 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 - `inline` → the Inline Task Procedure below
 - `subagent/<tier>` → superpowers-beads:subagent-driven-development, The Loop (per-task procedure), scheduled per The Loop below
 
-**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
+**bd conventions:** Read `skills/shared/bd-defaults.md` once per session, skip if already read.
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 

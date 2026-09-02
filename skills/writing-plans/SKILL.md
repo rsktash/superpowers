@@ -14,7 +14,7 @@ A plan is a contract of intent, not a transcript of the code to come. The planne
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Input:** the root epic bead id, passed as the skill argument (`$ARGUMENTS`), holding the spec. This skill runs forked (see Venue) with no conversation history — read the spec from that bead and the repo, never from a caller's context. Tasks are created as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`. Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` before any bd command.
+**Input:** the root epic bead id, passed as the skill argument (`$ARGUMENTS`), holding the spec. This skill runs forked (see Venue) with no conversation history — read the spec from that bead and the repo, never from a caller's context. Tasks are created as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" -l "review:trivial-deterministic" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`; `-l` is repeatable, and the second label is added only when the task earns it (Execution Annotation). Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` once per session, skip if already read — a forked skill has a fresh context, so this one always reads it.
 
 **Mandatory step:** writing-plans is the step between an epic and ANY execution skill. Executing an undecomposed epic is a bypass, not a shortcut.
 
@@ -85,7 +85,7 @@ Parent: [epic title] — [one-line purpose of the feature]
 This task: [what it does and WHY it matters to the plan]
 Depends on: [what prior tasks produced that this consumes, or "—"]
 
-**Execution:** [inline | subagent/cheap | subagent/standard | subagent/capable] — [one-line reason]
+**Execution:** [inline | subagent/cheap | subagent/standard | subagent/capable] — [one-line reason; if `review:trivial-deterministic` applies, name the executing task]
 
 **Acceptance Gate — DONE when ALL pass:**
 - [ ] [observable outcome]
@@ -133,7 +133,7 @@ Each "NOT Your Concern" names the specific sibling that owns it — never generi
 
 ## Execution Annotation
 
-Every body carries one `**Execution:**` line, mirrored as the create-time label — the router routes from labels and never opens a body.
+Every body carries one `**Execution:**` line, mirrored as the create-time `exec:<mode>` label — the router routes from labels and never opens a body.
 
 - `inline` — 1 file, complete spec, gate verifiable in one command, no judgment
 - `subagent/cheap` — 1–2 files, complete spec, real implementation work
@@ -141,6 +141,8 @@ Every body carries one `**Execution:**` line, mirrored as the create-time label 
 - `subagent/capable` — design judgment or broad codebase understanding
 
 Default to `subagent/*`; `inline` only when dispatch overhead clearly exceeds the work. Tiers are abstract — never name a concrete model. A task whose steps leave a genuine fork to the executor is `subagent/capable` regardless of file count — economize on the contract or on the executor, never both. Tier measures the judgment the task demands, nothing else: scheduling never moves it — a task doesn't become `capable` by joining a wave of `capable` siblings; concurrency belongs to the dependency graph. A reason that says "mechanical" or "follows a template" argues for `standard` at most — fix the tier, not the reason.
+
+A second, independent label is emitted alongside it at create time: `review:trivial-deterministic`, when every gate item is a command, or when a later plan task executes the artifact — and in that second case the Execution line's one-line reason names the executing task. No second label means the combined reviewer runs; subagent-driven-development's Review Tier resolves the label at routing, this section only states when to emit it.
 
 ## Multi-Phase Epics
 

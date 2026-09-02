@@ -19,7 +19,7 @@ writing-plans (or locate it via `docs/beads/*.md` when resuming); drive the loop
 directives (Acceptance Gates falsifiable against under-doing, Drift Detectors, allowed
 Files, TDD steps). Codex cannot compensate for a vague bead.
 
-**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
+**bd conventions:** Read `skills/shared/bd-defaults.md` once per session, skip if already read.
 
 ## Preconditions (check BEFORE the first dispatch)
 

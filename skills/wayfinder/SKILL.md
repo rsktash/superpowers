@@ -15,7 +15,7 @@ Naming the destination is the first act of charting; it fixes the scope and shap
 
 **Refer by name.** In everything the human reads, call the map and its tickets by their titles — the bead id rides beside the name, never stands in for it. A wall of bare ids is illegible.
 
-**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
+**bd conventions:** Read `skills/shared/bd-defaults.md` once per session, skip if already read.
 
 ## The Map
 
