@@ -68,27 +68,30 @@ Frontier parallelism — 2–3 implementers running concurrently — activates O
 
 Follow this procedure for any task routed `inline`.
 
-1. Get the contract and claim — never `--claim`:
+1. Get the contract, then claim — never `--claim`:
    ```bash
-   bd show <task-id>
-   bd rulings <task-id>
-   bd get <task-id> body > .bd/.scratch/progress.md
+   bd workfile <task-id>
    bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
    ```
-   The rulings output is part of the contract: it is inheritance-resolved, so
-   a ruling filed on the parent epic binds this task and no read of the task
-   alone surfaces it. A ruling outranks the body it contradicts.
-   Read `.bd/.scratch/progress.md` — it is your complete contract AND your working copy; the body enters context once, as the file you'll work in. If `bd show`'s section index lists `design`, also read `bd show <task-id> --section design`. Example assignee: "Alex / Claude Opus 4.6".
+   That call writes the body to `.bd/.scratch/<task-id>.md` and prints a
+   header: metadata, deps, the **ACTIVE RULINGS** block, findings, the
+   section index, and notes. The ACTIVE RULINGS block is the rulings read:
+   it is inheritance-resolved, so a ruling filed on the parent epic binds
+   this task and no read of the task alone surfaces it. A ruling outranks
+   the body it contradicts and is settled — implement it, never re-litigate
+   it.
+   Read `.bd/.scratch/<task-id>.md` — it is your complete contract AND your
+   working copy; the body enters context once, as the file you'll work in.
+   If the header's section index lists `design`, also read
+   `bd show <task-id> --section design`. Example assignee: "Alex / Claude
+   Opus 4.6".
 2. Extract the **Acceptance Gate** from the working copy — the machine-verifiable completion criteria (`- [ ]` lines under "Acceptance Gate"). Keep these visible; you re-read them between steps and verify them before closing.
 3. If the task body references images, resolve them to local files and view them before implementing.
-4. Checkbox flips happen in `.bd/.scratch/progress.md` — it already exists from step 1; never re-print the body to get a working copy.
-5. For each step in the task body:
+4. For each step in the task body:
    - **First step only:** read everything listed under "Before you start" — files, rules, callers. Do not skip this.
    - **Attention refresh:** re-read the Acceptance Gate items before executing — attention on initial goals decays after 3–4 tool calls.
    - Execute the step.
-   - In `.bd/.scratch/progress.md`, flip the step's `- [ ]` to `- [x]` with the Edit tool. Local edit only — do not `bd update` per step.
-6. After all steps complete, sync the checkbox state to bd once: `bd update <task-id> --body-file .bd/.scratch/progress.md`. **Why:** per-step `bd update` roundtrips get skipped in practice; batching keeps the bookkeeping cheap enough to happen.
-7. **Verify the Acceptance Gate before closing:**
+5. **Verify the Acceptance Gate before closing:**
    - Re-read every gate item from the task body.
    - Run the verification command for each (test, file check, grep for export).
    - If ALL pass: `bd close <task-id> --reason "Done — all gate items verified"`.
