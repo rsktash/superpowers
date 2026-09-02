@@ -2,11 +2,14 @@
 # Generate a review package: commit list, stat summary, and the net
 # diff with extended context, written to a file the reviewer reads in one
 # call. Using the recorded per-task BASE (not HEAD~1) keeps multi-commit
-# tasks intact.
+# tasks intact. Also creates (or reuses) the pinned review worktree at
+# HEAD — the only directory a reviewer may run commands in.
 #
 # Usage: review-package BASE HEAD [OUTFILE]
 # Default OUTFILE: <repo-root>/.bd/.scratch/review-<base7>..<head7>.diff
 # (named per range, so a re-review after fixes gets a distinct fresh file).
+# Output: two lines — the package path, then the pinned review worktree
+# path (<repo-root>/.worktrees/review-<head7>).
 set -euo pipefail
 
 if [ $# -lt 2 ] || [ $# -gt 3 ]; then
@@ -20,13 +23,28 @@ head=$2
 git rev-parse --verify --quiet "$base" >/dev/null || { echo "bad BASE: $base" >&2; exit 2; }
 git rev-parse --verify --quiet "$head" >/dev/null || { echo "bad HEAD: $head" >&2; exit 2; }
 
+root=$(git rev-parse --show-toplevel)
+
 if [ $# -eq 3 ]; then
   out=$3
 else
-  root=$(git rev-parse --show-toplevel)
   dir="$root/.bd/.scratch"
   mkdir -p "$dir"
   out="$dir/review-$(git rev-parse --short "$base")..$(git rev-parse --short "$head").diff"
+fi
+
+wt="$root/.worktrees/review-$(git rev-parse --short "$head")"
+head_sha=$(git rev-parse "$head")
+
+if [ -e "$wt" ]; then
+  if [ -d "$wt" ] && [ "$(git -C "$wt" rev-parse HEAD 2>/dev/null || true)" = "$head_sha" ]; then
+    : # reuse existing worktree already pinned at HEAD
+  else
+    echo "review worktree path exists but is not a worktree at $head: $wt" >&2
+    exit 2
+  fi
+else
+  git worktree add --detach "$wt" "$head" >&2
 fi
 
 {
@@ -43,3 +61,4 @@ fi
 } > "$out"
 
 echo "$out"
+echo "$wt"
