@@ -167,6 +167,22 @@ fi
 rm -f /tmp/review-package-argcount.out
 
 echo ""
+echo "Test 7: a plain directory at the worktree path is rejected, never reused"
+git worktree remove --force "$TEST_DIR/.worktrees/review-$(git rev-parse --short "$HEAD_REV")" >/dev/null 2>&1 || true
+mkdir -p "$TEST_DIR/.worktrees/review-$(git rev-parse --short "$HEAD_REV")"
+echo "stale" > "$TEST_DIR/.worktrees/review-$(git rev-parse --short "$HEAD_REV")/stale.txt"
+set +e
+"$SCRIPT" "$BASE" "$HEAD_REV" >/tmp/review-package-plain-dir.out 2>&1
+PLAIN_DIR_EXIT=$?
+set -e
+if [ "$PLAIN_DIR_EXIT" -eq 2 ] && grep -q "not a worktree" /tmp/review-package-plain-dir.out; then
+    pass "plain directory at the worktree path exits 2 with the not-a-worktree message"
+else
+    fail "plain directory at the worktree path exits 2 with the not-a-worktree message (got exit $PLAIN_DIR_EXIT: $(tail -1 /tmp/review-package-plain-dir.out))"
+fi
+rm -f /tmp/review-package-plain-dir.out
+
+echo ""
 echo "========================================"
 if [ "$FAILED" -eq 0 ]; then
     echo "STATUS: PASSED"
