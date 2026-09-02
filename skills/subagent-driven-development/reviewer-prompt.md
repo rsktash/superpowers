@@ -8,7 +8,11 @@ catch-rate gain.)
 ```
 Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edits confined to the disposable review worktree; general-purpose only if the review needs browser/device/MCP tools):
   description: "Review Task N: [task name]"
-  model: [REQUIRED — resolve per SKILL.md Model Selection / Review Tier; an omitted model silently inherits the session's most expensive one]
+  model: [REQUIRED — resolve the task's tier through the shared tier map
+    (skills/shared/model-tiers.md): `standard` → Sonnet, `capable` → the
+    capable model. This is the same model the coordinator's route line states
+    for this task; it is never the coordinator's free choice. An omitted
+    model silently inherits the session's most expensive one.]
   prompt: |
     You are reviewing whether an implementation matches its specification AND
     whether it is well-built. Spec compliance comes first; spec findings outrank
@@ -17,15 +21,23 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     BASE_SHA: [commit before task]
     HEAD_SHA: [current commit(s)]
     REVIEW_PACKAGE: [path printed by review-package]
+    REVIEW_WORKTREE: [path printed by review-package]
+
+    REVIEW_WORKTREE is the only directory you run commands in — never the
+    live working tree.
 
     ## What Was Requested
 
     Task bead: <bead-id>. Fetch the contract yourself from the repo root:
-    `bd get <bead-id> body` — its requirements and its **Acceptance Gate** are
-    what you review against. [Never paste the task body into this prompt — the
-    reviewer fetches it; the controller's context never carries it.] Need a bd
-    command this prompt does not name? `bd prime` prints the full reference —
-    never discover syntax via `--help`, the binary, or the database.
+    `bd workfile <bead-id> --out .bd/.scratch/review-<bead-id>.md` — the
+    printed header carries the rulings block your Authority anchors cite;
+    Read the written file for the body — its requirements and its
+    **Acceptance Gate** are what you review against. The `--out` name keeps
+    a re-review from overwriting the implementer's copy of the same bead's
+    scratch file. [Never paste the task body into this prompt — the reviewer
+    fetches it; the controller's context never carries it.] Need a bd command
+    this prompt does not name? `bd prime` prints the full reference — never
+    discover syntax via `--help`, the binary, or the database.
 
     ## What Implementer Claims They Built
 
@@ -45,14 +57,14 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
 
     **DO:**
     - Read the actual code they wrote: open REVIEW_PACKAGE (commit list + stat +
-      full diff with 15 lines of context) in one call. Consult the working tree
+      full diff with 15 lines of context) in one call. Consult REVIEW_WORKTREE
       only for context beyond what the diff hunks show.
     - Compare actual implementation to requirements line by line
     - Check for missing pieces they claimed to implement
     - Look for extra features they didn't mention
-    - Where a gate item claims coverage, prove it by falsification in the
-      review worktree: break the covered thing, show the check firing, revert.
-      "Passes" alone cannot distinguish a working guard from a decorative one.
+    - Where a gate item claims coverage, run falsification per your charter —
+      required, not optional. "Passes" alone cannot distinguish a working
+      guard from a decorative one.
     - Read the bead's FULL comment list once: `bd comment list <bead-id>`
       (the `--tag reviewer` filter only identifies addressed deviations —
       provenance is checked against the full list, since a fabricated ruling
@@ -108,11 +120,12 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     ## Constraints
 
     - Run only this task's targeted tests — the dispatch names them: [exact
-      commands, from the task's gate]. Add narrower checks freely, and
-      falsification experiments within the charter's budget — five, each a
-      pre-stated claim; never a workspace, component, or full suite — those
-      are the orchestrator's gate.
+      commands, from the task's gate]. Add narrower checks freely; run
+      falsification per your charter, inside REVIEW_WORKTREE only — never a
+      workspace, component, or full suite — those are the orchestrator's gate.
     - Verify by reading code and running commands, not by trusting the report.
+    - Images: never the same one twice, at most two reads per dispatch — per
+      your charter.
 
     ## Report format
 
