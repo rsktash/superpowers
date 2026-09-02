@@ -7,6 +7,33 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.46] - 2026-09-02
+
+Net `skills/` word delta: **+598** (handoff +598, new skill). Nothing removed: the skill fills a
+gap no existing text covered, and the compaction it enables lands elsewhere — the resume-by-
+transcript habit it replaces cost 34K–58K characters per read.
+
+**handoff skill: session close, resume, night-session preparation.** Mining the last 14 days of
+solo and zanjir transcripts showed 39 of 93 and 19 of 31 sessions opening with "read last
+session's latest 8-10 messages", and the fresh session then reading its predecessor's raw JSONL —
+those are the sessions that peaked at 500K–800K tokens, past the 400K boundary the orchestration
+rule sets. The rule already demanded "pointers to durable state, never a retelling" at the
+boundary, but nothing produced those pointers or told a fresh session where to look. The skill
+adds three procedures: **Close** writes a fixed 20-line record (header, Done, Next, Parked, a
+5-line Thread with the pending decision, Rules) as a `[handoff]`-tagged comment on one anchor
+bead per project (`Session handoffs`, label `handoff-anchor`) and delivers it as the final message
+or by `SendMessage`; **Resume** reads that record with `bd comment list <anchor> --tag handoff
+--last 1`, verifies only the beads it names, and never opens a transcript — the habitual prompt is
+this procedure; **Night**, only on the owner's explicit words, pairs one open session to one epic
+via `ListAgents`, refuses two sessions on one repository, sends one brief each, and the receiver
+runs the named execution skill, never rules, parks questioned tasks, and closes with a `day`
+record for the morning. Nothing fires before the owner's words or the boundary actually reached.
+Pressure tests live in `tests/skill-evals/handoff/` (five scenarios, `CREATION-LOG.md`): all five
+baselines passed the decision lines without the skill but drifted on the artifact — three of
+three Close runs invented `bd comment add` flags, none produced the `Rules:` line, the night
+receiver closed with the wrong header — and all five pass with the drift gone once the skill pins
+the template and the one-argument posting command.
+
 ## [1.4.45] - 2026-09-02
 
 Net `skills/` word delta: **−12** (subagent-driven-development −61, hybrid-execution +26,
