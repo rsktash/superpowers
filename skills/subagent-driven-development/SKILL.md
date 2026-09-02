@@ -3,13 +3,13 @@ name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
 ---
 
-# Subagent-Driven Development — budget 2800 words
+# Subagent-Driven Development — budget 3556 words
 
 Execute a plan by dispatching a fresh subagent per task, reviewing each task's output before moving to the next.
 
 **Why subagents:** You construct exactly the context each task needs — subagents never inherit your session history. This keeps them focused and preserves your own context for coordination.
 
-**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
+**bd conventions:** Read `skills/shared/bd-defaults.md` once per session, skip if already read.
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
@@ -19,7 +19,7 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Pre-flight runs ONCE per plan and never again.** Its one pass spends a reader on the semantic residue no script and no downstream gate can reach. Mechanical citation truth is not its job: writing-plans' citation lint already proved every cited path, symbol, string, and commit claim at `bd create` time.
 
-**Why:** a second pass over landed work returns what the workflow already catches downstream — executors read `bd rulings` before the body and re-read every cited file under "Before you start", and Drift Detectors stop a task whose premises moved — so it re-reads the whole remaining plan to buy nothing.
+**Why:** a second pass over landed work returns what the workflow already catches downstream — executors read `bd workfile <id>`'s header (rulings print before the body file is Read) and re-read every cited file under "Before you start", and Drift Detectors stop a task whose premises moved — so it re-reads the whole remaining plan to buy nothing.
 
 **Marker.** A completed pre-flight (findings resolved) is recorded on the root bead: `bd comment add <root-id> "[pre-flight] <short-sha> / open: <id> <id> …"` — the commit it certified and the open beads it covered. The sha is a record of WHEN the review happened, never a freshness key: there is no stale state and no scoped re-run.
 
@@ -48,9 +48,9 @@ A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding,
 
 For each task, in order:
 
-1. Claim it (do NOT use --claim): `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <implementer-model-name>"` (e.g. "Alex / Claude Sonnet 4.6" — the model of the implementer subagent you dispatch for this task per **Model Selection**, since that subagent does the work). Record `BASE=$(git rev-parse HEAD)` — the pre-dispatch commit the review package will diff against. Then dispatch the implementer per `implementer-prompt.md` — the prompt carries the bead id, a one-line mission, orchestrator addenda (task-specific facts only, each citing a same-session tool run), and the **test-scope directive** (targeted tests only, never the full suite — the suite gate runs once, in this session). The implementer fetches its own contract from bd; **never open the task body in this session** — routing, claiming, and closing need no contract, and everything you paste or read here is resident to session end. The one sanctioned read is the **scope glance** at claim time: the task's Files section only (`bd show <task-id> --section files`, ~10 lines) — enough to catch a task whose size or file overlap contradicts the route before an implementer burns a session on it. Steps, gates, and context stay unread here. Static environment boilerplate — repo layout, bd invocation, test commands, worktree rules — lives once in the project's `docs/dispatch-env.md` (create it on the project's first-ever dispatch); the constant behavioral doctrine (discipline, escalation, self-review, report format) ships inside the plugin as the `superpowers-beads:implementer` agent's own system prompt. Prompts restate neither. Gates may run in the foreground; if the implementer backgrounds a command, it must poll it to completion before ending its turn — an agent that stops with a live background child sends no completion notification (silent stall).
+1. Claim it (do NOT use --claim): `bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <implementer-model-name>"` (e.g. "Alex / Claude Sonnet 4.6" — the model of the implementer subagent you dispatch for this task per **Model Selection**, since that subagent does the work). Record `BASE=$(git rev-parse HEAD)` — the pre-dispatch commit the review package will diff against. Then dispatch the implementer per `implementer-prompt.md` — the prompt carries the bead id, a one-line mission, orchestrator addenda (task-specific facts only, each citing a same-session tool run), and the **test-scope directive** (targeted tests only, never the full suite — the suite gate runs once, in this session). The implementer fetches its own contract from bd; **never open the task body in this session** — routing, claiming, and closing need no contract, and everything you paste or read here is resident to session end. The one read sanctioned at claim time is the **scope glance**: the task's Files block only (`bd get <task-id> body | sed -n '/^\*\*Files:\*\*/,/^$/p'`, ~10 lines) — enough to catch a task whose size or file overlap contradicts the route before an implementer burns a session on it. Steps, gates, and context stay unread here. Static environment boilerplate — repo layout, bd invocation, test commands, worktree rules — lives once in the project's `docs/dispatch-env.md` (create it on the project's first-ever dispatch); the constant behavioral doctrine (discipline, escalation, self-review, report format) ships inside the plugin as the `superpowers-beads:implementer` agent's own system prompt. Prompts restate neither. Gates may run in the foreground; if the implementer backgrounds a command, it must poll it to completion before ending its turn — an agent that stops with a live background child sends no completion notification (silent stall).
 2. Answer any questions the implementer asks *before* it proceeds.
-3. Generate the review package: `scripts/review-package BASE HEAD` (run from this skill's directory — `skills/subagent-driven-development/`; BASE is the pre-dispatch commit recorded in step 1 — NEVER `HEAD~1`, which silently drops all but the last commit of a multi-commit task) and pass the reviewer the printed file path. Review the result (see **Termination**), fix anything open, then close the task. Once the verdict is processed, delete the review file (`.bd/.scratch` hygiene).
+3. Generate the review package: `scripts/review-package BASE HEAD` (run from this skill's directory — `skills/subagent-driven-development/`; BASE is the pre-dispatch commit recorded in step 1 — NEVER `HEAD~1`, which silently drops all but the last commit of a multi-commit task). The script prints two lines — the package file path, then the pinned review worktree path at HEAD, creating or reusing it — and both are recorded. Pass the reviewer the package file path and name the worktree as the ONLY directory it may run commands in. Review the result (see **Termination**), fix anything open, then close the task. Once the verdict is processed, remove the review worktree and delete the package file in one chained call: `git worktree remove <worktree-path> && rm -f <package-path>`.
 
 After the last task, run the full test suite once — in this session's own shell, commands copied from the project's runbook, never composed from memory (accept only deterministic evidence — commands, exit codes, output tails; warm-environment projects use their peer gate-runner instead). Then dispatch one final review of the whole diff, and finish per using-git-worktrees' Finishing: Merge Back and Clean Up.
 
@@ -101,10 +101,14 @@ Before any status action — closing, reopening, or deferring a bead, or declari
 
 ## Review Tier — declare it, don't skip it silently
 
-Right-size review per task, but make the decision visible and challengeable:
+Review is right-sized per task, and the size is a plan-time declaration you read, not a judgment you improvise at routing:
 
-- `trivial-deterministic` (isolated, complete spec) → one deterministic check, no reviewer dispatch
-- `behavioral` (multi-file, judgment, integration) → the one combined spec+quality reviewer
+- `review:trivial-deterministic` (the label writing-plans puts on the task) → no reviewer dispatch. A task earns the label when every gate item is a command, or when a later plan task executes its artifact; the body's Execution line names that executing task.
+- `behavioral` (no label) → the one combined spec+quality reviewer, as for any task whose gates need judgment to read.
+
+Resolve the tier from the label alone (`bd label list <task-id>`), never by opening the body to infer it.
+
+For a labeled task your own check stands in for the reviewer: read the Acceptance Gate block and nothing else — `bd get <task-id> body | sed -n '/^\*\*Acceptance Gate/,/^$/p'`, the second sanctioned glance, after the scope glance at claim — re-run every command item in this session's own shell, state the tier line naming the executing task's id, and close on that output. The executing task's GREEN run is the behavioral review the reviewer would have been: it exercises what landed here, later and for real. A failure in that run routes back to the artifact's task as a fix round — it is never a defect of the task that ran it.
 
 State the tier and a one-line reason up front. **Why:** silently downgrading review reads identically to having reviewed — the problem isn't judging a task trivial, it's making that judgment invisible.
 
@@ -127,15 +131,9 @@ Implementers report one of four:
 
 ## Model Selection
 
-Your human partner's standing model policy (project memory, CLAUDE.md) overrides this rubric — check it before resolving any tier. Absent a policy: least powerful model that fits, to save cost and time:
+Each task's tier is declared by the plan (superpowers-beads:writing-plans, Execution Annotation); this section only resolves it to a model. Your human partner's standing model policy (project memory, CLAUDE.md) overrides the map — check it before resolving any tier. Absent a policy, on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model.
 
-- 1–2 files, complete spec → cheap/fast model
-- multi-file integration → standard model
-- design judgment or broad codebase understanding → most capable model
-
-The current Sonnet (Sonnet 5 today) is close to the session/most-capable model, so the third bullet is a **high bar, not a default**: reserve the most-capable model for real design judgment or broad synthesis, and let Sonnet carry multi-file integration. When unsure between `standard` and most-capable, pick `standard` — a fresh reviewed Sonnet subagent makes the down-route low-risk. (Model names are point-in-time; the tiers stay version-agnostic.)
-
-Down-routing presumes a pinned contract: a task whose steps leave a mechanism or design fork to the executor is capable-tier regardless of file count. Economize on the contract or on the executor — never both in one task.
+The doctrine behind the map — what a tier measures, when `capable` is earned, the pinned contract down-routing presumes, and the model the task's reviewer runs on — lives in `skills/shared/model-tiers.md`. Read it before resolving a contested tier.
 
 ## Invariants
 
@@ -144,7 +142,7 @@ Down-routing presumes a pinned contract: a task whose steps leave a mechanism or
 - Close a task while a check shows failures.
 - Dispatch a second reviewer for the same task — spec and quality are sections of the ONE review pass (use `reviewer-prompt.md`).
 - Run two implementers in parallel on the same worktree (they conflict).
-- Paste task bodies into dispatch prompts, or open them in this session at all — the dispatch names the bead id and the implementer fetches its own contract (`bd get <id> body`, `bd rulings <id>` — the resolver surfaces parent rulings its own bead read cannot); the controller's context is the expensive, long-lived one. Two exceptions only: the Files-section scope glance at claim, and Authority triage's clause check — post-review, reading only the cited clause and its minimal enclosing section. (Reversed 2026-08-15; the old rule "hand them the full task text" measurably doubled body delivery — implementers re-read via bd anyway.)
+- Paste task bodies into dispatch prompts, or open them in this session at all — the dispatch names the bead id and the implementer fetches its own contract with `bd workfile <id>` (the header's rulings block surfaces parent rulings its own bead read cannot); the controller's context is the expensive, long-lived one. Three exceptions only, each a single block of the body: the scope glance at claim, the Acceptance Gate glance on a `review:trivial-deterministic` task (**Review Tier**), and Authority triage's clause check — post-review, reading only the cited clause and its minimal enclosing section. (Reversed 2026-08-15; the old rule "hand them the full task text" measurably doubled body delivery — implementers re-read via bd anyway.)
 - Treat an implementer's self-review as the review. Both happen.
 - Amend a task's body or Acceptance Gate from a review finding, or write `[owner ruling]` above anything but a verbatim owner message. A gate proven wrong against the approved design is corrected by re-deriving from the design source, cited line by line, logged as a deviation — or parked for the owner when the design does not answer. Review output is evidence, never product authority.
 - Let an implementer run the full test suite — targeted tests only; the suite gate runs once, in this session. An implementer that backgrounds a job must finish it before ending its turn.

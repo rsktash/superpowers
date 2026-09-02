@@ -7,6 +7,55 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.47] - 2026-09-02
+
+Net `skills/` word delta: **+610** (`skills/shared/model-tiers.md` +469, new — the tier doctrine
+moved out of `skills/hybrid-execution/references/model-tiers.md`, −222, removed;
+subagent-driven-development +194, writing-plans +111, `reviewer-prompt.md` +90, hybrid-execution
+−29, `implementer-prompt.md` −12; brainstorming +2, codex-execution +2, using-superpowers +3,
+wayfinder +2, the seven-skill once-per-session conventions line). Ruling R-14 sets the title-line
+budget of each skill already over budget at the plan-ready commit — subagent-driven-development,
+hybrid-execution, writing-plans, codex-execution — to its landed word count instead of forcing a
+compaction outside the approved design; the other three touched skills (brainstorming, wayfinder,
+using-superpowers) stay within their unchanged budgets. The corpus grows: the new falsification
+requirement and the two-image cap in subagent-driven-development, the
+`review:trivial-deterministic` label rule and template in writing-plans, and the reviewer's
+`REVIEW_WORKTREE` and tier-bound model lines in `reviewer-prompt.md` cost more words than the
+collapsed implementer read and the deleted `references/model-tiers.md` removed; a further
+compaction pass was out of scope for this epic.
+
+**Execution ceremony: collapse mandated calls per task and re-tier per-task review.** Fourteen
+days of transcripts showed one dispatched task costing the implementer about 30 calls and 78K
+tokens before its first edit, the reviewer about 44 calls and 78K tokens, and the coordinator
+about 19 calls and 44K tokens, and where that went: the implementer's contract read three times
+over (the rulings block printed twice, a mandated third read firing on 1.7% of dispatches), the
+claim hook injecting rulings the coordinator never reads, the review tier keyed on file count so
+a templated five-file task drew a full reviewer, an invariant line contradicting the tier skip,
+the scope glance erroring on every bead, only 27% of reviewers getting a pinned worktree while
+90% ran mutation-shaped commands, no rule binding the reviewer's model, and 70% of what reviewers
+caught being a green test that proved nothing. Fifteen changes close it without dropping a review
+the data shows catching defects — per-task review on judgment tasks and the whole-diff review at
+two or more tasks both stay. The implementer's contract read collapses to one `bd workfile` call,
+replacing the three separate reads. The claim hook in `~/.claude/hooks/claim-rulings-guard`
+prints ruling ids and first lines only, keeping the injected context under 1.5 KB. writing-plans
+emits the `review:trivial-deterministic` label at plan time so a command-only task or one whose
+artifact a later task executes skips the per-task reviewer, and the coordinator re-runs its gate
+commands itself and states the tier line. The reviewer's model is bound to the task's tier map
+and stated in the route line, no longer the coordinator's free choice. `review-package` creates
+the pinned review worktree and prints its path; the reviewer runs every command there,
+unconditionally. Falsification — one mutate/check/revert experiment per gate item that claims
+coverage — is required, not encouraged, for both the implementer and the reviewer, capped at five
+per task. Both dispatches cap image reads at two, never the same image twice. The scope glance
+reads the Files label instead of erroring on it, and the trivial-deterministic tier reads the
+Acceptance Gate block only. The tier doctrine — the model map, the floor, the pinned-contract
+rule — moves into one shared file, `skills/shared/model-tiers.md`, so subagent-driven-development
+and hybrid-execution each carry only the map line and a pointer. The bd-defaults conventions line
+reads once per session, skip if already read, across all seven skills that carry it. Pressure
+tests in `tests/skill-evals/hybrid-execution/` (the trivial-deterministic label and the
+reviewer-model-tier scenarios, plus the eight pre-existing evals re-run) and
+`tests/skill-evals/implementer/` (a green test with no falsification, pressured toward DONE, must
+run the experiment first) all pass.
+
 ## [1.4.46] - 2026-09-02
 
 Net `skills/` word delta: **+598** (handoff +598, new skill). Nothing removed: the skill fills a

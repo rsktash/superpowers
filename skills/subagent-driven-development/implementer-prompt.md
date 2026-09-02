@@ -22,19 +22,19 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        rulings are refused to you). Need a bd command this prompt does not
        name? `bd prime` prints the full reference — never discover syntax via
        `--help`, the binary, or the database.
-       From the repo root: `bd show <bead-id>` (metadata, deps, section index),
-       then `bd get <bead-id> body > .bd/.scratch/progress-<bead-id>.md` and
-       **Read that file** — your working copy: flip each `- [ ]` to `- [x]`
-       there as you complete it (Edit tool, local only),
-       then one `bd update <bead-id> --body-file .bd/.scratch/progress-<bead-id>.md`
-       at the end. If the section index lists a `design` section, also read
+       From the repo root: `bd workfile <bead-id>` — one call whose header
+       prints metadata, deps, the **ACTIVE RULINGS** block, findings, the
+       section index, and notes, and whose body writes to
+       `.bd/.scratch/<bead-id>.md`. **Read that file once** — it is your
+       complete contract AND your local working copy.
+       The header's ACTIVE RULINGS block is REQUIRED reading, never skipped:
+       it is every ruling binding your task, inheritance-resolved — a ruling
+       filed on the parent epic binds you and is invisible on your bead
+       alone. A ruling OUTRANKS the body it contradicts and is settled:
+       implement it, never re-litigate it, never re-open it as a fork, never
+       ask about it again.
+       If the section index lists a `design` section, also read
        `bd show <bead-id> --section design`.
-    3. `bd rulings <bead-id>` — REQUIRED, never skipped. The body is NOT the
-       whole contract: this returns every ruling binding your task,
-       inheritance-resolved — a ruling filed on the parent epic binds you and
-       is invisible on your bead alone. A ruling OUTRANKS the body it
-       contradicts and is settled: implement it, never re-litigate it, never
-       re-open it as a fork, never ask about it again.
        Then `bd comment list <bead-id>` — narrative and evidence: review
        verdicts and BLOCKED reports land here, oldest to newest. Two things
        you must carry out of them:
@@ -45,7 +45,7 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        - A **prior review verdict** tells you what is already fixed and what is
          still owed. On a RESUMED task that verdict, not the body, is the true
          state of the work — the body describes the task, not its progress.
-    4. The body's directive sections govern you: **Context Anchor** (where this
+    3. The body's directive sections govern you: **Context Anchor** (where this
        task fits), **Acceptance Gate** (the ONLY criteria for "done" — do not add
        your own), **Drift Detectors** (editing files outside the Files list →
        STOP — except a test your in-contract change broke, which is in-contract

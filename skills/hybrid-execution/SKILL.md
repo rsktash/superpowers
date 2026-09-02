@@ -3,7 +3,7 @@ name: hybrid-execution
 description: Use when executing implementation plans whose tasks carry Execution annotations - routes each task to inline execution or subagent dispatch per the annotation
 ---
 
-# Hybrid Execution — budget 2900 words
+# Hybrid Execution — budget 2888 words
 
 Execute a plan task-by-task, routing each task to the mode its plan annotation names: trivial tasks run inline in this session; everything else goes to a fresh subagent. Dispatch is the default — inline is reserved for tasks where dispatch overhead exceeds the work itself.
 
@@ -14,7 +14,7 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 - `inline` → the Inline Task Procedure below
 - `subagent/<tier>` → superpowers-beads:subagent-driven-development, The Loop (per-task procedure), scheduled per The Loop below
 
-**bd conventions:** Read `skills/shared/bd-defaults.md` before using any bd commands.
+**bd conventions:** Read `skills/shared/bd-defaults.md` once per session, skip if already read.
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
@@ -26,19 +26,27 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 **Step 0 — pre-flight gate:** resolve the root's pre-flight marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before this session's first claim. Marker present → skip, one line citing it; no marker → run the review once, then write it. Pre-flight runs once per plan and is never re-checked for freshness.
 
-1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, mode from its `exec:` label (`bd label list <task-id>`): `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). Legacy plan without the label: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
-2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end. The one sanctioned read is the **scope glance** at claim time: the task's Files section only (`bd show <task-id> --section files`, ~10 lines) — enough to catch a task whose size or file overlap contradicts the route. Steps, gates, and context stay unread here.
+1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, both labels from one call (`bd label list <task-id>`). The `exec:` label gives the mode: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). The `review:` label gives the review tier: `review:trivial-deterministic` means no reviewer for this task, its absence means the combined reviewer runs (subagent-driven-development, **Review Tier**). Legacy plan without the labels: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
+
+   Resolve both models from that tier per **Model Tiers** — the implementer's, and the reviewer's, which the same tier fixes — and compose the task's **route line**: id, mode and tier, implementer model, reviewer model, reason. One format, used for every route:
+
+   - `<task-id> → subagent/standard → implementer Sonnet, reviewer Sonnet — <reason>`
+   - `<task-id> → subagent/capable → implementer <session model>, reviewer none (review:trivial-deterministic, executed by <task-id>) — <reason>`
+   - `<task-id> → inline — <reason>`
+
+   The id inside `none (…)` is the executing task's, not this one's.
+2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end. The one read sanctioned at claim time is the **scope glance**: the task's Files block only (`bd get <task-id> body | sed -n '/^\*\*Files:\*\*/,/^$/p'`, ~10 lines) — enough to catch a task whose size or file overlap contradicts the route. Steps, gates, and context stay unread here.
 
    **Source reads the same way: never upfront, only on a cited failure.** No survey of a task's files before dispatch — that is the planner's read. On a concrete FAIL or BLOCKED, open the cited hunk and the minimal contract or ruling clause: Termination requires verifying a finding against code and authority before it becomes an obligation, and delegating THAT makes the reviewer the product authority. Thin, not blind.
-3. Announce the route as its own assistant-visible line naming the resolved model (per Model Tiers) — "Task N → subagent/standard → Sonnet (<reason>)", inline routes "Task N → inline (<reason>)" — emitted **before** the claim command. Assignee values, Bash command descriptions, and dispatch parameters are actions, not the announcement. Every route gets its line, however routine.
+3. Emit step 1's route line as its own assistant-visible line, **before** the claim command. Assignee values, Bash command descriptions, and dispatch parameters are actions, not the announcement — none of them discharges it. Every route gets its line, however routine.
 4. Execute by mode:
    - **inline** → follow the Inline Task Procedure (below) for this one task, start to close.
-   - **subagent/<tier>** → follow subagent-driven-development's per-task procedure for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Record `BASE=$(git rev-parse HEAD)`, declare the review tier, then dispatch the implementer per subagent-driven-development's `implementer-prompt.md` — by bead id, the implementer fetches its own contract — including the test-scope directive (targeted tests only; the full-suite gate stays in this session).
-5. **Pipeline the review — this is the default loop shape.** When task N's implementer reports DONE and its commits exist on the branch (`trivial-deterministic` tasks skip 5.1–5.2 entirely: run the one deterministic check yourself, close, move on — no package, no reviewer, nothing to pipeline):
-   1. Freeze the evidence: `scripts/review-package BASE HEAD` (run from `skills/subagent-driven-development/`) writes the review package file. Record `HEAD_SHA=$(git rev-parse HEAD)`.
-   2. Dispatch N's ONE combined spec+quality reviewer (`reviewer-prompt.md`; spec section outranks quality) **in the background**, handing it the frozen package file path. If the reviewer needs to run anything at all — targeted tests, greps — the controller first creates a temporary read-only worktree pinned at N's HEAD, `git worktree add .worktrees/review-<short-sha> <HEAD_SHA>`, names it in the prompt as the ONLY directory the reviewer may run commands in, and removes it (`git worktree remove .worktrees/review-<short-sha>`) after the verdict is processed.
+   - **subagent/<tier>** → follow subagent-driven-development's per-task procedure for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Record `BASE=$(git rev-parse HEAD)`, then dispatch the implementer per subagent-driven-development's `implementer-prompt.md` — by bead id, the implementer fetches its own contract — including the test-scope directive (targeted tests only; the full-suite gate stays in this session).
+5. **Pipeline the review — this is the default loop shape.** When task N's implementer reports DONE and its commits exist on the branch (a task labeled `review:trivial-deterministic` skips 5.1–5.2 entirely: run its check yourself per subagent-driven-development's **Review Tier**, close, move on — no package, no reviewer, nothing to pipeline):
+   1. Freeze the evidence: `scripts/review-package BASE HEAD` (run from `skills/subagent-driven-development/`) writes the review package file and creates (or reuses) the pinned review worktree at N's HEAD, printing two lines — the package path, then the worktree path. Record both.
+   2. Dispatch N's ONE combined spec+quality reviewer (`reviewer-prompt.md`; spec section outranks quality) **in the background**, handing it the frozen package file path and naming the pinned review worktree as the ONLY directory it may run commands in.
    3. Immediately claim and dispatch task N+1 (steps 1–4). Do not idle on N's verdict — the frozen package cannot be perturbed by N+1's work, dispatched or inline.
-   4. When N's verdict returns, process it per subagent-driven-development's Termination: deterministic artifacts only, verify findings before acting, close N only on visible evidence. Then delete the review file and remove the review worktree.
+   4. When N's verdict returns, process it per subagent-driven-development's Termination: deterministic artifacts only, verify findings before acting, close N only on visible evidence. Then remove the review worktree and delete the package file in one chained call: `git worktree remove <worktree-path> && rm -f <package-path>`.
 6. Loop — which means: wait for the in-flight implementer's DONE and re-enter at step 5. Never claim another ready task while an implementer is in flight; the loop's concurrency is one implementer plus background reviewers, and anything wider is Hybrid Parallel (below), opt-in only.
 
 **Pipeline safety rules — non-negotiable:**
@@ -60,27 +68,30 @@ Frontier parallelism — 2–3 implementers running concurrently — activates O
 
 Follow this procedure for any task routed `inline`.
 
-1. Get the contract and claim — never `--claim`:
+1. Get the contract, then claim — never `--claim`:
    ```bash
-   bd show <task-id>
-   bd rulings <task-id>
-   bd get <task-id> body > .bd/.scratch/progress.md
+   bd workfile <task-id>
    bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
    ```
-   The rulings output is part of the contract: it is inheritance-resolved, so
-   a ruling filed on the parent epic binds this task and no read of the task
-   alone surfaces it. A ruling outranks the body it contradicts.
-   Read `.bd/.scratch/progress.md` — it is your complete contract AND your working copy; the body enters context once, as the file you'll work in. If `bd show`'s section index lists `design`, also read `bd show <task-id> --section design`. Example assignee: "Alex / Claude Opus 4.6".
+   That call writes the body to `.bd/.scratch/<task-id>.md` and prints a
+   header: metadata, deps, the **ACTIVE RULINGS** block, findings, the
+   section index, and notes. The ACTIVE RULINGS block is the rulings read:
+   it is inheritance-resolved, so a ruling filed on the parent epic binds
+   this task and no read of the task alone surfaces it. A ruling outranks
+   the body it contradicts and is settled — implement it, never re-litigate
+   it.
+   Read `.bd/.scratch/<task-id>.md` — it is your complete contract AND your
+   working copy; the body enters context once, as the file you'll work in.
+   If the header's section index lists `design`, also read
+   `bd show <task-id> --section design`. Example assignee: "Alex / Claude
+   Opus 4.6".
 2. Extract the **Acceptance Gate** from the working copy — the machine-verifiable completion criteria (`- [ ]` lines under "Acceptance Gate"). Keep these visible; you re-read them between steps and verify them before closing.
 3. If the task body references images, resolve them to local files and view them before implementing.
-4. Checkbox flips happen in `.bd/.scratch/progress.md` — it already exists from step 1; never re-print the body to get a working copy.
-5. For each step in the task body:
+4. For each step in the task body:
    - **First step only:** read everything listed under "Before you start" — files, rules, callers. Do not skip this.
    - **Attention refresh:** re-read the Acceptance Gate items before executing — attention on initial goals decays after 3–4 tool calls.
    - Execute the step.
-   - In `.bd/.scratch/progress.md`, flip the step's `- [ ]` to `- [x]` with the Edit tool. Local edit only — do not `bd update` per step.
-6. After all steps complete, sync the checkbox state to bd once: `bd update <task-id> --body-file .bd/.scratch/progress.md`. **Why:** per-step `bd update` roundtrips get skipped in practice; batching keeps the bookkeeping cheap enough to happen.
-7. **Verify the Acceptance Gate before closing:**
+5. **Verify the Acceptance Gate before closing:**
    - Re-read every gate item from the task body.
    - Run the verification command for each (test, file check, grep for export).
    - If ALL pass: `bd close <task-id> --reason "Done — all gate items verified"`.
@@ -106,7 +117,7 @@ The annotation is the default, not a cage — but every override must be stated,
 
 Tiers are abstract — resolve them against your human partner's standing model policy first (project memory, CLAUDE.md); a standing policy always overrides the default map. Default on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model.
 
-A tier names the **judgment a task demands, not model cost.** `cheap` and `standard` both resolve to exactly Sonnet — the floor; "cheap" never licenses anything below it. `capable` → the session model is reserved for genuine design judgment or broad codebase synthesis, never the safe default for "anything non-trivial"; unsure between `standard` and `capable` → `standard`. State any tier change, in either direction, as a visible override. Down-routing presumes a pinned contract: a task whose steps leave a mechanism or design fork to the executor is `capable` regardless of file count — economize on the contract or on the executor, never both in one task. Full reasoning: `references/model-tiers.md`.
+The doctrine behind the map — what a tier measures, when `capable` is earned, the pinned contract down-routing presumes, and the model the task's reviewer runs on — lives in `skills/shared/model-tiers.md`. Read it before resolving a contested tier.
 
 ## Invariants
 
@@ -119,7 +130,7 @@ In addition, **never:**
 - Run implementers concurrently outside Hybrid Parallel — and even inside it, never two in one worktree, never more than 2–3 total, never on tasks whose Files lists overlap or that share a Consumes-From edge.
 - Point a reviewer at the live working tree, or dispatch new work past an unresolved FAIL verdict.
 - Execute a `subagent/capable` task inline. If it needs design judgment, it needs dispatch — or escalate to your human partner.
-- Blend procedures: an inline task gets the Inline Task Procedure's gate verification; a dispatched task gets subagent-driven-development's combined review. No task gets a mixture, and no task gets neither.
+- Blend procedures: an inline task gets the Inline Task Procedure's gate verification; a dispatched task gets the review its declared tier names (subagent-driven-development, Review Tier). No task gets a mixture, and no task gets neither.
 - Let a dispatched implementer run the full test suite — targeted tests only; the suite gate runs once, in this session. A dispatched implementer that backgrounds a job must finish it before ending its turn.
 
 ## Red Flags — STOP

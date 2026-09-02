@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Test: review-package script
 # Verifies it freezes a task's net diff (commit list, stat summary, full
-# diff) into a file under .bd/.scratch/ and prints only the outfile path.
+# diff) into a file under .bd/.scratch/, creates the pinned review worktree
+# at HEAD, and prints exactly two lines: package path, then worktree path.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -44,31 +45,58 @@ git add file.txt
 git commit --quiet -m "Add a second line"
 HEAD_REV=$(git rev-parse HEAD)
 
-echo "Test 1: default outfile is produced and printed as the only stdout line"
+echo "Test 1: stdout is exactly two lines (package path, worktree path)"
 STDOUT_OUTPUT=$("$SCRIPT" "$BASE" "$HEAD_REV")
 LINE_COUNT=$(echo "$STDOUT_OUTPUT" | wc -l | tr -d ' ')
-if [ "$LINE_COUNT" -eq 1 ]; then
-    pass "stdout is exactly one line"
+if [ "$LINE_COUNT" -eq 2 ]; then
+    pass "stdout is exactly two lines"
 else
-    fail "stdout is exactly one line (got $LINE_COUNT lines: $STDOUT_OUTPUT)"
+    fail "stdout is exactly two lines (got $LINE_COUNT lines: $STDOUT_OUTPUT)"
 fi
 
-OUTFILE="$STDOUT_OUTPUT"
+OUTFILE=$(echo "$STDOUT_OUTPUT" | sed -n '1p')
+WORKTREE=$(echo "$STDOUT_OUTPUT" | sed -n '2p')
 
 if [ -f "$OUTFILE" ]; then
-    pass "outfile exists at printed path"
+    pass "line 1: outfile exists at printed path"
 else
-    fail "outfile exists at printed path ($OUTFILE)"
+    fail "line 1: outfile exists at printed path ($OUTFILE)"
 fi
 
 case "$OUTFILE" in
     "$TEST_DIR"/.bd/.scratch/review-*..*.diff)
-        pass "outfile path follows .bd/.scratch/review-<base7>..<head7>.diff convention"
+        pass "line 1: outfile path follows .bd/.scratch/review-<base7>..<head7>.diff convention"
         ;;
     *)
-        fail "outfile path follows .bd/.scratch/review-<base7>..<head7>.diff convention (got $OUTFILE)"
+        fail "line 1: outfile path follows .bd/.scratch/review-<base7>..<head7>.diff convention (got $OUTFILE)"
         ;;
 esac
+
+case "$WORKTREE" in
+    "$TEST_DIR"/.worktrees/review-*)
+        pass "line 2: worktree path is under the test repo's .worktrees/"
+        ;;
+    *)
+        fail "line 2: worktree path is under the test repo's .worktrees/ (got $WORKTREE)"
+        ;;
+esac
+
+if [ -d "$WORKTREE" ]; then
+    pass "line 2: worktree directory exists"
+else
+    fail "line 2: worktree directory exists ($WORKTREE)"
+fi
+
+if [ -n "$WORKTREE" ] && [ -d "$WORKTREE" ]; then
+    WORKTREE_HEAD=$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || echo "MISSING")
+else
+    WORKTREE_HEAD="MISSING"
+fi
+if [ "$WORKTREE_HEAD" = "$HEAD_REV" ]; then
+    pass "worktree HEAD equals the HEAD passed to the script"
+else
+    fail "worktree HEAD equals the HEAD passed to the script (got $WORKTREE_HEAD, want $HEAD_REV)"
+fi
 
 echo ""
 echo "Test 2: outfile contains commit subject and a diff addition line"
@@ -85,17 +113,35 @@ else
 fi
 
 echo ""
-echo "Test 3: custom OUTFILE argument is honored"
-CUSTOM_OUT="$TEST_DIR/custom-review.diff"
-STDOUT_CUSTOM=$("$SCRIPT" "$BASE" "$HEAD_REV" "$CUSTOM_OUT")
-if [ "$STDOUT_CUSTOM" = "$CUSTOM_OUT" ] && [ -f "$CUSTOM_OUT" ]; then
-    pass "custom outfile path honored and printed"
+echo "Test 3: a second identical run exits 0 and prints the same two lines"
+set +e
+STDOUT_SECOND=$("$SCRIPT" "$BASE" "$HEAD_REV")
+SECOND_EXIT=$?
+set -e
+if [ "$SECOND_EXIT" -eq 0 ]; then
+    pass "second run exits 0"
 else
-    fail "custom outfile path honored and printed (got $STDOUT_CUSTOM)"
+    fail "second run exits 0 (got exit $SECOND_EXIT)"
+fi
+if [ "$STDOUT_SECOND" = "$STDOUT_OUTPUT" ]; then
+    pass "second run prints the same two lines"
+else
+    fail "second run prints the same two lines (got: $STDOUT_SECOND, want: $STDOUT_OUTPUT)"
 fi
 
 echo ""
-echo "Test 4: bad ref exits 2"
+echo "Test 4: custom OUTFILE argument is honored"
+CUSTOM_OUT="$TEST_DIR/custom-review.diff"
+STDOUT_CUSTOM=$("$SCRIPT" "$BASE" "$HEAD_REV" "$CUSTOM_OUT")
+CUSTOM_LINE1=$(echo "$STDOUT_CUSTOM" | sed -n '1p')
+if [ "$CUSTOM_LINE1" = "$CUSTOM_OUT" ] && [ -f "$CUSTOM_OUT" ]; then
+    pass "custom outfile path honored and printed on line 1"
+else
+    fail "custom outfile path honored and printed on line 1 (got $CUSTOM_LINE1)"
+fi
+
+echo ""
+echo "Test 5: bad ref exits 2"
 set +e
 "$SCRIPT" "not-a-real-ref" "$HEAD_REV" >/tmp/review-package-bad-ref.out 2>&1
 BAD_REF_EXIT=$?
@@ -108,7 +154,7 @@ fi
 rm -f /tmp/review-package-bad-ref.out
 
 echo ""
-echo "Test 5: wrong arg count exits 2"
+echo "Test 6: wrong arg count exits 2"
 set +e
 "$SCRIPT" "$BASE" >/tmp/review-package-argcount.out 2>&1
 ARGCOUNT_EXIT=$?
@@ -119,6 +165,22 @@ else
     fail "wrong arg count exits 2 (got exit $ARGCOUNT_EXIT)"
 fi
 rm -f /tmp/review-package-argcount.out
+
+echo ""
+echo "Test 7: a plain directory at the worktree path is rejected, never reused"
+git worktree remove --force "$TEST_DIR/.worktrees/review-$(git rev-parse --short "$HEAD_REV")" >/dev/null 2>&1 || true
+mkdir -p "$TEST_DIR/.worktrees/review-$(git rev-parse --short "$HEAD_REV")"
+echo "stale" > "$TEST_DIR/.worktrees/review-$(git rev-parse --short "$HEAD_REV")/stale.txt"
+set +e
+"$SCRIPT" "$BASE" "$HEAD_REV" >/tmp/review-package-plain-dir.out 2>&1
+PLAIN_DIR_EXIT=$?
+set -e
+if [ "$PLAIN_DIR_EXIT" -eq 2 ] && grep -q "not a worktree" /tmp/review-package-plain-dir.out; then
+    pass "plain directory at the worktree path exits 2 with the not-a-worktree message"
+else
+    fail "plain directory at the worktree path exits 2 with the not-a-worktree message (got exit $PLAIN_DIR_EXIT: $(tail -1 /tmp/review-package-plain-dir.out))"
+fi
+rm -f /tmp/review-package-plain-dir.out
 
 echo ""
 echo "========================================"
