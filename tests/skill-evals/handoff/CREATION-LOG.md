@@ -83,3 +83,23 @@ Same method, same model, scenario verbatim plus the full `skills/handoff/SKILL.m
 ## Key Insight
 
 Pinning the negative ("takes no other flag, not `--tag`, not `--body-file`") is what stopped the fabricated flags — three of three baseline agents reached for a flag that "should" exist, and a positive example alone did not stop the first GREEN reader from reaching for one either; the explicit denial did.
+
+# Follow-up: Night sender pairing (2026-09-02, same session)
+
+Triggered by the end-of-plan whole-diff review, not a hypothesis: the spec's second acceptance criterion — "hand off to the night sessions" with two open sessions in two repositories delivers one brief each and reports the pairing — had no scenario. The five above came from the spec's Testing list, which covered the night *receiver* only. `test-night-sender-pairing.md` adds the sender side: discovery, pairing by working directory, the one-session-per-repository refusal, the pairing report.
+
+## Baseline: test-night-sender-pairing.md — PASS (contaminated, not evidence)
+
+- Expected: two `night` records, one per anchor; one `SendMessage` to `night-a` with the zanjir record plus the codex-execution invocation line; nothing to `night-b` or `night-c`; the collision reported; `solo-7fk` named as unpaired with its record still posted.
+- Observed: all of it — but the agent had read the skill: "Close steps 1–4 run first, per-epic, header `night` (per skill: 'Close 1–4 first, header night')". The skill file exists on this branch's checkout, so a "no skill text" prompt no longer yields a clean baseline for a general-purpose agent with file access. Recorded as PASS with the contamination named; it carries no weight. One drift the Judging lines do not cover: the Next line's "exact next command" was `bd claim solo-7fk.5 --assignee ...`, a command that does not exist.
+- Action: none on the skill. Future baselines for this skill run against a checkout without `skills/handoff/`, or with file tools withheld.
+
+## Run: test-night-sender-pairing.md — PASS
+
+- Expected: as above.
+- Observed: posted `[handoff] 2026-09-02 night epic:solo-7fk mode:hybrid` to `solo-1` and `[handoff] 2026-09-02 night epic:zanjir-9pk mode:codex` to `zanjir-1`, seven single lines each with the `Rules:` line, via the one-argument `bd comment add`. Paired by working directory: "`zanjir-9pk` → `night-a` — unambiguous, only session in that repo." Refused the solo pair: "Two sessions share `/Users/partner/Projects/solo`. Per rule, send to neither; report the collision." One `SendMessage`, to `night-a`, ending "Invoke superpowers-beads:codex-execution for epic zanjir-9pk." Report: one line per session, `solo-7fk` named unpaired with "its handoff record is still posted to anchor `solo-1`", and the partner asked to name a session or close one.
+- Action: none.
+
+## Outcome (updated)
+
+6/6 scenarios pass with the skill; no skill-text edits were made in either round. The sixth scenario exists because the whole-diff review caught an acceptance criterion with no test, not because a run failed.

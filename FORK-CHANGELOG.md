@@ -28,11 +28,12 @@ this procedure; **Night**, only on the owner's explicit words, pairs one open se
 via `ListAgents`, refuses two sessions on one repository, sends one brief each, and the receiver
 runs the named execution skill, never rules, parks questioned tasks, and closes with a `day`
 record for the morning. Nothing fires before the owner's words or the boundary actually reached.
-Pressure tests live in `tests/skill-evals/handoff/` (five scenarios, `CREATION-LOG.md`): all five
-baselines passed the decision lines without the skill but drifted on the artifact — three of
+Pressure tests live in `tests/skill-evals/handoff/` (six scenarios, `CREATION-LOG.md`): all five
+original baselines passed the decision lines without the skill but drifted on the artifact — three of
 three Close runs invented `bd comment add` flags, none produced the `Rules:` line, the night
-receiver closed with the wrong header — and all five pass with the drift gone once the skill pins
-the template and the one-argument posting command.
+receiver closed with the wrong header — and all six pass with the drift gone once the skill pins
+the template and the one-argument posting command (the sixth, the night sender's pairing, was
+added when the whole-diff review found the acceptance criterion untested).
 
 ## [1.4.45] - 2026-09-02
 
