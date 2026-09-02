@@ -3,7 +3,7 @@ name: codex-execution
 description: Use when executing an implementation plan's task beads via the codex CLI instead of Claude subagents — session-budget execution, "run this plan with codex", or the Codex Execution mode chosen at the writing-plans handoff
 ---
 
-# Codex Execution — budget 1100 words
+# Codex Execution — budget 1204 words
 
 Execution mode: codex (`codex exec`, non-interactive) implements each task bead; this
 session orchestrates, verifies every landing, and runs the terminal whole-diff review.

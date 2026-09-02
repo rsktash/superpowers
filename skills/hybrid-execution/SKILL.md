@@ -3,7 +3,7 @@ name: hybrid-execution
 description: Use when executing implementation plans whose tasks carry Execution annotations - routes each task to inline execution or subagent dispatch per the annotation
 ---
 
-# Hybrid Execution — budget 2900 words
+# Hybrid Execution — budget 2888 words
 
 Execute a plan task-by-task, routing each task to the mode its plan annotation names: trivial tasks run inline in this session; everything else goes to a fresh subagent. Dispatch is the default — inline is reserved for tasks where dispatch overhead exceeds the work itself.
 

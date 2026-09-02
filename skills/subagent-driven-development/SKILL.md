@@ -3,7 +3,7 @@ name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
 ---
 
-# Subagent-Driven Development — budget 2800 words
+# Subagent-Driven Development — budget 3556 words
 
 Execute a plan by dispatching a fresh subagent per task, reviewing each task's output before moving to the next.
 

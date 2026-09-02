@@ -4,7 +4,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 context: fork
 ---
 
-# Writing Plans — budget 2000 words
+# Writing Plans — budget 2215 words
 
 ## Overview
 
