@@ -4,7 +4,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 context: fork
 ---
 
-# Writing Plans — budget 2684 words
+# Writing Plans — budget 2776 words
 
 ## Overview
 
@@ -90,7 +90,8 @@ Depends on: [what prior tasks produced that this consumes, or "—"]
 
 **Execution:** [inline | subagent/cheap | subagent/standard | subagent/capable] — [one-line reason; if `review:trivial-deterministic` applies, name the executing task]
 
-**Acceptance Gate — DONE when ALL pass:**
+**Acceptance Gate — ONE turn, DONE when ALL pass:**
+All gate commands run together and report together in this turn — the verification batch.
 - [ ] [observable outcome]
 - [ ] [the same outcome on the regime that can fail it]
 - [ ] [what the change must leave intact]
@@ -105,8 +106,11 @@ Depends on: [what prior tasks produced that this consumes, or "—"]
 - Modify: `exact/path` — [the intent of the change]
 - Test: `exact/path`
 
-**Before you start:**
-- Read: [the files whose current behavior this task changes or consumes]
+**Before you start — ONE turn (discovery batch):**
+- Read: the span of every fresh map entry; every STALE map entry in full at its current span
+- Run: [the index queries this task names — `structural-index symbol|callers|tests <name>`, each with its expected count]
+- A file this task creates or restructures is read whole and stated in the report
+- All issued in a single turn; no other file is opened before the first edit
 - Rules: [the `.claude/rules/` file governing this area, if one exists]
 
 **Steps:** the TDD skeleton, one action each, naming every behavior each test asserts.
@@ -119,7 +123,7 @@ symbol: reusedThing @ its/home.ts
 
 ## Writing the Gate
 
-Every gate item is an outcome you observe, machine-verifiable — "test_validate_jwt_expired passes", never "works correctly" — and falsifiable against under-doing: write it so under-coverage fails ("every variant has its own assertion"), because a fluent executor will satisfy the literal minimum convincingly. Gates collectively exercise the regime the artifact exists to survive — the second page, the full buffer — never only the one-of-everything case; and at least one item names what must stay intact, checked on that same regime. Mechanisms ("flag X is set", "Y is called") belong in steps, not gates. Visual work's gate names what the owner verifies against pixels.
+Every gate item is an outcome you observe, machine-verifiable — "test_validate_jwt_expired passes", never "works correctly" — and falsifiable against under-doing: write it so under-coverage fails ("every variant has its own assertion"), because a fluent executor will satisfy the literal minimum convincingly. Gates collectively exercise the regime the artifact exists to survive — the second page, the full buffer — never only the one-of-everything case; and at least one item names what must stay intact, checked on that same regime. Mechanisms ("flag X is set", "Y is called") belong in steps, not gates. Visual work's gate names what the owner verifies against pixels. The planner names the index queries and expected counts the task's discovery batch runs.
 
 ## Exploration Map
 

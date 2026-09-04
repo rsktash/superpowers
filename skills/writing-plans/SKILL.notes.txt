@@ -143,3 +143,24 @@ INCIDENT (the mining evidence behind the map): the codex mining of 64 zanjir ses
   subagents counted one fixture file read 33 times by 8 agents and one bead body read 29 times by
   14 agents — first-encounter exploration re-paid by every executor; a plan-time symbol table with
   computed freshness removes the re-read.
+
+### (2026-09-04) The task template's two blocks become one-turn batches: discovery before the first edit, verification at the gate.
+RULE CHANGE: the Task Structure template's "**Before you start — ONE turn (discovery batch):**"
+  block lists the span read of every fresh map entry, STALE entries in full at their current span,
+  and the index queries the task names with their expected counts — all issued in a single turn,
+  no other file opened before the first edit, a file the task creates or restructures read whole
+  and stated in the report. The "**Acceptance Gate — ONE turn, DONE when ALL pass:**" label gains
+  a lead line: all gate commands run together and report together — the verification batch.
+  Writing the Gate gains one sentence: the planner names the index queries and expected counts
+  the task's discovery batch runs. CONTEXT.md's existing "discovery batch" and "verification
+  batch" glossary lines already carried this wording; no term was coined.
+
+BASELINE (the mining this batching answers): implementer median 77 tool calls, 682M of 2.09B
+  implementer + reviewer tokens spent before the first edit — exploration and gate checks re-paid
+  turn after turn, 98% of input a cache re-read of an unchanged prefix. One turn per batch caps
+  the turn count that prefix tax is paid on.
+
+NOT CHANGED, deliberately: the template's citations block and Drift Detectors part; the Amend
+  Mode section, the Exploration Map section, and the "## Decision Beads", "## Multi-Phase
+  Epics", "## Handoff" headings — byte-identical across this edit. The charters and dispatch
+  prompts belong to sibling tasks (implementer charter, reviewer, pre-flight, codex protocol).
