@@ -147,7 +147,7 @@ has 7 lines; the cap is 5`).
 ## Scenario: test-boundary-mid-plan.md — expected PASS
 
 - Expected: Close in order — drain, `tracker-mining audit`, `bd session close`, one `bd plan handoff solo --lane solo-7fk` carrying `--done solo-7fk.3:a1b2c3d,solo-7fk.4:e4f5a6b`, `--next solo-7fk.5`, `--parked solo-7fk.7:Q-4` and a five-line thread; final message is the `bd plan show solo` output.
-- Failure mode caught: the retired habit surviving the rewrite — composing a record and posting it to the still-open `solo-1` anchor, which the scenario leaves in place precisely as bait; also a free-text park and a thread over five lines.
+- Failure mode caught: the retired habit surviving the rewrite — composing a record and posting it to the still-open `solo-1` anchor, which the scenario leaves in place precisely as bait; also a free-text park, a thread over five lines, and the repeated-flag form `--done a:1 --done b:2`, which keeps only the last value and silently drops a completed task from the entry. The one comment retiring `solo-1` by naming plan `solo` is the skill's own rule and is excepted from the no-record clause.
 
 ## Scenario: test-habitual-transcript-prompt.md — expected PASS
 
@@ -167,12 +167,12 @@ has 7 lines; the cap is 5`).
 ## Scenario: test-handoff-no-epic.md — expected PASS
 
 - Expected: no plan exists, this session holds no lane, so nothing is posted anywhere; the owner decision `bd session close` lists becomes a ruling, the unmade decision becomes a filed question, and the final message says the thread is lost by design and names `bd ready`, `bd question list`, `bd plan show solo` as the next session's start.
-- Failure mode caught: filling the silence — posting to the `handoff-anchor` bead the project still carries, or creating a plan and a lane so that there is somewhere to append.
+- Failure mode caught: filling the silence — posting to the `handoff-anchor` bead the project still carries, or creating a plan and a lane so that there is somewhere to append; and the opposite failure, a bare "nothing to hand off" that drops the restart line, which is all a lane-less session leaves the next one.
 
 ## Scenario: test-night-sender-pairing.md — expected PASS
 
 - Expected: its own lane closed with a typed entry first; exactly one `SendMessage`, to `night-a`, naming plan `zanjir`, lane `zanjir-9pk` and codex-execution; nothing to `night-b` or `night-c`; the collision and the unpaired `solo-7fk` both reported.
-- Failure mode caught: breaking the one-session-per-repository refusal by picking a solo session on its own judgment, and sending a copied narrative in place of the three-fact brief.
+- Failure mode caught: breaking the one-session-per-repository refusal by picking a solo session on its own judgment, and sending a copied narrative in place of the three-fact brief. As in scenario 1, the sanctioned anchor-retirement comment is excepted from the no-record clause, which still catches a composed handoff record on either anchor.
 
 ## Scenario: test-parked-needs-question-id.md — expected PASS
 
@@ -182,4 +182,43 @@ has 7 lines; the cap is 5`).
 ## Scenario: test-lane-less-close-posts-nothing.md — expected PASS
 
 - Expected: nothing appended to `zanjir-9pk` and nothing posted to any bead; the owner decision typed as a ruling, the undecided routing typed as a question, and the loss of the thread stated rather than worked around.
-- Failure mode caught: a lane-less session appending to a lane it does not hold — the scenario puts a live, richly-populated lane one command away, held by another session, so "post nothing" has to beat an available target rather than an absent one.
+- Failure mode caught: a lane-less session appending to a lane it does not hold — the scenario puts a live, richly-populated lane one command away, held by another session, so "post nothing" has to beat an available target rather than an absent one; also delivering the lane's `bd plan show` output in place of the restart line, which says nothing about what this session leaves behind.
+
+# Fix round (2026-09-05)
+
+The coordinator ran all eight at `56d4e5f`, each as one fresh Sonnet agent whose
+only context was the scenario file with its `## Judging` section stripped plus
+the landed `skills/handoff/SKILL.md`. Five passed —
+`test-350k-no-anticipation`, `test-habitual-transcript-prompt`,
+`test-night-brief-received`, `test-parked-needs-question-id`,
+`test-lane-less-close-posts-nothing`. Three failed, on three separate defects:
+
+1. The quoted command wrote one pair per flag. `bd plan handoff --help` defines
+   `--done` as `<bead-id>:<commit-sha>` pairs, comma-separated, and `--parked`
+   as `<bead-id>:<question-id>` pairs, comma-separated; a repeated string flag
+   keeps only the last value, so `--done a:1 --done b:2` drops the first
+   completed task. Three runs wrote that repeated form —
+   `test-boundary-mid-plan`, `test-night-brief-received`,
+   `test-parked-needs-question-id` — and the first failed on it, its Pass line
+   naming the comma-separated form verbatim. The command now shows two pairs in
+   each flag and the text pins the negative: "never a repeated flag".
+2. The Fail clauses of `test-boundary-mid-plan` and `test-night-sender-pairing`
+   failed a run for posting to an anchor bead, which the skill's own
+   anchor-retirement rule tells the first Close to do. Both runs performed that
+   retirement correctly. Both clauses now except that one comment by name and
+   still catch a composed handoff record — done ids, next id, parked ids or
+   thread — posted to an anchor.
+3. Close named the lane-less restart line in step 4 and defined the final
+   message in step 5, so a lane-less session had no stated final message.
+   `test-handoff-no-epic` failed there — its run stated only that no entry was
+   appended and named two of the three reads — and
+   `test-lane-less-close-posts-nothing` passed with the same gap, delivering
+   `bd plan show zanjir` output. Deliver now states both branches: the
+   lane-holder's `bd plan show <prefix>` output, and the lane-less message that
+   names the missing entry, the lost thread and the next session's three reads.
+
+The skill stayed inside its 600-word budget: 599 words, from 598. What paid for
+the additions is the "at execution start" gloss on the lane citation, "step 3 is
+the whole record" in Close 4 (Deliver now carries the lane-less branch), "an
+entry is a pointer, not state" in Resume 3, and a handful of single words. No
+scenario's expected verdict changes: all eight are expected PASS on the re-run.
