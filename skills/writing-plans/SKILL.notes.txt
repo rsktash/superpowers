@@ -211,3 +211,21 @@ NOT CHANGED, deliberately: "A plan is never written over an unresolved design fo
   below the tasks it blocks. The two words were paid for inside the section: "one-safe-answer
   defaults are pruned" lost "are" (the clause after it already elides it), and "mint only when
   none fits" became "mint if none fits" ("if none fits" already carries the limit).
+
+  FIX ROUND 2 (same day, from the coordinator's live run of tests/skill-evals/writing-plans/
+  test-typed-fork-filing.md at c280332): the scenario FAILED on its dep-link criterion. The
+  agent read "stops decomposition of that region" together with No Placeholders and left the
+  blocked tasks unwritten — "they get no bead yet; there is nothing to bd dep add against" —
+  which is exactly the orphan Decide bead the execution skills' epic gate stops on. RULE
+  CHANGE: a fork stops the answer, not the beads. Every task the fork blocks is still created,
+  its body naming the decision as an input and picking no side; the dep-link, not a missing
+  bead, is what blocks it. That is already licensed by "What a Task Body May Claim" ("A decision
+  settled upstream … appears in this body — cited by bead and section, not reproduced"), so no
+  placeholder is involved. Precedent on the tracker: superpowers-bqp.6 and .8 are full task
+  beads dep-linked to decision beads .13 and .12, whose rdeps are non-empty.
+  DISPLACED TO PAY FOR IT, inside the same section and the same 2776-word budget: the genuine-
+  fork examples ("rival architectures, an unvalidated dependency, a prototype-only shape") and
+  the clause "stop decomposition" itself, which this fix supersedes — triage still defines a
+  fork negatively, by what it prunes. Also trimmed: "A fork on an already-created task" -> "On
+  an already-created task", "The coordinator or owner" -> "Coordinator or owner", "never
+  picking a side" -> "never picking sides".
