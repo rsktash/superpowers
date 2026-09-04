@@ -9,6 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 INDEX="$REPO_ROOT/scripts/structural-index"
 FIXTURE="$REPO_ROOT/tests/fixtures/structural-index/ts"
+MIXED_FIXTURE="$REPO_ROOT/tests/fixtures/structural-index/mixed"
 
 FAILED=0
 PASSED=0
@@ -60,6 +61,100 @@ if [ ! -f "$typescript_package/lib/typescript.js" ]; then
     echo "  [FAIL] TypeScript package unavailable; set STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE"
     exit 1
 fi
+
+echo "Language roster: tracked counts, metadata, cache, and toolchain independence"
+MIXED_TARGET="$WORK/mixed-repo"
+mkdir -p "$MIXED_TARGET"
+cp -R "$MIXED_FIXTURE/." "$MIXED_TARGET/"
+git -C "$MIXED_TARGET" init -q
+git -C "$MIXED_TARGET" config user.name "Structural Index Test"
+git -C "$MIXED_TARGET" config user.email "structural-index@example.test"
+git -C "$MIXED_TARGET" add .
+git -C "$MIXED_TARGET" commit -qm "mixed fixture"
+
+mixed_roster=$'typescript\t1\tcompiler\ngo\t1\tcompiler\nkotlin\t3\tnone\nswift\t3\tnone\npython\t4\tnone\nother\t3\tnone'
+"$INDEX" languages --repo "$MIXED_TARGET" --regen >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "mixed languages regeneration exits 0" "0" "$status"
+assert_eq "mixed languages prints the ordered tracked roster" "$mixed_roster" "$(cat "$WORK/stdout")"
+
+"$INDEX" languages --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "mixed languages cache hit exits 0" "0" "$status"
+assert_eq "mixed languages cache hit is byte-identical" "$mixed_roster" "$(cat "$WORK/stdout")"
+assert_eq "mixed languages cache hit is silent" "" "$(cat "$WORK/stderr")"
+
+metadata="$MIXED_TARGET/.bd/index/metadata.json"
+expected_metadata_roster='[{"id":"typescript","count":1,"backend":"compiler"},{"id":"go","count":1,"backend":"compiler"},{"id":"kotlin","count":3,"backend":"none"},{"id":"swift","count":3,"backend":"none"},{"id":"python","count":4,"backend":"none"},{"id":"other","count":3,"backend":"none"}]'
+if [ -f "$metadata" ]; then
+    recorded_roster="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).roster))' "$metadata")"
+else
+    recorded_roster="missing metadata"
+fi
+assert_eq "metadata records the complete roster" "$expected_metadata_roster" "$recorded_roster"
+
+if [ -f "$metadata" ]; then
+    node -e 'const fs=require("fs"),p=process.argv[1],m=JSON.parse(fs.readFileSync(p,"utf8"));delete m.roster;fs.writeFileSync(p,`${JSON.stringify(m, null, 2)}\n`)' "$metadata"
+fi
+"$INDEX" languages --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+if [ -f "$metadata" ]; then
+    restored_roster="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).roster))' "$metadata")"
+else
+    restored_roster="missing metadata"
+fi
+if [ "$status" -eq 0 ] \
+    && [ "$(cat "$WORK/stdout")" = "$mixed_roster" ] \
+    && [ "$restored_roster" = "$expected_metadata_roster" ]; then
+    pass "missing metadata roster regenerates the same roster"
+else
+    fail "missing metadata roster regenerates the same roster (exit $status; stdout: $(cat "$WORK/stdout"); roster: $restored_roster; stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
+fi
+
+NO_TOOLCHAIN_TARGET="$WORK/no-toolchain-repo"
+mkdir -p "$NO_TOOLCHAIN_TARGET"
+cp -R "$FIXTURE/." "$NO_TOOLCHAIN_TARGET/"
+git -C "$NO_TOOLCHAIN_TARGET" init -q
+git -C "$NO_TOOLCHAIN_TARGET" config user.name "Structural Index Test"
+git -C "$NO_TOOLCHAIN_TARGET" config user.email "structural-index@example.test"
+git -C "$NO_TOOLCHAIN_TARGET" add .
+git -C "$NO_TOOLCHAIN_TARGET" commit -qm "fixture without toolchain"
+ts_count="$(git -C "$NO_TOOLCHAIN_TARGET" ls-files '*.ts' '*.tsx' | wc -l | tr -d ' ')"
+tracked_count="$(git -C "$NO_TOOLCHAIN_TARGET" ls-files | wc -l | tr -d ' ')"
+other_count=$((tracked_count - ts_count))
+typescript_roster="$(printf 'typescript\t%s\tcompiler\nother\t%s\tnone' "$ts_count" "$other_count")"
+env -u STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE \
+    "$INDEX" languages --repo "$NO_TOOLCHAIN_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+languages_status=$?
+if [ "$languages_status" -eq 0 ] \
+    && [ "$(cat "$WORK/stdout")" = "$typescript_roster" ] \
+    && [ ! -s "$WORK/stderr" ]; then
+    pass "languages needs no TypeScript toolchain"
+else
+    fail "languages needs no TypeScript toolchain (exit $languages_status; stdout: $(cat "$WORK/stdout"); stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
+fi
+
+env -u STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE \
+    "$INDEX" symbol triple --repo "$NO_TOOLCHAIN_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+symbol_status=$?
+if [ "$symbol_status" -eq 2 ] \
+    && [ ! -s "$WORK/stdout" ] \
+    && grep -Fq "STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE" "$WORK/stderr" \
+    && [ "$(wc -l <"$WORK/stderr" | tr -d ' ')" -eq 1 ]; then
+    pass "symbol still requires the TypeScript toolchain"
+else
+    fail "symbol still requires the TypeScript toolchain (exit $symbol_status; stdout: $(cat "$WORK/stdout"); stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
+fi
+
+repo_backends="$("$INDEX" languages --repo "$REPO_ROOT" 2>"$WORK/stderr" | cut -f1,3)"
+status=$?
+expected_repo_backends=$'typescript\tcompiler\ngo\tcompiler\nkotlin\tnone\nswift\tnone\npython\tnone\nother\tnone'
+if [ "$status" -eq 0 ] && [ "$repo_backends" = "$expected_repo_backends" ]; then
+    pass "repository roster contains every language and backend"
+else
+    fail "repository roster contains every language and backend (exit $status; output: $repo_backends; stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
+fi
+
 mkdir -p "$TARGET/server/node_modules"
 ln -s "$typescript_package" "$TARGET/server/node_modules/typescript"
 

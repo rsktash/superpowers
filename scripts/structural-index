@@ -8,9 +8,25 @@ import { createRequire } from "node:module";
 import { performance } from "node:perf_hooks";
 
 const SCHEMA = 1;
-const VALID_QUERIES = new Set(["symbol", "callers", "tests"]);
-const LANGUAGE_ORDER = ["typescript", "go"];
-const LANGUAGE_NAMES = { typescript: "TypeScript", go: "Go" };
+const VALID_QUERIES = new Set(["symbol", "callers", "tests", "languages"]);
+const LANGUAGE_ORDER = ["typescript", "go", "kotlin", "swift", "python", "other"];
+const LANGUAGE_NAMES = {
+  typescript: "TypeScript",
+  go: "Go",
+  kotlin: "Kotlin",
+  swift: "Swift",
+  python: "Python",
+  other: "Other",
+};
+const EXTENSION_LANGUAGES = new Map([
+  [".ts", "typescript"],
+  [".tsx", "typescript"],
+  [".go", "go"],
+  [".kt", "kotlin"],
+  [".kts", "kotlin"],
+  [".swift", "swift"],
+  [".py", "python"],
+]);
 
 function fail(message, status = 2) {
   process.stderr.write(`${message}\n`);
@@ -18,9 +34,20 @@ function fail(message, status = 2) {
 }
 
 function parseArguments(argv) {
-  const [query, symbol, ...flags] = argv;
-  if (!VALID_QUERIES.has(query) || !symbol) {
-    fail("usage: structural-index <symbol|callers|tests> <name> --repo <root> [--regen]");
+  const [query, ...operands] = argv;
+  if (!VALID_QUERIES.has(query)) {
+    fail("usage: structural-index (<symbol|callers|tests> <name>|languages) --repo <root> [--regen]");
+  }
+
+  let symbol;
+  let flags;
+  if (query === "languages") {
+    flags = operands;
+  } else {
+    [symbol, ...flags] = operands;
+    if (!symbol) {
+      fail("usage: structural-index (<symbol|callers|tests> <name>|languages) --repo <root> [--regen]");
+    }
   }
 
   let repo;
@@ -42,6 +69,15 @@ function parseArguments(argv) {
 function gitLines(repo, patterns) {
   const output = execFileSync("git", ["-C", repo, "ls-files", "-z", "--", ...patterns]);
   return output.toString("utf8").split("\0").filter(Boolean);
+}
+
+function trackedFilesByLanguage(repo) {
+  const files = Object.fromEntries(LANGUAGE_ORDER.map((id) => [id, []]));
+  for (const file of gitLines(repo, [])) {
+    const id = EXTENSION_LANGUAGES.get(path.extname(file)) ?? "other";
+    files[id].push(file);
+  }
+  return files;
 }
 
 function targetHead(repo) {
@@ -808,39 +844,92 @@ function generateGo(repo, goFiles) {
   };
 }
 
-function generate(repo, head, indexDirectory, files) {
+const LANGUAGE_GENERATORS = {
+  typescript: (repo) => generateTypeScript(repo),
+  go: (repo, files) => generateGo(repo, files),
+};
+
+function languageRoster(files) {
+  return LANGUAGE_ORDER
+    .filter((id) => files[id].length > 0)
+    .map((id) => ({
+      id,
+      count: files[id].length,
+      backend: LANGUAGE_GENERATORS[id] ? "compiler" : "none",
+    }));
+}
+
+function writeMetadata(indexDirectory, metadata) {
+  fs.mkdirSync(indexDirectory, { recursive: true });
+  const metadataPath = path.join(indexDirectory, "metadata.json");
+  const suffix = `.tmp-${process.pid}`;
+  fs.writeFileSync(metadataPath + suffix, `${JSON.stringify(metadata, null, 2)}\n`);
+  fs.renameSync(metadataPath + suffix, metadataPath);
+}
+
+function generate(repo, head, indexDirectory, files, roster) {
   const data = {};
   const seconds = {};
-  if (files.typescript.length > 0) {
-    const generated = generateTypeScript(repo);
-    data.typescript = generated.data;
-    seconds.typescript = generated.seconds;
-  }
-  if (files.go.length > 0) {
-    const generated = generateGo(repo, files.go);
-    data.go = generated.data;
-    seconds.go = generated.seconds;
+  for (const id of LANGUAGE_ORDER) {
+    const generator = LANGUAGE_GENERATORS[id];
+    if (!generator || files[id].length === 0) continue;
+    const generated = generator(repo, files[id]);
+    data[id] = generated.data;
+    seconds[id] = generated.seconds;
   }
   fs.mkdirSync(indexDirectory, { recursive: true });
-  const metadata = { schema: SCHEMA, commit: head, languages: Object.keys(data) };
   const suffix = `.tmp-${process.pid}`;
   for (const id of Object.keys(data)) {
     const dataPath = path.join(indexDirectory, `${id}.json`);
     fs.writeFileSync(dataPath + suffix, `${JSON.stringify(data[id], null, 2)}\n`);
     fs.renameSync(dataPath + suffix, dataPath);
   }
-  const metadataPath = path.join(indexDirectory, "metadata.json");
-  fs.writeFileSync(metadataPath + suffix, `${JSON.stringify(metadata, null, 2)}\n`);
-  fs.renameSync(metadataPath + suffix, metadataPath);
+  writeMetadata(indexDirectory, { schema: SCHEMA, commit: head, languages: Object.keys(data), roster });
   return { data, seconds };
 }
 
-function cachedIndex(indexDirectory, head, files) {
+function readMetadata(indexDirectory) {
+  return JSON.parse(fs.readFileSync(path.join(indexDirectory, "metadata.json"), "utf8"));
+}
+
+function cachedRoster(indexDirectory, head, roster) {
   try {
-    const metadata = JSON.parse(fs.readFileSync(path.join(indexDirectory, "metadata.json"), "utf8"));
-    const present = LANGUAGE_ORDER.filter((id) => files[id].length > 0);
+    const metadata = readMetadata(indexDirectory);
+    return metadata.schema === SCHEMA
+      && metadata.commit === head
+      && JSON.stringify(metadata.roster) === JSON.stringify(roster);
+  } catch {
+    return false;
+  }
+}
+
+function existingIndexedLanguages(indexDirectory, head) {
+  try {
+    const metadata = readMetadata(indexDirectory);
+    if (metadata.schema !== SCHEMA || metadata.commit !== head || !Array.isArray(metadata.languages)) return [];
+    for (const id of metadata.languages) {
+      if (!LANGUAGE_GENERATORS[id]) return [];
+      const parsed = JSON.parse(fs.readFileSync(path.join(indexDirectory, `${id}.json`), "utf8"));
+      if (parsed.schema !== SCHEMA) return [];
+    }
+    return metadata.languages;
+  } catch {
+    return [];
+  }
+}
+
+function regenerateRoster(indexDirectory, head, roster) {
+  const languages = existingIndexedLanguages(indexDirectory, head);
+  writeMetadata(indexDirectory, { schema: SCHEMA, commit: head, languages, roster });
+}
+
+function cachedIndex(indexDirectory, head, roster) {
+  try {
+    const metadata = readMetadata(indexDirectory);
+    const present = roster.filter((entry) => entry.backend === "compiler").map((entry) => entry.id);
     if (metadata.schema !== SCHEMA || metadata.commit !== head) return undefined;
     if (JSON.stringify(metadata.languages) !== JSON.stringify(present)) return undefined;
+    if (JSON.stringify(metadata.roster) !== JSON.stringify(roster)) return undefined;
     const data = {};
     for (const id of present) {
       const parsed = JSON.parse(fs.readFileSync(path.join(indexDirectory, `${id}.json`), "utf8"));
@@ -858,14 +947,23 @@ function main() {
   const args = parseArguments(process.argv.slice(2));
   const head = targetHead(args.repo);
   const indexDirectory = path.join(args.repo, ".bd", "index");
-  const files = {
-    typescript: gitLines(args.repo, ["*.ts", "*.tsx"]),
-    go: gitLines(args.repo, ["*.go"]),
-  };
-  let data = args.regen ? undefined : cachedIndex(indexDirectory, head, files);
+  const files = trackedFilesByLanguage(args.repo);
+  const roster = languageRoster(files);
+
+  if (args.query === "languages") {
+    if (args.regen || !cachedRoster(indexDirectory, head, roster)) {
+      regenerateRoster(indexDirectory, head, roster);
+    }
+    for (const entry of roster) {
+      process.stdout.write(`${entry.id}\t${entry.count}\t${entry.backend}\n`);
+    }
+    return;
+  }
+
+  let data = args.regen ? undefined : cachedIndex(indexDirectory, head, roster);
   let seconds;
   if (!data) {
-    const generated = generate(args.repo, head, indexDirectory, files);
+    const generated = generate(args.repo, head, indexDirectory, files, roster);
     data = generated.data;
     seconds = generated.seconds;
   }
