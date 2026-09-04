@@ -2,8 +2,10 @@
 # Test: map-check script
 # Verifies task-row and seam-row selection, both Hash cell forms, all six
 # line shapes (fresh / STALE / CHECK / GONE / NEW / seam), commit
-# attribution via git log, one-hop CHECK seeding, exit codes (0, 1, 2), and
-# tracker-free operation (no bd on PATH, no bd in the script).
+# attribution via git log, one-hop CHECK seeding, exit codes (0, 1, 2),
+# tracker-free operation (no bd on PATH, no bd in the script), and the
+# unindexed-language header lines (roster order, other excluded, none
+# when every language is indexed, exit 1 when the languages query fails).
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -11,6 +13,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 MAP_CHECK="$REPO_ROOT/scripts/map-check"
 INDEX="$REPO_ROOT/scripts/structural-index"
 FIXTURE="$REPO_ROOT/tests/fixtures/structural-index/ts"
+MIXED_FIXTURE="$REPO_ROOT/tests/fixtures/structural-index/mixed"
 
 FAILED=0
 PASSED=0
@@ -90,6 +93,11 @@ SANDBOX_BIN="$WORK/bin"
 mkdir -p "$SANDBOX_BIN"
 ln -s "$(command -v git)" "$SANDBOX_BIN/git"
 ln -s "$(command -v node)" "$SANDBOX_BIN/node"
+if ! command -v go >/dev/null 2>&1; then
+    echo "  [FAIL] go toolchain unavailable; see docs/dispatch-env.md"
+    exit 1
+fi
+ln -s "$(command -v go)" "$SANDBOX_BIN/go"
 if PATH="$SANDBOX_BIN" command -v bd >/dev/null 2>&1; then
     fail "sandbox PATH excludes bd"
 else
@@ -150,6 +158,7 @@ assert_grep "new row prints NEW not yet created" \
     '^NEW createdLater src/created-later.ts (not yet created)$' "$MAP_A"
 assert_not_grep "task-2 rows never print for task 1: priceLine" 'priceLine' "$MAP_A"
 assert_not_grep "task-2 rows never print for task 1: triple" 'triple' "$MAP_A"
+assert_not_grep "fully indexed clone prints no unindexed header line" '^unindexed' "$MAP_A"
 
 run_map_check map-epic 1
 assert_status "bare-number task id exits 0" 0 "$MAP_STATUS"
@@ -239,6 +248,95 @@ seam 1→2 Task 2 consumes the six line kinds' "$MSHA" "$DSHA")" \
     "$MAP_E"
 assert_grep "new row prints NEW created since planning with its span" \
     '^NEW createdLater src/created-later.ts:1-3 (created since planning)$' "$MAP_E"
+
+echo ""
+echo "Phase F: unindexed languages — header lines precede every row line"
+MIXED_TARGET="$WORK/mixed-repo"
+mkdir -p "$MIXED_TARGET"
+cp -R "$MIXED_FIXTURE/." "$MIXED_TARGET/"
+git -C "$MIXED_TARGET" init -q
+git -C "$MIXED_TARGET" config user.name "Map Check Test"
+git -C "$MIXED_TARGET" config user.email "map-check@example.test"
+git -C "$MIXED_TARGET" add .
+git -C "$MIXED_TARGET" commit -qm "mixed fixture"
+
+rb_line="$("$INDEX" symbol renderBadge --repo "$MIXED_TARGET")"
+rb_file="$(printf '%s\n' "$rb_line" | cut -f1)"
+rb_span="$(printf '%s\n' "$rb_line" | cut -f2)"
+rb_hash="$(printf '%s\n' "$rb_line" | cut -f3)"
+
+mkdir -p "$MIXED_TARGET/docs/beads"
+cat >"$MIXED_TARGET/docs/beads/mixed-epic.map.md" <<EOF
+# mixed-epic exploration map
+
+| Task | Symbol | File | Hash | Note | Source |
+|------|--------|------|------|------|--------|
+| 1 | renderBadge | $rb_file | $rb_hash | fresh row in an indexed language | index |
+| 1 | kotlinOnlyMarker | src/kotlin/BadgeScreen.kt | new | a symbol whose only home is uncovered | planner |
+| 1→2 | seam: header placement | — | — | row lines follow the headers | planner |
+EOF
+git -C "$MIXED_TARGET" add docs
+git -C "$MIXED_TARGET" commit -qm "mixed map"
+
+PATH="$SANDBOX_BIN" "$MAP_CHECK" mixed-epic 1 --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+MAP_STATUS=$?
+assert_status "mixed-epic run exits 0" 0 "$MAP_STATUS"
+assert_eq "mixed run prints one header per uncovered language in roster order, then the unchanged row lines" \
+    "unindexed kotlin 3 files (callers and tests by text search; no definition rows)
+unindexed swift 3 files (callers and tests by text search; no definition rows)
+unindexed python 4 files (callers and tests by text search; no definition rows)
+fresh renderBadge $rb_file:$rb_span
+NEW kotlinOnlyMarker src/kotlin/BadgeScreen.kt (not yet created)
+seam 1→2 row lines follow the headers" \
+    "$(cat "$WORK/stdout")"
+assert_eq "exactly three header lines print on the mixed clone" "3" "$(grep -c '^unindexed ' "$WORK/stdout")"
+assert_not_grep "other never prints a header line" '^unindexed other' "$(cat "$WORK/stdout")"
+
+echo ""
+echo "Phase F2: a kotlin-only repository — header line then seam line, exit 0"
+KOTLIN_TARGET="$WORK/kotlin-repo"
+mkdir -p "$KOTLIN_TARGET/src" "$KOTLIN_TARGET/docs/beads"
+printf 'class BadgeScreen {\n    fun render() = "badge"\n}\n' >"$KOTLIN_TARGET/src/BadgeScreen.kt"
+printf 'class BadgeScreenTest {\n    fun probe() = BadgeScreen().render()\n}\n' >"$KOTLIN_TARGET/src/BadgeScreenTest.kt"
+cat >"$KOTLIN_TARGET/docs/beads/kotlin-epic.map.md" <<'EOF'
+# kotlin-epic exploration map
+
+| Task | Symbol | File | Hash | Note | Source |
+|------|--------|------|------|------|--------|
+| 1→2 | seam: only row | — | — | no indexed language is not an error | planner |
+EOF
+git -C "$KOTLIN_TARGET" init -q
+git -C "$KOTLIN_TARGET" config user.name "Map Check Test"
+git -C "$KOTLIN_TARGET" config user.email "map-check@example.test"
+git -C "$KOTLIN_TARGET" add .
+git -C "$KOTLIN_TARGET" commit -qm "kotlin-only fixture"
+
+PATH="$SANDBOX_BIN" "$MAP_CHECK" kotlin-epic 1 --repo "$KOTLIN_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+MAP_STATUS=$?
+assert_status "kotlin-only run exits 0" 0 "$MAP_STATUS"
+assert_eq "kotlin-only run prints the kotlin header then the seam line" \
+    "unindexed kotlin 2 files (callers and tests by text search; no definition rows)
+seam 1→2 no indexed language is not an error" \
+    "$(cat "$WORK/stdout")"
+
+echo ""
+echo "Phase F3: a languages query failure exits 1 with one stderr line"
+EMPTY_TARGET="$WORK/empty-repo"
+mkdir -p "$EMPTY_TARGET/docs/beads"
+cat >"$EMPTY_TARGET/docs/beads/empty-epic.map.md" <<'EOF'
+# empty-epic exploration map
+
+| Task | Symbol | File | Hash | Note | Source |
+|------|--------|------|------|------|--------|
+| 1→2 | seam: only row | — | — | zero-commit repository | planner |
+EOF
+git -C "$EMPTY_TARGET" init -q
+PATH="$SANDBOX_BIN" "$MAP_CHECK" empty-epic 1 --repo "$EMPTY_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+MAP_STATUS=$?
+assert_status "languages query failure exits 1" 1 "$MAP_STATUS"
+assert_eq "languages query failure leaves stdout empty" "" "$(cat "$WORK/stdout")"
+assert_eq "languages query failure prints one stderr line" "1" "$(wc -l <"$WORK/stderr" | tr -d ' ')"
+assert_grep "languages failure stderr names the failed query" 'structural-index languages failed' "$(cat "$WORK/stderr")"
 
 echo ""
 echo "Phase G: a file:-prefixed Hash cell exits 2 naming the row"

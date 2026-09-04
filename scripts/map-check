@@ -2,7 +2,8 @@
 // map-check — computed freshness for the exploration map.
 // Reads <repo>/docs/beads/<epic-id>.map.md, selects the rows of one task
 // plus its seam rows, compares each plan-time hash with the structural
-// index at HEAD, and prints one line per selected row. It never writes:
+// index at HEAD, and prints one line per selected row, preceded by one
+// header line per language the index does not cover. It never writes:
 // freshness is computed, never recorded.
 import fs from "node:fs";
 import path from "node:path";
@@ -129,6 +130,24 @@ function callersFor(repo, symbol) {
     callerResults.set(symbol, sites);
   }
   return callerResults.get(symbol);
+}
+
+function unindexedHeaders(repo) {
+  let stdout;
+  try {
+    stdout = execFileSync(process.execPath, [indexScript, "languages", "--repo", repo], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  } catch (error) {
+    fail(`map-check: structural-index languages failed (exit ${error.status ?? "unknown"})`, 1);
+  }
+  return stdout.split("\n").filter(Boolean).map((line) => {
+    const [id, count, backend] = line.split("\t");
+    return { id, count: Number(count), backend };
+  })
+    .filter((entry) => entry.backend === "none" && entry.id !== "other" && entry.count > 0)
+    .map((entry) => `unindexed ${entry.id} ${entry.count} files (callers and tests by text search; no definition rows)`);
 }
 
 function parseDefinitions(stdout) {
@@ -265,6 +284,9 @@ function main() {
     }
   }
 
+  // Headers print only after every exit path has passed, so an error exit
+  // leaves stdout empty.
+  for (const line of unindexedHeaders(args.repo)) process.stdout.write(`${line}\n`);
   for (const verdict of verdicts) process.stdout.write(`${verdict.line}\n`);
 }
 
