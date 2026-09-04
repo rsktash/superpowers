@@ -307,6 +307,13 @@ assert_status "bad --repo exits 1" 1 "$MAP_STATUS"
 assert_eq "bad --repo leaves stdout empty" "" "$(cat "$WORK/stdout")"
 assert_eq "bad --repo prints one stderr line" "1" "$(wc -l <"$WORK/stderr" | tr -d ' ')"
 
+PATH="$SANDBOX_BIN" "$MAP_CHECK" map-epic 1 >"$WORK/stdout" 2>"$WORK/stderr"
+MAP_STATUS=$?
+assert_status "missing --repo exits 1" 1 "$MAP_STATUS"
+PATH="$SANDBOX_BIN" "$MAP_CHECK" map-epic abc --repo "$TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+MAP_STATUS=$?
+assert_status "task id without a number exits 1" 1 "$MAP_STATUS"
+
 echo ""
 if [ "$FAILED" -eq 0 ]; then
     echo "All map-check tests passed ($PASSED assertions)."

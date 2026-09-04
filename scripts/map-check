@@ -22,7 +22,7 @@ function fail(message, status = 2) {
 function parseArguments(argv) {
   const [epicId, taskId, ...flags] = argv;
   if (!epicId || !taskId) {
-    fail("usage: map-check <epic-id> <task-id> --repo <root>");
+    fail("usage: map-check <epic-id> <task-id> --repo <root>", 1);
   }
 
   let repo;
@@ -31,17 +31,17 @@ function parseArguments(argv) {
       repo = flags[index + 1];
       index += 1;
     } else {
-      fail(`unknown argument: ${flags[index]}`);
+      fail(`unknown argument: ${flags[index]}`, 1);
     }
   }
-  if (!repo) fail("missing required --repo <root>");
+  if (!repo) fail("missing required --repo <root>", 1);
 
   const trailing = taskId.match(/\.(\d+)$/);
   const bare = taskId.match(/^(\d+)$/);
   let taskNumber;
   if (trailing) taskNumber = Number(trailing[1]);
   else if (bare) taskNumber = Number(bare[1]);
-  else fail(`task id has no task number: ${taskId}`);
+  else fail(`task id has no task number: ${taskId}`, 1);
   return { epicId, taskNumber, repo: fs.realpathSync(repo) };
 }
 
