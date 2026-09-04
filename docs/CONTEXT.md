@@ -24,3 +24,13 @@ One line per term of art. Specs, bead bodies, and dispatch prompts write in this
 - **planner-only decomposition** — the rule that only writing-plans creates task beads, and only flat: a task never has children.
 - **language roster** — the per-repository list of language id, tracked file count, and backend status (`compiler` | `none`) that `structural-index languages` prints and the exploration map file's header carries.
 - **text answer** — a `callers` or `tests` result produced by word-boundary text search over languages with no definition backend, marked by one stderr line; never a definition.
+- **execution plan** — the one bd plan per project, id fixed to the tracker prefix, that orders beads into lanes; never a second active plan.
+- **lane** — one epic's ordered queue inside the execution plan, with one cursor and at most one holding session; created and claimed by the coordinator at execution start.
+- **lane step** — the shared procedure (`skills/shared/plan-lane.md`) the three execution skills cite after the epic gate: ensure plan, add lane, claim with the session id.
+- **handoff entry** — the typed `bd plan handoff` row on a lane: done ids with commits, next id, parked ids each with a question id, five-line thread; replaces the handoff record and the anchor bead.
+- **lane-less session** — a session that holds no lane; at Close it types its rulings and questions and posts no record.
+- **session id export** — the SessionStart hook's `export BD_SESSION_ID=<session_id>` line in `$CLAUDE_ENV_FILE`; every lane verb and `bd session close` read it.
+- **planner actor** — `BD_ACTOR=planner`, exported by the forked planner for its whole run; bylines its questions and makes bd refuse its rulings.
+- **topic pick** — filing a question or finding without `--topic` first, reading the printed catalogue, and choosing an existing slug; executors never mint.
+- **pending topic** — a statement filed with no fitting slug, resolved by the coordinator at Close; `--topic pending-<task-id>` until bd stores the state itself.
+- **mining brief** — the tracker-mining skill's only output: header line, `bd authority`-format lines, a capped "Proposed actions" block of bd commands.
