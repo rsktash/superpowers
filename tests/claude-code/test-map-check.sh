@@ -75,26 +75,9 @@ TARGET="$WORK/repo"
 mkdir -p "$TARGET"
 cp -R "$FIXTURE/." "$TARGET/"
 
-# The index backend needs a TypeScript package inside the target repo —
-# the same discovery mechanism test-structural-index.sh uses.
+# Keep a TypeScript package inside the target repo so the repository-first
+# resolution path stays covered.
 typescript_package="${STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE:-}"
-if [ -z "$typescript_package" ]; then
-    common_dir="$(git -C "$REPO_ROOT" rev-parse --git-common-dir)"
-    case "$common_dir" in
-        /*) common_root="$(cd "$common_dir/.." && pwd)" ;;
-        *) common_root="$(cd "$REPO_ROOT/$common_dir/.." && pwd)" ;;
-    esac
-    projects_root="$(dirname "$common_root")"
-    for candidate in \
-        "$projects_root/zanjir/server/node_modules/typescript" \
-        "$projects_root/zanjir/web-app/node_modules/typescript" \
-        "$(npm root -g 2>/dev/null)/typescript"; do
-        if [ -f "$candidate/lib/typescript.js" ]; then
-            typescript_package="$candidate"
-            break
-        fi
-    done
-fi
 if [ ! -f "$typescript_package/lib/typescript.js" ]; then
     echo "  [FAIL] TypeScript package unavailable; set STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE"
     exit 1
@@ -295,7 +278,8 @@ git -C "$BROKEN" config user.name "Map Check Test"
 git -C "$BROKEN" config user.email "map-check@example.test"
 git -C "$BROKEN" add -A
 git -C "$BROKEN" commit -q -m "tracked TypeScript, no compiler"
-PATH="$SANDBOX_BIN" "$MAP_CHECK" broken-index 1 --repo "$BROKEN" >"$WORK/stdout" 2>"$WORK/stderr"
+env -u STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE PATH="$SANDBOX_BIN" \
+    "$MAP_CHECK" broken-index 1 --repo "$BROKEN" >"$WORK/stdout" 2>"$WORK/stderr"
 MAP_STATUS=$?
 assert_status "structural-index failure exits 1" 1 "$MAP_STATUS"
 assert_eq "structural-index failure leaves stdout empty" "" "$(cat "$WORK/stdout")"

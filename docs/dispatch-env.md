@@ -19,6 +19,8 @@ Run `bd` from the repo root only (`/Users/rustam/Projects/superpowers`); the wor
 
 Deterministic suite (run from the worktree root):
 
+The deterministic suite needs the `go` toolchain on `PATH` and `STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE` exported to a directory holding `lib/typescript.js`, for example: `export STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE=/Users/rustam/Projects/zanjir/server/node_modules/typescript`.
+
 ```
 cd tests/claude-code && for t in test-completion-gate test-gate-lint test-fail-streak-guard test-review-package test-structural-index test-map-check; do ./$t.sh; done
 ```
@@ -37,7 +39,7 @@ scripts/structural-index tests <name> --repo <root> [--regen]
 
 `symbol` prints one tab-separated `<file>\t<start>-<end>\t<hash>` line per definition. `callers` and `tests` print one `<file>:<line>` reference per line; `tests` limits those references to test files — `*.test.*`, `*.spec.*`, and `__tests__` paths for TypeScript, `*_test.go` files for Go. Paths are relative to `<root>`, and the hash is the first 12 hexadecimal characters of SHA-256 over the definition span's source bytes. An unknown symbol exits 1, leaves stdout empty, and writes `symbol not found: <name>` as one stderr line.
 
-Each language is generated only when the target repository tracks files of that language: `<root>/.bd/index/typescript.json` for `*.ts`/`*.tsx`, `<root>/.bd/index/go.json` for `*.go`, plus `<root>/.bd/index/metadata.json`. The metadata records the target repository's HEAD and the indexed languages. An absent index or changed HEAD regenerates and reports per-language wall time on stderr; reuse on the same HEAD is silent, and `--regen` forces regeneration. The TypeScript package is resolved from a tracked package directory inside the target repository; the Go backend runs Go's own go/parser + go/types through the `go` toolchain on PATH.
+Each language is generated only when the target repository tracks files of that language: `<root>/.bd/index/typescript.json` for `*.ts`/`*.tsx`, `<root>/.bd/index/go.json` for `*.go`, plus `<root>/.bd/index/metadata.json`. The metadata records the target repository's HEAD and the indexed languages. An absent index or changed HEAD regenerates and reports per-language wall time on stderr; reuse on the same HEAD is silent, and `--regen` forces regeneration. The TypeScript package is resolved from a tracked package directory inside the target repository, then from `STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE`; when neither holds one, the CLI exits 2 and names the variable. The Go backend runs Go's own go/parser + go/types through the `go` toolchain on PATH.
 
 ## map-check
 

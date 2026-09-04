@@ -60,7 +60,19 @@ function loadTypeScript(repo) {
       return createRequire(import.meta.url)(implementation);
     }
   }
-  throw new Error(`TypeScript package not found under target repository: ${repo}`);
+
+  const fallbackDirectory = process.env.STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE;
+  if (fallbackDirectory) {
+    const implementation = path.resolve(fallbackDirectory, "lib", "typescript.js");
+    if (fs.existsSync(implementation)) {
+      return createRequire(import.meta.url)(implementation);
+    }
+    throw new Error(`TypeScript package not found via STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE: ${implementation}`);
+  }
+  throw new Error(
+    `TypeScript package not found under target repository: ${repo}; `
+    + "set STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE to a directory holding lib/typescript.js",
+  );
 }
 
 function definitionCandidates(ts, sourceFile) {

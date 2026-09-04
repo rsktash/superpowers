@@ -56,23 +56,6 @@ mkdir -p "$TARGET"
 cp -R "$FIXTURE/." "$TARGET/"
 
 typescript_package="${STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE:-}"
-if [ -z "$typescript_package" ]; then
-    common_dir="$(git -C "$REPO_ROOT" rev-parse --git-common-dir)"
-    case "$common_dir" in
-        /*) common_root="$(cd "$common_dir/.." && pwd)" ;;
-        *) common_root="$(cd "$REPO_ROOT/$common_dir/.." && pwd)" ;;
-    esac
-    projects_root="$(dirname "$common_root")"
-    for candidate in \
-        "$projects_root/zanjir/server/node_modules/typescript" \
-        "$projects_root/zanjir/web-app/node_modules/typescript" \
-        "$(npm root -g 2>/dev/null)/typescript"; do
-        if [ -f "$candidate/lib/typescript.js" ]; then
-            typescript_package="$candidate"
-            break
-        fi
-    done
-fi
 if [ ! -f "$typescript_package/lib/typescript.js" ]; then
     echo "  [FAIL] TypeScript package unavailable; set STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE"
     exit 1
@@ -187,6 +170,55 @@ fi
 cp "$WORK/unused.ts" "$TARGET/src/unused.ts"
 "$INDEX" symbol unused --repo "$TARGET" --regen >"$WORK/stdout" 2>"$WORK/stderr"
 assert_eq "reverting mutation restores span and hash" $'src/unused.ts\t1-3\t6594898741b7' "$(cat "$WORK/stdout")"
+
+echo ""
+echo "TypeScript package fallback: no package under the target repository"
+FALLBACK_TARGET="$WORK/fallback-repo"
+mkdir -p "$FALLBACK_TARGET"
+cp -R "$FIXTURE/." "$FALLBACK_TARGET/"
+git -C "$FALLBACK_TARGET" init -q
+git -C "$FALLBACK_TARGET" config user.name "Structural Index Test"
+git -C "$FALLBACK_TARGET" config user.email "structural-index@example.test"
+git -C "$FALLBACK_TARGET" add .
+git -C "$FALLBACK_TARGET" commit -qm "fixture without TypeScript package"
+
+in_repo_triple="$("$INDEX" symbol triple --repo "$TARGET" 2>"$WORK/stderr")"
+ln -s "$typescript_package" "$WORK/typescript-package"
+(
+    cd "$WORK" || exit
+    STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE=typescript-package \
+        "$INDEX" symbol triple --repo "$FALLBACK_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+)
+status=$?
+if [ "$status" -eq 0 ] && [ "$(cat "$WORK/stdout")" = "$in_repo_triple" ]; then
+    pass "relative environment fallback matches the in-repo symbol result"
+else
+    fail "relative environment fallback matches the in-repo symbol result (exit $status; stdout: $(cat "$WORK/stdout"); stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
+fi
+
+rm -rf "$FALLBACK_TARGET/.bd/index"
+env -u STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE \
+    "$INDEX" symbol triple --repo "$FALLBACK_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+if [ "$status" -eq 2 ] \
+    && [ ! -s "$WORK/stdout" ] \
+    && grep -Fq "TypeScript package not found" "$WORK/stderr" \
+    && grep -Fq "STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE" "$WORK/stderr"; then
+    pass "missing fallback exits 2 with empty stdout and fallback guidance"
+else
+    fail "missing fallback exits 2 with empty stdout and fallback guidance (exit $status; stdout: $(cat "$WORK/stdout"); stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
+fi
+
+rm -rf "$FALLBACK_TARGET/.bd/index"
+mkdir -p "$WORK/no-typescript-package"
+STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE="$WORK/no-typescript-package" \
+    "$INDEX" symbol triple --repo "$FALLBACK_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+if [ "$status" -eq 2 ] && grep -Fq "STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE" "$WORK/stderr"; then
+    pass "invalid fallback exits 2 and names the variable"
+else
+    fail "invalid fallback exits 2 and names the variable (exit $status; stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
+fi
 
 echo ""
 echo "Go fixture: the same CLI contract over the Go backend"
