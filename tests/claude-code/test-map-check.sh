@@ -3,9 +3,12 @@
 # Verifies task-row and seam-row selection, both Hash cell forms, all six
 # line shapes (fresh / STALE / CHECK / GONE / NEW / seam), commit
 # attribution via git log, one-hop CHECK seeding, exit codes (0, 1, 2),
-# tracker-free operation (no bd on PATH, no bd in the script), and the
+# tracker-free operation (no bd on PATH, no bd in the script), the
 # unindexed-language header lines (roster order, other excluded, none
-# when every language is indexed, exit 1 when the languages query fails).
+# when every language is indexed, exit 1 when the languages query fails),
+# and consumer parity: SKILL.md, implementer-prompt.md, reviewer-prompt.md,
+# and dispatch-prompt.md list fresh / STALE / CHECK / GONE / NEW / seam /
+# unindexed identically (whitespace collapsed).
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -395,6 +398,22 @@ assert_status "missing --repo exits 1" 1 "$MAP_STATUS"
 PATH="$SANDBOX_BIN" "$MAP_CHECK" map-epic abc --repo "$TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
 MAP_STATUS=$?
 assert_status "task id without a number exits 1" 1 "$MAP_STATUS"
+
+echo ""
+echo "Phase J: consumer parity — the unindexed token rides every line-shape list"
+SEVEN="fresh / STALE / CHECK / GONE / NEW / seam / unindexed"
+shapes_of() {
+    tr '\n\t' '  ' <"$1" | tr -s ' ' \
+        | grep -o 'fresh / STALE / CHECK / GONE / NEW / seam / unindexed' | sort -u
+}
+for f in \
+    "$REPO_ROOT/skills/subagent-driven-development/SKILL.md" \
+    "$REPO_ROOT/skills/subagent-driven-development/implementer-prompt.md" \
+    "$REPO_ROOT/skills/subagent-driven-development/reviewer-prompt.md" \
+    "$REPO_ROOT/skills/codex-execution/dispatch-prompt.md"; do
+    assert_eq "line-shape list in ${f#"$REPO_ROOT/"} reads the seven tokens" \
+        "$SEVEN" "$(shapes_of "$f")"
+done
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then

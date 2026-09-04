@@ -66,9 +66,13 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
 
     [VERBATIM output of `${CLAUDE_PLUGIN_ROOT}/scripts/map-check <epic-id> <task-id>
      --repo <repo-root>` run at claim — the task's fresh / STALE / CHECK / GONE /
-     NEW / seam lines, its span list for the executor's discovery batch. The
-     section is left empty, with one line saying so, when the epic has no map file
+     NEW / seam / unindexed lines, its span list for the executor's discovery batch.
+     The section is left empty, with one line saying so, when the epic has no map file
      (exit 2).]
+    An `unindexed <id> <n> files (callers and tests by text search; no definition
+    rows)` header line means the discovery batch for that language is the Files list
+    read whole plus the task's named text queries — `symbol not found` for a name in
+    that language is neither a missing symbol nor a stop condition.
 
     ## Test Scope
 

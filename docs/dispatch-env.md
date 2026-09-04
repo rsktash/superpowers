@@ -35,9 +35,12 @@ Run the TypeScript and Go structural index from the plugin worktree:
 scripts/structural-index symbol <name> --repo <root> [--regen]
 scripts/structural-index callers <name> --repo <root> [--regen]
 scripts/structural-index tests <name> --repo <root> [--regen]
+scripts/structural-index languages --repo <root>
 ```
 
 `symbol` prints one tab-separated `<file>\t<start>-<end>\t<hash>` line per definition. `callers` and `tests` print one `<file>:<line>` reference per line; `tests` limits those references to test files — `*.test.*`, `*.spec.*`, and `__tests__` paths for TypeScript, `*_test.go` files for Go. Paths are relative to `<root>`, and the hash is the first 12 hexadecimal characters of SHA-256 over the definition span's source bytes. An unknown symbol exits 1, leaves stdout empty, and writes `symbol not found: <name>` as one stderr line.
+
+`languages` prints one line per language the target repository tracks: `<id>`, its tracked file count, and its backend, tab-separated, ordered typescript, go, kotlin, swift, python, other — backend `compiler` for typescript and go, `none` for kotlin, swift, python, and other. A name whose definitions live only in `none` languages still gets `callers` and `tests` answers, produced by word-boundary text search and marked by one stderr line, quoted exactly: `structural-index: <query> <name> answered by text search over <n> files in <ids>`. A `symbol` query in the same position prints `symbol not found: <name>` followed by `structural-index: no definition backend for <ids>; not searched` — a text answer's grade, never a missing symbol.
 
 Each language is generated only when the target repository tracks files of that language: `<root>/.bd/index/typescript.json` for `*.ts`/`*.tsx`, `<root>/.bd/index/go.json` for `*.go`, plus `<root>/.bd/index/metadata.json`. The metadata records the target repository's HEAD and the indexed languages. An absent index or changed HEAD regenerates and reports per-language wall time on stderr; reuse on the same HEAD is silent, and `--regen` forces regeneration. The TypeScript package is resolved from a tracked package directory inside the target repository, then from `STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE`; when neither holds one, the CLI exits 2 and names the variable. The Go backend runs Go's own go/parser + go/types through the `go` toolchain on PATH.
 
@@ -49,7 +52,7 @@ Run the exploration-map freshness check from the plugin worktree:
 scripts/map-check <epic-id> <task-id> --repo <root>
 ```
 
-`<task-id>` resolves to a task number: its trailing `.N` segment or a bare number. The script reads `<root>/docs/beads/<epic-id>.map.md`, selects the rows whose Task cell is that number plus seam rows (`N→M` or `M→N`), compares each plan-time hash with `scripts/structural-index symbol` at HEAD, and prints exactly one line per selected row. Freshness is computed, never written. The Hash cell accepts exactly two forms: 12 hex characters (the plan-time symbol hash) or the literal token `new` (a symbol this plan creates); any other cell — a `file:`-prefixed one included — exits 2 with one stderr line naming the offending row. The six line shapes:
+`<task-id>` resolves to a task number: its trailing `.N` segment or a bare number. The script reads `<root>/docs/beads/<epic-id>.map.md`, selects the rows whose Task cell is that number plus seam rows (`N→M` or `M→N`), compares each plan-time hash with `scripts/structural-index symbol` at HEAD, and prints exactly one line per selected row, preceded by one header line per language the index does not cover. Freshness is computed, never written. The Hash cell accepts exactly two forms: 12 hex characters (the plan-time symbol hash) or the literal token `new` (a symbol this plan creates); any other cell — a `file:`-prefixed one included — exits 2 with one stderr line naming the offending row. The seven line shapes:
 
 - `fresh <symbol> <file>:<start>-<end>` — the current hash equals the plan-time hash.
 - `STALE <symbol> <file>:<start>-<end> (<old> → <new>, changed by <sha>)` — a different hash resolves; `<sha>` is the newest commit touching the current span (`git log -L`).
@@ -57,6 +60,7 @@ scripts/map-check <epic-id> <task-id> --repo <root>
 - `GONE <symbol> <file> (no definition at HEAD; removed or renamed, file last changed by <sha>)` — the index reports no definition in the row's file.
 - `NEW <symbol> <file> (not yet created)` or `NEW <symbol> <file>:<start>-<end> (created since planning)` — a `new` row before and after the symbol exists; no hash comparison.
 - `seam <N→M> <note>` — the seam row's Note cell.
+- `unindexed <id> <n> files (callers and tests by text search; no definition rows)` — one header line per language whose backend is `none` and whose tracked count is above zero (`other` excluded), in roster order, printed before any row line.
 
 Rows of other tasks print nothing. Any mix of these lines exits 0. A missing or unparseable map file exits 2 with one stderr line naming the path. A `structural-index` failure or an invalid argument exits 1 with one stderr line — an error at dispatch, never an absent map: the coordinator stops on it instead of filling the Exploration Map slot with "no map file".
 

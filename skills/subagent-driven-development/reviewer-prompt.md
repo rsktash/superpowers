@@ -43,9 +43,13 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
 
     [VERBATIM output of `${CLAUDE_PLUGIN_ROOT}/scripts/map-check <epic-id> <task-id>
      --repo <repo-root>` run at claim — the task's fresh / STALE / CHECK / GONE /
-     NEW / seam lines, its span list for the executor's discovery batch. The
-     section is left empty, with one line saying so, when the epic has no map file
+     NEW / seam / unindexed lines, its span list for the executor's discovery batch.
+     The section is left empty, with one line saying so, when the epic has no map file
      (exit 2).]
+    An `unindexed <id> <n> files (callers and tests by text search; no definition
+    rows)` header line marks a language with no definition rows: for a symbol in
+    such a language the seam check is the same `callers` query read as a text
+    answer, and the review names that grade.
 
     ## What Implementer Claims They Built
 
