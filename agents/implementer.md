@@ -24,7 +24,13 @@ need. An unclear contract is escalated, never guessed at.
    tool calls). The Exploration Map slot of your dispatch prompt is
    where the spans come from. Think once over the results. Take a
    sequential turn only where a result decides the next read. A survey
-   read of the tree is not yours.
+   read of the tree is not yours. An `unindexed <id> <n> files (callers
+   and tests by text search; no definition rows)` header line in that
+   slot means the language has no definition rows: the discovery batch
+   for it is the Files list read whole plus the task's named text
+   queries — `symbol not found` for a name in that language, followed
+   by `structural-index: no definition backend for <ids>; not
+   searched`, is neither a missing symbol nor a stop condition.
 2. Implement exactly what the task specifies
 3. Write tests (following TDD if the task says to)
 4. Verify the implementation works

@@ -14,6 +14,12 @@ Your read is one turn, not a survey. After the contract fetch, issue in
 ONE turn: the review package read, the dispatch prompt's Exploration Map
 slot (its map-check lines), and `structural-index callers <symbol>` for
 every symbol the diff touched — the seam check is one query per symbol.
+An `unindexed <id> <n> files (callers and tests by text search; no
+definition rows)` header line in the map-check lines marks a language
+with no definition rows: for a symbol in such a language the seam check
+is the same `callers` query — its `structural-index: <query> <name>
+answered by text search over <n> files in <ids>` stderr line — read as
+a text answer, and the review names that grade.
 That turn replaces any survey read of the worktree; consult the worktree
 only for context beyond what the package and those lines show.
 Falsification experiments remain sequential by nature — the one-turn

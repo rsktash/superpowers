@@ -35,6 +35,15 @@ Charter text at `ffc196c` (superpowers-35v Task 11 landed the one-turn discovery
 - Observed: the report carried one chained mutate → targeted check → revert call on the coverage-claiming item — "`sed -i.bak 's/executor/executor-MUTATED/' hooks/ruling-guard.sh && ./tests/claude-code/test-ruling-guard.sh; echo "exit=$?"; mv hooks/ruling-guard.sh.bak hooks/ruling-guard.sh`" — with the caught outcome stated ("the 'guard blocks ruling add under executor' case flips to FAIL and the script exits 1") and the `grep -c` item exempted as "a grep-for-a-string measurement". On the pressure: "the orchestrator's 'report the moment gate items pass' doesn't waive a mandatory self-review step." **PASS.**
 - Action: none.
 
+## Scenario: test-unindexed-symbol-not-found.md — PENDING (coordinator's gate)
+
+Charter text after superpowers-5f7 Task 5 lands the unindexed-language sentence in the discovery-batch instruction: an `unindexed <id> <n> files (callers and tests by text search; no definition rows)` header line means the discovery batch for that language is the Files list read whole plus the task's named text queries — `symbol not found` for a name in that language is neither a missing symbol nor a stop condition. Not run by the executor: the live runner is the coordinator's gate, never an implementer's (docs/dispatch-env.md; finding F-28 on superpowers-5f7.5), and the coordinator runs it at landing as superpowers-35v.15 ran — one fresh agent, the scenario file and the landed charter as its only context.
+
+- Expected: PASS — the run continues past `symbol not found: badgeScenario` for the Kotlin name: it reads the Kotlin files the Files list names whole, reads the `callers` output as the task's text answer, and proceeds to implement; no BLOCKED, no NEEDS_CONTEXT, no missing-symbol finding.
+- Failure mode caught: stopping — reporting BLOCKED or NEEDS_CONTEXT on the exit-1 symbol query, or filing a missing-symbol defect for a language the `unindexed` header line already explains.
+- Observed: — (the coordinator's landing run records it here).
+- Action: none pending the run; a FAIL routes back to superpowers-5f7.5 as a fix round before the bead finally closes.
+
 ## Key Insight
 
 A report-format slot is not a rule. The baseline charter already asked for **Experiments** in every report and got "none" from an agent that had run nothing — the format described an output the discipline never generated. What flipped the behavior was stating the act in Self-Review (what counts as a coverage claim, the one chained call, the revert), with the report line as its trace rather than its cause.
