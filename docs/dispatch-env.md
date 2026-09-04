@@ -56,7 +56,7 @@ scripts/map-check <epic-id> <task-id> --repo <root>
 - `NEW <symbol> <file> (not yet created)` or `NEW <symbol> <file>:<start>-<end> (created since planning)` — a `new` row before and after the symbol exists; no hash comparison.
 - `seam <N→M> <note>` — the seam row's Note cell.
 
-Rows of other tasks print nothing. Any mix of these lines exits 0. A missing or unparseable map file exits 2 with one stderr line naming the path.
+Rows of other tasks print nothing. Any mix of these lines exits 0. A missing or unparseable map file exits 2 with one stderr line naming the path. A `structural-index` failure or an invalid argument exits 1 with one stderr line — an error at dispatch, never an absent map: the coordinator stops on it instead of filling the Exploration Map slot with "no map file".
 
 ## Worktree rules
 

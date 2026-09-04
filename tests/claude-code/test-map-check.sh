@@ -2,7 +2,7 @@
 # Test: map-check script
 # Verifies task-row and seam-row selection, both Hash cell forms, all six
 # line shapes (fresh / STALE / CHECK / GONE / NEW / seam), commit
-# attribution via git log, one-hop CHECK seeding, exit codes, and
+# attribution via git log, one-hop CHECK seeding, exit codes (0, 1, 2), and
 # tracker-free operation (no bd on PATH, no bd in the script).
 set -uo pipefail
 
@@ -282,6 +282,30 @@ assert_status "unparseable map file exits 2" 2 "$MAP_STATUS"
 assert_eq "unparseable map leaves stdout empty" "" "$MAP_OUT"
 assert_eq "unparseable map prints one stderr line" "1" "$(wc -l <"$WORK/stderr" | tr -d ' ')"
 assert_grep "unparseable map stderr names the path" 'docs/beads/broken-epic.map.md' "$(cat "$WORK/stderr")"
+
+echo ""
+echo "Phase I: an index failure or a bad --repo exits 1, never 2"
+BROKEN="$WORK/broken"
+mkdir -p "$BROKEN/src" "$BROKEN/docs/beads"
+printf 'export function lonely() { return 1; }\n' >"$BROKEN/src/lonely.ts"
+printf '| Task | Symbol | File | Hash | Note | Source |\n|---|---|---|---|---|---|\n| 1 | lonely | src/lonely.ts | 0123456789ab | no typescript package here | index |\n' \
+    >"$BROKEN/docs/beads/broken-index.map.md"
+git -C "$BROKEN" init -q
+git -C "$BROKEN" config user.name "Map Check Test"
+git -C "$BROKEN" config user.email "map-check@example.test"
+git -C "$BROKEN" add -A
+git -C "$BROKEN" commit -q -m "tracked TypeScript, no compiler"
+PATH="$SANDBOX_BIN" "$MAP_CHECK" broken-index 1 --repo "$BROKEN" >"$WORK/stdout" 2>"$WORK/stderr"
+MAP_STATUS=$?
+assert_status "structural-index failure exits 1" 1 "$MAP_STATUS"
+assert_eq "structural-index failure leaves stdout empty" "" "$(cat "$WORK/stdout")"
+assert_grep "structural-index failure stderr names the failed query" 'structural-index symbol lonely failed' "$(cat "$WORK/stderr")"
+
+PATH="$SANDBOX_BIN" "$MAP_CHECK" map-epic 1 --repo "$WORK/no-such-repo" >"$WORK/stdout" 2>"$WORK/stderr"
+MAP_STATUS=$?
+assert_status "bad --repo exits 1" 1 "$MAP_STATUS"
+assert_eq "bad --repo leaves stdout empty" "" "$(cat "$WORK/stdout")"
+assert_eq "bad --repo prints one stderr line" "1" "$(wc -l <"$WORK/stderr" | tr -d ' ')"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then

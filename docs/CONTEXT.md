@@ -16,7 +16,7 @@ One line per term of art. Specs, bead bodies, and dispatch prompts write in this
 - **whole-section rewrite** — the editing discipline for skill changes: the affected section is rewritten as one authored piece, never patched line by line.
 - **exploration map** — the per-epic file `docs/beads/<epic-id>.map.md` of symbol entries the planner writes once at plan time; derived data that lives with the code, never maintained through bead writes.
 - **map entry** — one row of the exploration map: task, symbol, file, hash of the symbol's own source text, the planner's note, source (planner | index); keyed by symbol, never by line range.
-- **map-check** — the dispatch-time script that compares plan-time hashes with HEAD and prints fresh / STALE / CHECK lists into the dispatch header; the only freshness mechanism.
+- **map-check** — the dispatch-time script that compares plan-time hashes with HEAD and prints fresh / STALE / CHECK / GONE / NEW / seam lines into the dispatch header; the only freshness mechanism.
 - **structural index** — the deterministic per-repo symbol table (`symbol`, `callers`, `tests`) regenerated per commit; answers first-encounter structural questions without a model.
 - **discovery batch** — the single turn in which an executor reads every map entry span and runs every index query its task names, before any edit.
 - **verification batch** — the single turn in which all Acceptance Gate commands run and report together.

@@ -110,7 +110,7 @@ function runIndex(repo, query, symbol) {
     return { status: 0, stdout };
   } catch (error) {
     if (error.status === 1) return { status: 1, stdout: "" };
-    fail(`map-check: structural-index ${query} ${symbol} failed (exit ${error.status ?? "unknown"})`);
+    fail(`map-check: structural-index ${query} ${symbol} failed (exit ${error.status ?? "unknown"})`, 1);
   }
   return undefined;
 }
@@ -205,7 +205,7 @@ function main() {
     const match = definitions.find((definition) => definition.file === entry.file);
 
     if (entry.type === "new") {
-      const chosen = match ?? definitions[0];
+      const chosen = match;
       verdicts.push({
         entry,
         kind: "new",
@@ -268,4 +268,8 @@ function main() {
   for (const verdict of verdicts) process.stdout.write(`${verdict.line}\n`);
 }
 
-main();
+try {
+  main();
+} catch (error) {
+  fail(`map-check: ${error.message}`, 1);
+}
