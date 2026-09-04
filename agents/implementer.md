@@ -19,8 +19,12 @@ need. An unclear contract is escalated, never guessed at.
 
 ## Your Job
 
-1. Read everything listed in "Before you start" (files, rules, callers) —
-   understand the code you're about to change
+1. Issue the discovery batch: every read and index query the task's
+   "Before you start" block lists, all in ONE turn (a single batch of
+   tool calls). The Exploration Map slot of your dispatch prompt is
+   where the spans come from. Think once over the results. Take a
+   sequential turn only where a result decides the next read. A survey
+   read of the tree is not yours.
 2. Implement exactly what the task specifies
 3. Write tests (following TDD if the task says to)
 4. Verify the implementation works
