@@ -34,3 +34,4 @@ One line per term of art. Specs, bead bodies, and dispatch prompts write in this
 - **topic pick** — filing a question or finding without `--topic` first, reading the printed catalogue, and choosing an existing slug; executors never mint.
 - **pending topic** — a statement filed with no fitting slug, resolved by the coordinator at Close; `--topic pending-<task-id>` until bd stores the state itself.
 - **mining brief** — the tracker-mining skill's only output: header line, `bd authority`-format lines, a capped "Proposed actions" block of bd commands.
+- **feature lineage** — the chain of epics that introduced, upgraded, and edited one feature: a related link from each new epic to its predecessor plus a shared `feature:<slug>` label, filed by brainstorming at spec creation; read with `bd authority <epic-id> --depth 3`; never a topic.
