@@ -22,3 +22,5 @@ One line per term of art. Specs, bead bodies, and dispatch prompts write in this
 - **verification batch** — the single turn in which all Acceptance Gate commands run and report together.
 - **amend mode** — writing-plans invoked with an epic id plus child ids: plans those children in place, splits only into siblings under the epic, re-mints `plan-ready`.
 - **planner-only decomposition** — the rule that only writing-plans creates task beads, and only flat: a task never has children.
+- **language roster** — the per-repository list of language id, tracked file count, and backend status (`compiler` | `none`) that `structural-index languages` prints and the exploration map file's header carries.
+- **text answer** — a `callers` or `tests` result produced by word-boundary text search over languages with no definition backend, marked by one stderr line; never a definition.
