@@ -254,71 +254,80 @@ assert_grep "new row prints NEW created since planning with its span" \
 
 echo ""
 echo "Phase F: unindexed languages — header lines precede every row line"
-MIXED_TARGET="$WORK/mixed-repo"
-mkdir -p "$MIXED_TARGET"
-cp -R "$MIXED_FIXTURE/." "$MIXED_TARGET/"
-git -C "$MIXED_TARGET" init -q
-git -C "$MIXED_TARGET" config user.name "Map Check Test"
-git -C "$MIXED_TARGET" config user.email "map-check@example.test"
-git -C "$MIXED_TARGET" add .
-git -C "$MIXED_TARGET" commit -qm "mixed fixture"
+# The mixed clone tracks Kotlin files and the Kotlin backend now generates
+# them, so the map's index queries need the Kotlin toolchain.
+kotlin_toolchain="${STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN:-}"
+if [ -z "$kotlin_toolchain" ] \
+    || [ ! -d "$kotlin_toolchain/node_modules/tree-sitter" ] \
+    || [ ! -d "$kotlin_toolchain/node_modules/tree-sitter-kotlin" ]; then
+    echo "[SKIP] STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN unset or incomplete; mixed-fixture map assertions skipped"
+else
+    MIXED_TARGET="$WORK/mixed-repo"
+    mkdir -p "$MIXED_TARGET"
+    cp -R "$MIXED_FIXTURE/." "$MIXED_TARGET/"
+    git -C "$MIXED_TARGET" init -q
+    git -C "$MIXED_TARGET" config user.name "Map Check Test"
+    git -C "$MIXED_TARGET" config user.email "map-check@example.test"
+    git -C "$MIXED_TARGET" add .
+    git -C "$MIXED_TARGET" commit -qm "mixed fixture"
 
-rb_line="$("$INDEX" symbol renderBadge --repo "$MIXED_TARGET")"
-rb_file="$(printf '%s\n' "$rb_line" | cut -f1)"
-rb_span="$(printf '%s\n' "$rb_line" | cut -f2)"
-rb_hash="$(printf '%s\n' "$rb_line" | cut -f3)"
+    rb_line="$("$INDEX" symbol renderBadge --repo "$MIXED_TARGET")"
+    rb_file="$(printf '%s\n' "$rb_line" | cut -f1)"
+    rb_span="$(printf '%s\n' "$rb_line" | cut -f2)"
+    rb_hash="$(printf '%s\n' "$rb_line" | cut -f3)"
 
-mkdir -p "$MIXED_TARGET/docs/beads"
-cat >"$MIXED_TARGET/docs/beads/mixed-epic.map.md" <<EOF
+    mkdir -p "$MIXED_TARGET/docs/beads"
+    cat >"$MIXED_TARGET/docs/beads/mixed-epic.map.md" <<EOF
 # mixed-epic exploration map
 
 | Task | Symbol | File | Hash | Note | Source |
 |------|--------|------|------|------|--------|
 | 1 | renderBadge | $rb_file | $rb_hash | fresh row in an indexed language | index |
-| 1 | kotlinOnlyMarker | src/kotlin/BadgeScreen.kt | new | a symbol whose only home is uncovered | planner |
+| 1 | kotlinOnlyMarker | src/kotlin/BadgeScreen.kt | new | a symbol the Kotlin backend defines | planner |
 | 1→2 | seam: header placement | — | — | row lines follow the headers | planner |
 EOF
-git -C "$MIXED_TARGET" add docs
-git -C "$MIXED_TARGET" commit -qm "mixed map"
+    git -C "$MIXED_TARGET" add docs
+    git -C "$MIXED_TARGET" commit -qm "mixed map"
 
-PATH="$SANDBOX_BIN" "$MAP_CHECK" mixed-epic 1 --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
-MAP_STATUS=$?
-assert_status "mixed-epic run exits 0" 0 "$MAP_STATUS"
-assert_eq "mixed run prints one header per uncovered language in roster order, then the unchanged row lines" \
-    "unindexed kotlin 3 files (callers and tests by text search; no definition rows)
-unindexed swift 3 files (callers and tests by text search; no definition rows)
+    PATH="$SANDBOX_BIN" "$MAP_CHECK" mixed-epic 1 --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+    MAP_STATUS=$?
+    assert_status "mixed-epic run exits 0" 0 "$MAP_STATUS"
+    assert_eq "mixed run prints one header per uncovered language in roster order, then the unchanged row lines" \
+        "unindexed swift 3 files (callers and tests by text search; no definition rows)
 unindexed python 4 files (callers and tests by text search; no definition rows)
 fresh renderBadge $rb_file:$rb_span
-NEW kotlinOnlyMarker src/kotlin/BadgeScreen.kt (not yet created)
+NEW kotlinOnlyMarker src/kotlin/BadgeScreen.kt:3-3 (created since planning)
 seam 1→2 row lines follow the headers" \
-    "$(cat "$WORK/stdout")"
-assert_eq "exactly three header lines print on the mixed clone" "3" "$(grep -c '^unindexed ' "$WORK/stdout")"
-assert_not_grep "other never prints a header line" '^unindexed other' "$(cat "$WORK/stdout")"
+        "$(cat "$WORK/stdout")"
+    assert_eq "exactly two header lines print on the mixed clone" "2" "$(grep -c '^unindexed ' "$WORK/stdout")"
+    assert_not_grep "other never prints a header line" '^unindexed other' "$(cat "$WORK/stdout")"
+    assert_not_grep "an indexed language never prints a header line" '^unindexed kotlin' "$(cat "$WORK/stdout")"
+fi
 
 echo ""
-echo "Phase F2: a kotlin-only repository — header line then seam line, exit 0"
-KOTLIN_TARGET="$WORK/kotlin-repo"
-mkdir -p "$KOTLIN_TARGET/src" "$KOTLIN_TARGET/docs/beads"
-printf 'class BadgeScreen {\n    fun render() = "badge"\n}\n' >"$KOTLIN_TARGET/src/BadgeScreen.kt"
-printf 'class BadgeScreenTest {\n    fun probe() = BadgeScreen().render()\n}\n' >"$KOTLIN_TARGET/src/BadgeScreenTest.kt"
-cat >"$KOTLIN_TARGET/docs/beads/kotlin-epic.map.md" <<'EOF'
-# kotlin-epic exploration map
+echo "Phase F2: a swift-only repository — header line then seam line, exit 0"
+SWIFT_TARGET="$WORK/swift-repo"
+mkdir -p "$SWIFT_TARGET/src" "$SWIFT_TARGET/docs/beads"
+printf 'func badgeView(_ label: String) -> String {\n    renderBadge(label)\n}\n' >"$SWIFT_TARGET/src/BadgeView.swift"
+printf 'func badgeViewTests() -> String {\n    renderBadge("test")\n}\n' >"$SWIFT_TARGET/src/BadgeViewTests.swift"
+cat >"$SWIFT_TARGET/docs/beads/swift-epic.map.md" <<'EOF'
+# swift-epic exploration map
 
 | Task | Symbol | File | Hash | Note | Source |
 |------|--------|------|------|------|--------|
 | 1→2 | seam: only row | — | — | no indexed language is not an error | planner |
 EOF
-git -C "$KOTLIN_TARGET" init -q
-git -C "$KOTLIN_TARGET" config user.name "Map Check Test"
-git -C "$KOTLIN_TARGET" config user.email "map-check@example.test"
-git -C "$KOTLIN_TARGET" add .
-git -C "$KOTLIN_TARGET" commit -qm "kotlin-only fixture"
+git -C "$SWIFT_TARGET" init -q
+git -C "$SWIFT_TARGET" config user.name "Map Check Test"
+git -C "$SWIFT_TARGET" config user.email "map-check@example.test"
+git -C "$SWIFT_TARGET" add .
+git -C "$SWIFT_TARGET" commit -qm "swift-only fixture"
 
-PATH="$SANDBOX_BIN" "$MAP_CHECK" kotlin-epic 1 --repo "$KOTLIN_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+PATH="$SANDBOX_BIN" "$MAP_CHECK" swift-epic 1 --repo "$SWIFT_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
 MAP_STATUS=$?
-assert_status "kotlin-only run exits 0" 0 "$MAP_STATUS"
-assert_eq "kotlin-only run prints the kotlin header then the seam line" \
-    "unindexed kotlin 2 files (callers and tests by text search; no definition rows)
+assert_status "swift-only run exits 0" 0 "$MAP_STATUS"
+assert_eq "swift-only run prints the swift header then the seam line" \
+    "unindexed swift 2 files (callers and tests by text search; no definition rows)
 seam 1→2 no indexed language is not an error" \
     "$(cat "$WORK/stdout")"
 

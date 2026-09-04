@@ -889,7 +889,161 @@ function generateGo(repo, goFiles) {
 const LANGUAGE_GENERATORS = {
   typescript: (repo) => generateTypeScript(repo),
   go: (repo, files) => generateGo(repo, files),
+  kotlin: (repo, files) => generateKotlin(repo, files),
 };
+
+// The tree-sitter Node binding ships a 32 KiB input buffer; the largest
+// tracked Kotlin sources exceed it, so every parse passes a 1 MiB buffer
+// (measured in the superpowers-5f7.6 trial).
+const KOTLIN_PARSE_OPTIONS = { bufferSize: 1024 * 1024 };
+
+function loadKotlinToolchain(repo) {
+  const modulePaths = (directory) => [
+    path.join(directory, "node_modules", "tree-sitter"),
+    path.join(directory, "node_modules", "tree-sitter-kotlin"),
+  ];
+  const holds = (entries) => entries.every((entry) => fs.existsSync(entry));
+
+  const packageDirectories = new Set([repo]);
+  for (const packageFile of gitLines(repo, ["package.json", "**/package.json"])) {
+    packageDirectories.add(path.join(repo, path.dirname(packageFile)));
+  }
+  const require = createRequire(import.meta.url);
+  for (const directory of packageDirectories) {
+    const entries = modulePaths(directory);
+    if (holds(entries)) return entries.map((entry) => require(entry));
+  }
+
+  const fallbackDirectory = process.env.STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN;
+  if (fallbackDirectory) {
+    const entries = modulePaths(path.resolve(fallbackDirectory));
+    if (!holds(entries)) {
+      throw new Error(
+        `Kotlin toolchain not found via STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN: ${fallbackDirectory} `
+        + "(expected node_modules/tree-sitter and node_modules/tree-sitter-kotlin inside it)",
+      );
+    }
+    return entries.map((entry) => require(entry));
+  }
+  throw new Error(
+    `Kotlin toolchain not found under target repository: ${repo}; `
+    + "set STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN to a directory holding "
+    + "node_modules/tree-sitter and node_modules/tree-sitter-kotlin",
+  );
+}
+
+function kotlinNearest(node, types) {
+  for (let current = node; current; current = current.parent) {
+    if (types.has(current.type)) return current;
+  }
+  return null;
+}
+
+function kotlinDirectChild(node, type) {
+  return node.namedChildren.find((child) => child.type === type) ?? null;
+}
+
+function kotlinDeclaration(node) {
+  if (node.type === "function_declaration") {
+    const nameNode = kotlinDirectChild(node, "simple_identifier");
+    if (!nameNode) return null;
+    const container = kotlinNearest(node.parent, new Set(["class_declaration", "object_declaration"]));
+    if (!container) return { name: nameNode.text, nameNode, callable: true };
+    const containerName = kotlinDirectChild(container, "type_identifier");
+    // A function inside an anonymous object declares no nameable scope: its
+    // site is still a definition site, but it earns no row.
+    if (!containerName) return { name: null, nameNode, callable: true };
+    return { name: `${containerName.text}.${nameNode.text}`, nameNode, callable: true };
+  }
+  if (node.type === "class_declaration" || node.type === "object_declaration") {
+    const nameNode = kotlinDirectChild(node, "type_identifier");
+    return nameNode ? { name: nameNode.text, nameNode, callable: false } : null;
+  }
+  if (node.type === "property_declaration" && /\bconst\s+val\b/.test(node.text.slice(0, 120))) {
+    const nameNode = node.descendantsOfType("simple_identifier")[0] ?? null;
+    return nameNode ? { name: nameNode.text, nameNode, callable: false } : null;
+  }
+  return null;
+}
+
+function kotlinIsCallee(node) {
+  const call = kotlinNearest(node.parent, new Set(["call_expression"]));
+  if (!call) return false;
+  const suffix = call.namedChildren.find((child) => child.type === "call_suffix");
+  return suffix ? node.endIndex <= suffix.startIndex : node.startIndex === call.startIndex;
+}
+
+function generateKotlin(repo, kotlinFiles) {
+  const started = performance.now();
+  const [Parser, Kotlin] = loadKotlinToolchain(repo);
+  const parser = new Parser();
+  parser.setLanguage(Kotlin);
+
+  const rows = [];
+  const rowsByBareName = new Map();
+  const parsedFiles = [];
+  for (const file of kotlinFiles) {
+    const source = fs.readFileSync(path.join(repo, file), "utf8");
+    const tree = parser.parse(source, null, KOTLIN_PARSE_OPTIONS);
+    const nameOffsets = new Set();
+
+    for (const node of tree.rootNode.descendantsOfType([
+      "function_declaration",
+      "class_declaration",
+      "object_declaration",
+      "property_declaration",
+    ])) {
+      const declaration = kotlinDeclaration(node);
+      if (!declaration) continue;
+      nameOffsets.add(declaration.nameNode.startIndex);
+      if (!declaration.name) continue;
+      const end = node.endPosition.column === 0 && node.endIndex > node.startIndex
+        ? node.endPosition.row
+        : node.endPosition.row + 1;
+      const row = {
+        name: declaration.name,
+        file,
+        start: node.startPosition.row + 1,
+        end,
+        hash: crypto.createHash("sha256")
+          .update(source.slice(node.startIndex, node.endIndex))
+          .digest("hex")
+          .slice(0, 12),
+        callable: declaration.callable,
+        callers: new Set(),
+        tests: new Set(),
+      };
+      rows.push(row);
+      const bareName = declaration.name.split(".").pop();
+      const list = rowsByBareName.get(bareName) ?? [];
+      list.push(row);
+      rowsByBareName.set(bareName, list);
+    }
+
+    parsedFiles.push({ file, tree, nameOffsets });
+  }
+
+  // References resolve against every definition, so the walk runs only
+  // after all files contributed their rows.
+  for (const { file, tree, nameOffsets } of parsedFiles) {
+    for (const node of tree.rootNode.descendantsOfType(["simple_identifier", "type_identifier"])) {
+      const candidates = rowsByBareName.get(node.text);
+      if (!candidates || nameOffsets.has(node.startIndex)) continue;
+      if (kotlinNearest(node.parent, new Set(["import_header", "package_header"]))) continue;
+      const site = `${file}:${node.startPosition.row + 1}`;
+      for (const row of candidates) {
+        if (row.callable && !kotlinIsCallee(node)) continue;
+        row.callers.add(site);
+        if (isTextTestFile("kotlin", file)) row.tests.add(site);
+      }
+    }
+  }
+
+  return {
+    data: { schema: SCHEMA, language: "kotlin", definitions: normalizeDefinitions(rows) },
+    seconds: (performance.now() - started) / 1000,
+  };
+}
 
 function languageRoster(files) {
   return LANGUAGE_ORDER
