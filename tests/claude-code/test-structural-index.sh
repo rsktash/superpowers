@@ -72,7 +72,7 @@ git -C "$MIXED_TARGET" config user.email "structural-index@example.test"
 git -C "$MIXED_TARGET" add .
 git -C "$MIXED_TARGET" commit -qm "mixed fixture"
 
-mixed_roster=$'typescript\t1\tcompiler\ngo\t1\tcompiler\nkotlin\t3\tcompiler\nswift\t3\tcompiler\npython\t4\tcompiler\nother\t3\tnone'
+mixed_roster=$'typescript\t1\tcompiler\ngo\t1\tcompiler\nkotlin\t3\tcompiler\nswift\t3\tcompiler\npython\t4\tcompiler\nother\t4\tnone'
 "$INDEX" languages --repo "$MIXED_TARGET" --regen >"$WORK/stdout" 2>"$WORK/stderr"
 status=$?
 assert_eq "mixed languages regeneration exits 0" "0" "$status"
@@ -85,7 +85,7 @@ assert_eq "mixed languages cache hit is byte-identical" "$mixed_roster" "$(cat "
 assert_eq "mixed languages cache hit is silent" "" "$(cat "$WORK/stderr")"
 
 metadata="$MIXED_TARGET/.bd/index/metadata.json"
-expected_metadata_roster='[{"id":"typescript","count":1,"backend":"compiler"},{"id":"go","count":1,"backend":"compiler"},{"id":"kotlin","count":3,"backend":"compiler"},{"id":"swift","count":3,"backend":"compiler"},{"id":"python","count":4,"backend":"compiler"},{"id":"other","count":3,"backend":"none"}]'
+expected_metadata_roster='[{"id":"typescript","count":1,"backend":"compiler"},{"id":"go","count":1,"backend":"compiler"},{"id":"kotlin","count":3,"backend":"compiler"},{"id":"swift","count":3,"backend":"compiler"},{"id":"python","count":4,"backend":"compiler"},{"id":"other","count":4,"backend":"none"}]'
 if [ -f "$metadata" ]; then
     recorded_roster="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).roster))' "$metadata")"
 else
@@ -110,6 +110,55 @@ if [ "$status" -eq 0 ] \
 else
     fail "missing metadata roster regenerates the same roster (exit $status; stdout: $(cat "$WORK/stdout"); roster: $restored_roster; stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
 fi
+
+echo ""
+echo "Text answers: the tier 1 path needs no new toolchain"
+# The clone tracks the TypeScript module plus other-classified files only,
+# so no Kotlin, Swift, or Python toolchain is resolved and the text-answer
+# assertions run in every environment the suite runs in.
+TEXT_TARGET="$WORK/text-repo"
+mkdir -p "$TEXT_TARGET/src" "$TEXT_TARGET/tests"
+cp "$MIXED_FIXTURE/src/badge.ts" "$TEXT_TARGET/src/badge.ts"
+cp "$MIXED_FIXTURE/package.json" "$TEXT_TARGET/package.json"
+cp "$MIXED_FIXTURE/tsconfig.json" "$TEXT_TARGET/tsconfig.json"
+cp "$MIXED_FIXTURE/tests/other-notes.txt" "$TEXT_TARGET/tests/other-notes.txt"
+printf 'stub\x00otherOnlyMarker\x00stub\n' >"$TEXT_TARGET/blob.bin"
+git -C "$TEXT_TARGET" init -q
+git -C "$TEXT_TARGET" config user.name "Structural Index Test"
+git -C "$TEXT_TARGET" config user.email "structural-index@example.test"
+git -C "$TEXT_TARGET" add .
+git -C "$TEXT_TARGET" commit -qm "text fixture"
+
+"$INDEX" callers otherOnlyMarker --repo "$TEXT_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "text callers exit 0" "0" "$status"
+assert_eq "text callers report every word-boundary hit" $'package.json:4\ntests/other-notes.txt:1' "$(cat "$WORK/stdout")"
+assert_eq "text callers explain the fallback" "structural-index: callers otherOnlyMarker answered by text search over 4 files in other" "$(cat "$WORK/stderr")"
+if grep -Fq 'blob.bin' "$WORK/stdout"; then
+    fail "text callers skip a tracked binary holding the marker bytes"
+else
+    pass "text callers skip a tracked binary holding the marker bytes"
+fi
+
+"$INDEX" symbol otherOnlyMarker --repo "$TEXT_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "text-clone uncovered symbol exits 1" "1" "$status"
+assert_eq "text-clone uncovered symbol has empty stdout" "" "$(cat "$WORK/stdout")"
+assert_eq "text-clone uncovered symbol explains the missing backend" $'symbol not found: otherOnlyMarker\nstructural-index: no definition backend for other; not searched' "$(cat "$WORK/stderr")"
+
+"$INDEX" tests otherOnlyMarker --repo "$TEXT_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "text-clone tests exit 0" "0" "$status"
+assert_eq "text-clone tests keep only test-file hits" "tests/other-notes.txt:1" "$(cat "$WORK/stdout")"
+assert_eq "text-clone tests explain the fallback" "structural-index: tests otherOnlyMarker answered by text search over 1 files in other" "$(cat "$WORK/stderr")"
+
+for query in callers tests; do
+    "$INDEX" "$query" nowhereTextMarker --repo "$TEXT_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+    status=$?
+    assert_eq "text-clone $query nowhere name exits 1" "1" "$status"
+    assert_eq "text-clone $query nowhere name has empty stdout" "" "$(cat "$WORK/stdout")"
+    assert_eq "text-clone $query nowhere name has one stderr line" "symbol not found: nowhereTextMarker" "$(cat "$WORK/stderr")"
+done
 
 echo ""
 echo "Uncovered languages: compiler precedence and text answers"
@@ -220,8 +269,8 @@ else
     "$INDEX" callers otherOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     status=$?
     assert_eq "other text callers exit 0" "0" "$status"
-    assert_eq "other text callers remain covered" "package.json:4" "$(cat "$WORK/stdout")"
-    assert_eq "other text callers explain the fallback" "structural-index: callers otherOnlyMarker answered by text search over 3 files in other" "$(cat "$WORK/stderr")"
+    assert_eq "other text callers remain covered" $'package.json:4\ntests/other-notes.txt:1' "$(cat "$WORK/stdout")"
+    assert_eq "other text callers explain the fallback" "structural-index: callers otherOnlyMarker answered by text search over 4 files in other" "$(cat "$WORK/stderr")"
 
     "$INDEX" symbol otherOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     status=$?
@@ -231,9 +280,9 @@ else
 
     "$INDEX" tests otherOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     status=$?
-    assert_eq "other text tests exit 1" "1" "$status"
-    assert_eq "other text tests have empty stdout" "" "$(cat "$WORK/stdout")"
-    assert_eq "other text tests have one stderr line" "symbol not found: otherOnlyMarker" "$(cat "$WORK/stderr")"
+    assert_eq "other text tests exit 0" "0" "$status"
+    assert_eq "other text tests keep only other-classified test-file hits" "tests/other-notes.txt:1" "$(cat "$WORK/stdout")"
+    assert_eq "other text tests explain the fallback" "structural-index: tests otherOnlyMarker answered by text search over 1 files in other" "$(cat "$WORK/stderr")"
 
     for query in callers tests; do
         "$INDEX" "$query" nowhereTextMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"

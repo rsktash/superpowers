@@ -21,3 +21,8 @@ struct BadgeTheme {
 func orphanAnchor() -> Int {
     return BADGE_LIMIT
 }
+
+@MainActor
+struct AttrBadge {
+    static let label = "attr"
+}

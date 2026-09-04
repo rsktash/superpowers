@@ -13,3 +13,7 @@ func themeAccent() -> String {
 func cardSummary(_ card: BadgeCard) -> String {
     return card.summarize("unit")
 }
+
+func attrBadgeLabel() -> String {
+    return AttrBadge.label
+}

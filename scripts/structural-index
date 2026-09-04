@@ -226,6 +226,12 @@ function isTextTestFile(language, fileName) {
       && baseName.endsWith(".py")
       || /(^|\/)tests\//.test(fileName);
   }
+  if (language === "other") {
+    return /\.(test|spec)\.[^/]+$/.test(fileName)
+      || /_test\.[^/]+$/.test(fileName)
+      || /(^|\/)__tests__(\/|$)/.test(fileName)
+      || /(^|\/)tests\//.test(fileName);
+  }
   return false;
 }
 
@@ -243,7 +249,11 @@ function textAnswer(repo, files, roster, query, symbol) {
   const word = new RegExp(`(?<![A-Za-z0-9_])${escaped}(?![A-Za-z0-9_])`, "u");
   const sites = [];
   for (const file of candidates) {
-    const lines = fs.readFileSync(path.join(repo, file), "utf8").split("\n");
+    const contents = fs.readFileSync(path.join(repo, file));
+    // git grep -I skips binary files: a NUL byte in the first block marks
+    // one, so its lines are never searched.
+    if (contents.subarray(0, 8000).includes(0)) continue;
+    const lines = contents.toString("utf8").split("\n");
     for (let index = 0; index < lines.length; index += 1) {
       if (word.test(lines[index])) sites.push(`${file}:${index + 1}`);
     }
@@ -1097,10 +1107,16 @@ function swiftDirectChild(node, type) {
   return node.namedChildren.find((child) => child.type === type) ?? null;
 }
 
+const SWIFT_TYPE_KEYWORDS = new Set(["struct", "class", "enum", "protocol", "actor", "extension"]);
+
 function swiftHeadKeyword(node) {
-  const firstLine = node.text.split("\n", 1)[0];
-  const match = firstLine.match(/\b(struct|class|enum|protocol|actor|extension)\b/);
-  return match ? match[1] : null;
+  // The keyword is an anonymous child token of the declaration node; the
+  // node's first line can be an attribute line (@MainActor, @available),
+  // so the text is never regexed for it.
+  for (const child of node.children) {
+    if (SWIFT_TYPE_KEYWORDS.has(child.type)) return child.type;
+  }
+  return null;
 }
 
 function swiftContainerName(node) {
