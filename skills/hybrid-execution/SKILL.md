@@ -18,7 +18,7 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-**Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` label on the root (`bd label list <root-id>`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
+**Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
 
 ## The Loop
 
@@ -26,7 +26,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 **Step 0 — pre-flight gate:** resolve the root's pre-flight marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before this session's first claim. Marker present → skip, one line citing it; no marker → run the review once, then write it. Pre-flight runs once per plan and is never re-checked for freshness.
 
-1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, both labels from one call (`bd label list <task-id>`). The `exec:` label gives the mode: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). The `review:` label gives the review tier: `review:trivial-deterministic` means no reviewer for this task, its absence means the combined reviewer runs (subagent-driven-development, **Review Tier**). Legacy plan without the labels: `bd get <task-id> body | grep -m1 '^\*\*Execution'` — the one line, never the body. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
+1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, both labels from one call (`bd label list <task-id>`). The `exec:` label gives the mode: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). The `review:` label gives the review tier: `review:trivial-deterministic` means no reviewer for this task, its absence means the combined reviewer runs (subagent-driven-development, **Review Tier**). The labels are the only source of the mode — a body is never opened to find one, and a task with no `exec:` label is not routable: it failed the epic gate, and the plan goes back to writing-plans. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
 
    Resolve both models from that tier per **Model Tiers** — the implementer's, and the reviewer's, which the same tier fixes — and compose the task's **route line**: id, mode and tier, implementer model, reviewer model, reason. One format, used for every route:
 
@@ -109,7 +109,8 @@ The annotation is the default, not a cage — but every override must be stated,
 - **Toward subagent** (annotation says `inline`, you dispatch): always allowed. State one line: what made the task bigger than planned.
 - **Toward a lower subagent tier** (annotation says `capable`, the body argues for `standard`): **required, not optional** — provided the contract pins the mechanism; a task leaving a design fork to the executor stays `capable` however mechanical the reason reads. The annotation is a ceiling to validate, not a floor to honor. A reason describing mechanical work, a mirror, or a landed/reviewed template argues for `standard` at most — down-route to Sonnet and state the override. Down-routing has no gamble (Sonnet still gets a fresh reviewed subagent); honoring an inflated `capable` burns the session model on busywork. Tier measures the judgment the task demands — surface importance is not an axis.
 - **Toward inline** (annotation says `subagent/*`, you execute it yourself): requires all four writing-plans criteria, read literally: 1 file (the task's Files list, not "one logical unit"), complete spec, gate verifiable in one command, no judgment. A multi-file task fails the first criterion however small the diff. "The files are already in my context", "it's only N lines", and "dispatch overhead exceeds the work" are not criteria — the last is the planner's standard for annotating `inline`, not yours for overriding to it. Any criterion fails → dispatch. State the justification before touching any file.
-- **Missing annotation** (plan predates this skill): classify the task yourself against the rubric — fresh, per task, never by transcribing a dispatch plan or wave grouping already negotiated; scheduling never raises a tier. State the classification and reason, then proceed as if annotated.
+
+There is no override for a missing annotation. Classification is the planner's product; a task without one never reaches this section, because the epic gate stopped the plan and sent it to writing-plans.
 
 **Why stated, not silent:** a silent downgrade is invisible and unchallengeable.
 

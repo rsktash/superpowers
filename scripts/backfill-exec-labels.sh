@@ -4,9 +4,9 @@
 #
 # Mirrors each open bead's `**Execution:**` body line as an `exec:<mode>` label
 # so the orchestrator routes from `bd ready --json` without reading bodies.
-# Beads with no Execution line are left alone (the skill's "missing annotation →
-# classify fresh" rule covers them); beads already carrying an exec: label are
-# skipped, so re-running is safe. Only open beads are touched (`bd list` default).
+# Beads with no Execution line are left alone — since 1.4.48 such a child fails
+# the execution skills' epic gate and the plan goes back to writing-plans; beads
+# already carrying an exec: label are skipped, so re-running is safe. Only open beads are touched (`bd list` default).
 #
 # Exactly three bd invocations per project (list, bulk show, batch), so it stays
 # fast on slow/remote trackers.

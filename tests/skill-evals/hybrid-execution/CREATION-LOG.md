@@ -185,4 +185,8 @@ Both new scenarios failed at baseline for the same structural reason, and neithe
 
 ---
 
-*Created: 2026-06-07; updated 2026-06-08, 2026-09-02*
+*Created: 2026-06-07; updated 2026-06-08, 2026-09-02, 2026-09-04*
+
+## 2026-09-04 — test-missing-annotation flipped: the expected answer is now A
+
+Owner ruling R-A on superpowers-35v deleted the two clauses that licensed self-classification — the routing step's "Legacy plan without the labels" lookup and the override section's "Missing annotation (plan predates this skill): classify the task yourself" bullet — and extended the epic gate to demand an `exec:` label on every open child and an `## Attention Map` on the root. Why: both Release 1 and Release 2 in the beads repo entered execution on a hand-minted `plan-ready` label with no planner products, and a hand-filed plan was indistinguishable from a genuinely old one; the clauses were what licensed the bypass. The scenario text now states the labels and the map are absent while `plan-ready` is present; a Judging section is added (Pass = A with the gate named and no route line; Fail = any self-classification, or minting the missing product by hand). The recorded 2026-09-02 PASS on C is the pre-flip baseline. Re-run against the landed text: pending — the plan under superpowers-35v carries it.
