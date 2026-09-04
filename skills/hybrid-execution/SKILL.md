@@ -3,7 +3,7 @@ name: hybrid-execution
 description: Use when executing implementation plans whose tasks carry Execution annotations - routes each task to inline execution or subagent dispatch per the annotation
 ---
 
-# Hybrid Execution — budget 3019 words
+# Hybrid Execution — budget 3046 words
 
 Execute a plan task-by-task, routing each task to the mode its plan annotation names: trivial tasks run inline in this session; everything else goes to a fresh subagent. Dispatch is the default — inline is reserved for tasks where dispatch overhead exceeds the work itself.
 
@@ -18,7 +18,7 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-**Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans. One exemption: an open child whose title starts with `Decide:` is a decision bead, exempt from the `exec:` check, and must be the dependency of at least one open task (`bd get <id> rdeps` non-empty) — otherwise it is an orphan fork and the gate stops on it. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
+**Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans. Two exemptions: an open child whose title starts with `Decide:` is a decision bead, exempt from the `exec:` check, and must be the dependency of at least one open task (`bd get <id> rdeps` non-empty) — otherwise it is an orphan fork and the gate stops on it; an open child carrying an open owner question (`bd question list` names it) is parked on the owner, hidden by `bd ready`, and exempt the same way. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
 
 ## The Loop
 
