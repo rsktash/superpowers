@@ -62,6 +62,14 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
      and every line here is resident in the controller's context for the rest of
      its session. Empty is normal.]
 
+    ## Exploration Map
+
+    [VERBATIM output of `${CLAUDE_PLUGIN_ROOT}/scripts/map-check <epic-id> <task-id>
+     --repo <repo-root>` run at claim — the task's fresh / STALE / CHECK / GONE /
+     NEW / seam lines, its span list for the executor's discovery batch. The
+     section is left empty, with one line saying so, when the epic has no map file
+     (exit 2).]
+
     ## Test Scope
 
     Run ONLY this task's targeted tests: [exact commands]. Never the full suite —

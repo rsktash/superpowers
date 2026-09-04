@@ -3,7 +3,7 @@ name: codex-execution
 description: Use when executing an implementation plan's task beads via the codex CLI instead of Claude subagents — session-budget execution, "run this plan with codex", or the Codex Execution mode chosen at the writing-plans handoff
 ---
 
-# Codex Execution — budget 1343 words
+# Codex Execution — budget 1374 words
 
 Execution mode: codex (`codex exec`, non-interactive) implements each task bead; this
 session orchestrates, verifies every landing, and runs the terminal whole-diff review.
@@ -58,7 +58,9 @@ PROMPT
    commits on codex's behalf. Fill the context line with the landed sibling commits the
    task consumes, and QUOTE any cross-task contract a prior executor stated (e.g. a
    batch-naming contract) into the consumer task's prompt — contracts travel in
-   prompts, not in your memory.
+   prompts, not in your memory. Fill the template's Exploration Map block with the
+   verbatim output of `${CLAUDE_PLUGIN_ROOT}/scripts/map-check <epic-id> <task-id> --repo <repo-root>`
+   run at claim — one line when the epic has no map file (exit 2).
    Fill slots carry facts, not judgment: the bead's own content, landed shas, quoted
    contracts, the task's named test modules. Any constraint you ADD beyond the bead
    (an environment fact, a "do not run X") must cite a tool run from THIS session —

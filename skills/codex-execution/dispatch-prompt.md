@@ -22,6 +22,14 @@ Protocol:
    body it contradicts.
    [Context: landed sibling commits this task consumes — cite shas and one line each.
    QUOTE any cross-task contract a prior executor stated that this task must satisfy.]
+
+## Exploration Map
+
+[VERBATIM output of `${CLAUDE_PLUGIN_ROOT}/scripts/map-check <epic-id> <task-id>
+--repo <repo-root>` run at claim — the task's fresh / STALE / CHECK / GONE / NEW /
+seam lines, its span list for the executor's discovery batch. The section is left
+empty, with one line saying so, when the epic has no map file (exit 2).]
+
 2. Claim it: `bd update [task-id] --status=in_progress --assignee "[user] / [codex-model]"`.
 3. Execute the task exactly as written: follow its Steps in order (TDD — failing test
    first, run it, implement, run again), satisfy EVERY Acceptance Gate item, obey the
@@ -60,4 +68,10 @@ Protocol:
    stop for it again. [Name the specific satisfied drift detector if the ruling
    supersedes one.]
 4-6. [Same test-scope / close / STOP items as the EXECUTE form.]
+
+## Exploration Map
+
+[Re-filled at resume: VERBATIM output of `${CLAUDE_PLUGIN_ROOT}/scripts/map-check
+<epic-id> <task-id> --repo <repo-root>` re-run at this dispatch — one line when
+the epic has no map file (exit 2).]
 ```
