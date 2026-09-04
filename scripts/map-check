@@ -1,0 +1,271 @@
+#!/usr/bin/env node
+// map-check — computed freshness for the exploration map.
+// Reads <repo>/docs/beads/<epic-id>.map.md, selects the rows of one task
+// plus its seam rows, compares each plan-time hash with the structural
+// index at HEAD, and prints one line per selected row. It never writes:
+// freshness is computed, never recorded.
+import fs from "node:fs";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const COLUMNS = ["Task", "Symbol", "File", "Hash", "Note", "Source"];
+const HASH_PATTERN = /^[0-9a-f]{12}$/;
+const SEAM_PATTERN = /^(\d+)→(\d+)$/;
+const indexScript = fileURLToPath(new URL("./structural-index", import.meta.url));
+
+function fail(message, status = 2) {
+  process.stderr.write(`${message}\n`);
+  process.exit(status);
+}
+
+function parseArguments(argv) {
+  const [epicId, taskId, ...flags] = argv;
+  if (!epicId || !taskId) {
+    fail("usage: map-check <epic-id> <task-id> --repo <root>");
+  }
+
+  let repo;
+  for (let index = 0; index < flags.length; index += 1) {
+    if (flags[index] === "--repo" && flags[index + 1]) {
+      repo = flags[index + 1];
+      index += 1;
+    } else {
+      fail(`unknown argument: ${flags[index]}`);
+    }
+  }
+  if (!repo) fail("missing required --repo <root>");
+
+  const trailing = taskId.match(/\.(\d+)$/);
+  const bare = taskId.match(/^(\d+)$/);
+  let taskNumber;
+  if (trailing) taskNumber = Number(trailing[1]);
+  else if (bare) taskNumber = Number(bare[1]);
+  else fail(`task id has no task number: ${taskId}`);
+  return { epicId, taskNumber, repo: fs.realpathSync(repo) };
+}
+
+function splitRow(line) {
+  let text = line.trim();
+  if (text.startsWith("|")) text = text.slice(1);
+  if (text.endsWith("|")) text = text.slice(0, -1);
+  return text.split("|").map((cell) => cell.trim());
+}
+
+function isSeparator(cells) {
+  return cells.length > 0 && cells.every((cell) => /^:?-+:?$/.test(cell));
+}
+
+function parseMap(mapPath) {
+  let text;
+  try {
+    text = fs.readFileSync(mapPath, "utf8");
+  } catch {
+    fail(`map-check: map file not found: ${mapPath}`);
+  }
+  const lines = text.split("\n");
+  const header = COLUMNS.join("|");
+  let headerAt = -1;
+  for (let index = 0; index < lines.length; index += 1) {
+    if (splitRow(lines[index]).join("|") === header) {
+      headerAt = index;
+      break;
+    }
+  }
+  if (headerAt === -1) {
+    fail(`map-check: map file unparseable (expected header '| Task | Symbol | File | Hash | Note | Source |'): ${mapPath}`);
+  }
+  const rows = [];
+  for (let index = headerAt + 1; index < lines.length; index += 1) {
+    const trimmed = lines[index].trim();
+    if (!trimmed.startsWith("|")) continue;
+    const cells = splitRow(trimmed);
+    if (isSeparator(cells)) continue;
+    rows.push({ lineNumber: index + 1, cells, raw: trimmed });
+  }
+  return rows;
+}
+
+function seamParts(taskCell) {
+  const seam = taskCell.match(SEAM_PATTERN);
+  return seam ? { left: Number(seam[1]), right: Number(seam[2]) } : undefined;
+}
+
+function selectRows(rows, taskNumber) {
+  return rows.filter((row) => {
+    const taskCell = row.cells[0] ?? "";
+    if (/^\d+$/.test(taskCell)) return Number(taskCell) === taskNumber;
+    const seam = seamParts(taskCell);
+    if (seam) return seam.left === taskNumber || seam.right === taskNumber;
+    return false;
+  });
+}
+
+function runIndex(repo, query, symbol) {
+  try {
+    const stdout = execFileSync(process.execPath, [indexScript, query, symbol, "--repo", repo], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "inherit"],
+    });
+    return { status: 0, stdout };
+  } catch (error) {
+    if (error.status === 1) return { status: 1, stdout: "" };
+    fail(`map-check: structural-index ${query} ${symbol} failed (exit ${error.status ?? "unknown"})`);
+  }
+  return undefined;
+}
+
+const symbolResults = new Map();
+function definitionsFor(repo, symbol) {
+  if (!symbolResults.has(symbol)) symbolResults.set(symbol, runIndex(repo, "symbol", symbol));
+  return symbolResults.get(symbol);
+}
+
+const callerResults = new Map();
+function callersFor(repo, symbol) {
+  if (!callerResults.has(symbol)) {
+    const result = runIndex(repo, "callers", symbol);
+    const sites = result.status === 0 ? result.stdout.split("\n").filter(Boolean) : [];
+    callerResults.set(symbol, sites);
+  }
+  return callerResults.get(symbol);
+}
+
+function parseDefinitions(stdout) {
+  return stdout.split("\n").filter(Boolean).map((line) => {
+    const [file, span, hash] = line.split("\t");
+    const [start, end] = span.split("-").map(Number);
+    return { file, start, end, hash };
+  });
+}
+
+function gitOutput(repo, args) {
+  try {
+    return execFileSync("git", ["-C", repo, ...args], { encoding: "utf8" });
+  } catch {
+    return "";
+  }
+}
+
+function newestCommitForSpan(repo, file, start, end, row) {
+  const sha = gitOutput(repo, ["log", "-L", `${start},${end}:${file}`, "--format=%h", "-n", "1", "-s"]).trim();
+  if (!sha) {
+    fail(`map-check: no commit found for range ${start}-${end} of ${file} (map row line ${row.lineNumber}, symbol '${row.cells[1]}')`);
+  }
+  return sha;
+}
+
+function newestCommitForFile(repo, file, row) {
+  const sha = gitOutput(repo, ["log", "-1", "--format=%h", "--", file]).trim();
+  if (!sha) {
+    fail(`map-check: no commit found for ${file} (map row line ${row.lineNumber}, symbol '${row.cells[1]}')`);
+  }
+  return sha;
+}
+
+function main() {
+  const args = parseArguments(process.argv.slice(2));
+  const mapPath = path.join(args.repo, "docs", "beads", `${args.epicId}.map.md`);
+  const selected = selectRows(parseMap(mapPath), args.taskNumber);
+
+  // Validate every selected row's shape and Hash cell before any index
+  // query, so an invalid map prints nothing at all.
+  const entries = [];
+  for (const row of selected) {
+    const taskCell = row.cells[0] ?? "";
+    if (row.cells.length !== 6) {
+      fail(`map-check: map row must have six cells (line ${row.lineNumber}, task '${taskCell}'): ${row.raw}`);
+    }
+    if (seamParts(taskCell)) {
+      entries.push({ row, type: "seam" });
+      continue;
+    }
+    const symbol = row.cells[1];
+    const file = row.cells[2];
+    const hash = row.cells[3];
+    if (hash === "new") {
+      entries.push({ row, type: "new", symbol, file });
+    } else if (HASH_PATTERN.test(hash)) {
+      entries.push({ row, type: "hex", symbol, file, hash });
+    } else {
+      fail(`map-check: invalid Hash cell '${hash}' in map row (line ${row.lineNumber}, task '${taskCell}', symbol '${symbol}', file '${file}'); expected 12 hex characters or 'new'`);
+    }
+  }
+
+  // One verdict per entry: the line it will print, plus the current
+  // definition span a CHECK needs.
+  const verdicts = [];
+  for (const entry of entries) {
+    if (entry.type === "seam") {
+      verdicts.push({ entry, kind: "seam", line: `seam ${entry.row.cells[0]} ${entry.row.cells[4]}`.trimEnd() });
+      continue;
+    }
+    const result = definitionsFor(args.repo, entry.symbol);
+    const definitions = result.status === 0 ? parseDefinitions(result.stdout) : [];
+    const match = definitions.find((definition) => definition.file === entry.file);
+
+    if (entry.type === "new") {
+      const chosen = match ?? definitions[0];
+      verdicts.push({
+        entry,
+        kind: "new",
+        line: chosen
+          ? `NEW ${entry.symbol} ${chosen.file}:${chosen.start}-${chosen.end} (created since planning)`
+          : `NEW ${entry.symbol} ${entry.file} (not yet created)`,
+      });
+      continue;
+    }
+
+    if (!match) {
+      const sha = newestCommitForFile(args.repo, entry.file, entry.row);
+      verdicts.push({
+        entry,
+        kind: "gone",
+        line: `GONE ${entry.symbol} ${entry.file} (no definition at HEAD; removed or renamed, file last changed by ${sha})`,
+      });
+      continue;
+    }
+    if (match.hash === entry.hash) {
+      verdicts.push({
+        entry,
+        kind: "fresh",
+        span: match,
+        line: `fresh ${entry.symbol} ${match.file}:${match.start}-${match.end}`,
+      });
+    } else {
+      const sha = newestCommitForSpan(args.repo, match.file, match.start, match.end, entry.row);
+      verdicts.push({
+        entry,
+        kind: "stale",
+        line: `STALE ${entry.symbol} ${match.file}:${match.start}-${match.end} (${entry.hash} → ${match.hash}, changed by ${sha})`,
+      });
+    }
+  }
+
+  // One hop only: a fresh row whose current span references a symbol some
+  // STALE row names prints CHECK instead of fresh. GONE and NEW rows have
+  // no caller set to resolve and never seed a CHECK.
+  const staleSymbols = verdicts.filter((verdict) => verdict.kind === "stale").map((verdict) => verdict.entry.symbol);
+  if (staleSymbols.length > 0) {
+    for (const verdict of verdicts) {
+      if (verdict.kind !== "fresh") continue;
+      for (const staleSymbol of staleSymbols) {
+        const insideSpan = callersFor(args.repo, staleSymbol).some((site) => {
+          const splitAt = site.lastIndexOf(":");
+          const file = site.slice(0, splitAt);
+          const line = Number(site.slice(splitAt + 1));
+          return file === verdict.span.file && line >= verdict.span.start && line <= verdict.span.end;
+        });
+        if (insideSpan) {
+          verdict.kind = "check";
+          verdict.line = `CHECK ${verdict.entry.symbol} ${verdict.span.file}:${verdict.span.start}-${verdict.span.end} (calls ${staleSymbol})`;
+          break;
+        }
+      }
+    }
+  }
+
+  for (const verdict of verdicts) process.stdout.write(`${verdict.line}\n`);
+}
+
+main();
