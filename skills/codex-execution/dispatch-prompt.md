@@ -30,17 +30,22 @@ Protocol:
 seam lines, its span list for the executor's discovery batch. The section is left
 empty, with one line saying so, when the epic has no map file (exit 2).]
 
-2. Claim it: `bd update [task-id] --status=in_progress --assignee "[user] / [codex-model]"`.
-3. Execute the task exactly as written: follow its Steps in order (TDD — failing test
+2. Issue the discovery batch: every read and index query the task's "Before you
+   start" block lists, all in ONE turn (one batch of tool calls), using the
+   prompt's Exploration Map block for spans. Think once over the results. Take
+   a sequential turn only where a result decides the next read; no survey read
+   of the tree.
+3. Claim it: `bd update [task-id] --status=in_progress --assignee "[user] / [codex-model]"`.
+4. Execute the task exactly as written: follow its Steps in order (TDD — failing test
    first, run it, implement, run again), satisfy EVERY Acceptance Gate item, obey the
    Drift Detectors, touch only the listed Files.
-4. Test scope: run ONLY the test modules the task names, plus the fast invariant
+5. Test scope: run ONLY the test modules the task names, plus the fast invariant
    modules [list them]. NEVER the full suite, NEVER pytest -n. The venv is
    [venv-path] — invoke as `cd [test-dir] && [venv]/bin/pytest <modules> -q`.
-5. When all gates are green: commit exactly per the task's commit step (message must
+6. When all gates are green: commit exactly per the task's commit step (message must
    include the bead id), then `bd comment add [task-id] "<one line: what landed,
    commit sha, test counts>"` and `bd close [task-id]`.
-6. If a gate item cannot be satisfied honestly, or the code contradicts the task's
+7. If a gate item cannot be satisfied honestly, or the code contradicts the task's
    citations: STOP, file the blocker with `bd question add [task-id] "<the blocker>"`
    (the task leaves the ready queue until a ruling answers it), do NOT close it,
    and end with a clear FAILURE report. Never weaken a test or gate to pass.
@@ -67,7 +72,7 @@ Protocol:
 3. Resume from your red state per the ruling. Your prior blocker is RESOLVED — do not
    stop for it again. [Name the specific satisfied drift detector if the ruling
    supersedes one.]
-4-6. [Same test-scope / close / STOP items as the EXECUTE form.]
+5-7. [Same test-scope / close / STOP items as the EXECUTE form.]
 
 ## Exploration Map
 
