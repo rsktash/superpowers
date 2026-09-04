@@ -3,7 +3,7 @@ name: codex-execution
 description: Use when executing an implementation plan's task beads via the codex CLI instead of Claude subagents — session-budget execution, "run this plan with codex", or the Codex Execution mode chosen at the writing-plans handoff
 ---
 
-# Codex Execution — budget 1204 words
+# Codex Execution — budget 1316 words
 
 Execution mode: codex (`codex exec`, non-interactive) implements each task bead; this
 session orchestrates, verifies every landing, and runs the terminal whole-diff review.
@@ -23,7 +23,7 @@ Files, TDD steps). Codex cannot compensate for a vague bead.
 
 ## Preconditions (check BEFORE the first dispatch)
 
-- **Epic gate:** run `bd children <root-id>` first. An epic-type bead with no children — or with no `plan-ready:` label on the root (`bd label list <root-id>`) — is a spec or a half-written plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body.
+- **Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans; never improvise tasks from the epic body. One exemption: an open child whose title starts with `Decide:` is a decision bead, exempt from the `exec:` check, and must be the dependency of at least one open task (`bd get <id> rdeps` non-empty) — otherwise it is an orphan fork and the gate stops on it. Every one of them is writing-plans' product, and the gate exists to tell its output from a copy — never mint the missing label or section by hand.
 - **Pre-Flight Plan Review:** resolve the root's marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before the first dispatch — marker present → skip, no marker → run the review once and write it. It runs once per plan, never again. A ready bead labeled `needs-plan` is not dispatchable.
 - **Codex-fatal lint, each task body before its dispatch:** sandbox-impossible commands, gate commands that cannot run as written, unresolved placeholders — any hit labels the bead `needs-plan` instead of dispatching. Codex halts on these mid-run at a full round-trip each; the lint pays once, up front.
 - **AGENTS.md parity:** codex reads `AGENTS.md`, never `CLAUDE.md`. EVERY directory

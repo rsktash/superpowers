@@ -3,7 +3,7 @@ name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
 ---
 
-# Subagent-Driven Development — budget 3556 words
+# Subagent-Driven Development — budget 3699 words
 
 Execute a plan by dispatching a fresh subagent per task, reviewing each task's output before moving to the next.
 
@@ -13,7 +13,7 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-**Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
+**Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans. One exemption: an open child whose title starts with `Decide:` is a decision bead, exempt from the `exec:` check, and must be the dependency of at least one open task (`bd get <id> rdeps` non-empty) — otherwise it is an orphan fork and the gate stops on it. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
 
 ## Pre-Flight Plan Review
 
