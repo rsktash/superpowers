@@ -204,3 +204,10 @@ NOT CHANGED, deliberately: "A plan is never written over an unresolved design fo
   is kept as the dep-link instruction with its command, so the Decide bead's rdeps is never empty
   and the execution skills' epic gate has something to read. Frontmatter and every other section
   are byte-identical — the model: line belongs to a sibling task.
+
+  REVIEW FIX (same day): the quoted create gained `-p 1`, which spec Component A carries and the
+  first draft dropped — measured on a scratch database, the flagless command creates the Decide
+  bead at priority 2 while every task the Input line creates is priority 1, so a fork sorted
+  below the tasks it blocks. The two words were paid for inside the section: "one-safe-answer
+  defaults are pruned" lost "are" (the clause after it already elides it), and "mint only when
+  none fits" became "mint if none fits" ("if none fits" already carries the limit).
