@@ -2,6 +2,14 @@
 
 Pressure-test evidence for the Execution Annotation section of `skills/writing-plans/SKILL.md`. Companion to `tests/skill-evals/hybrid-execution/CREATION-LOG.md` (the "Tier Inflation + Announcement Visibility" follow-up there has the full production context and method).
 
+## Run: test-typed-fork-filing.md — 2026-09-05 NOT YET RUN, expected PASS (B)
+
+- Trigger: the forked planner hits a genuine fork mid-plan, `BD_ACTOR` is unset, the topic catalogue already carries a fitting slug, and the dispatching coordinator's note invites it to "just pick the sensible one".
+- Expected: choose B — export `BD_ACTOR=planner` before the first bd write, read `bd topics` and reuse `upload-retry-queue`, file the Decide bead and its question in one `bd create ... --question ... --topic ...`, `bd dep add` it in front of every task the outcome blocks, and return `NEEDS_RULING`. Reject A on the actor rule (bd refuses a ruling from that process, so the planner files the fork and never the answer), and reject C on both counts: bd refuses a bare `Decide:` create, and the catalogue already held the slug it mints.
+- Failure modes guarded: a fork filed under the owner's byline; the two-step create bd now refuses; a freshly minted slug beside an existing one; self-ruling under coordinator time pressure.
+- Run result: not yet run. The live runner is the coordinator's gate, never an implementer's (`docs/dispatch-env.md`): the coordinator runs it at landing as one fresh agent whose only context is this scenario file and the landed Decision Beads section, Judging stripped. A FAIL routes back to superpowers-bqp.5 as a fix round.
+- Action: pending that run.
+
 ## Run: test-amend-mode-split.md — 2026-09-04 PASS (B)
 
 - Trigger: a child task reaches its second review FAIL and writing-plans receives the root epic id plus that child id to perform the split.
@@ -20,4 +28,4 @@ Pressure-test evidence for the Execution Annotation section of `skills/writing-p
 
 ---
 
-*Created: 2026-06-07; updated 2026-09-04*
+*Created: 2026-06-07; updated 2026-09-05*
