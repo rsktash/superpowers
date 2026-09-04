@@ -111,6 +111,63 @@ else
     fail "missing metadata roster regenerates the same roster (exit $status; stdout: $(cat "$WORK/stdout"); roster: $restored_roster; stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
 fi
 
+echo ""
+echo "Uncovered languages: compiler precedence and text answers"
+"$INDEX" callers renderBadge --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "indexed callers query exits 0" "0" "$status"
+assert_eq "indexed callers exclude uncovered-language text hits" "" "$(cat "$WORK/stdout")"
+if ! grep -Fq 'answered by text search' "$WORK/stderr"; then
+    pass "indexed callers write no text-answer stderr line"
+else
+    fail "indexed callers write no text-answer stderr line (got: $(cat "$WORK/stderr"))"
+fi
+
+"$INDEX" callers kotlinOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "Kotlin text callers exit 0" "0" "$status"
+assert_eq "Kotlin text callers use sorted word-boundary hits" $'src/BadgeTest/BadgeScenario.kt:3\nsrc/kotlin/BadgeScreen.kt:3\nsrc/kotlin/BadgeScreen.kt:5\nsrc/kotlin/BadgeScreenTest.kt:3' "$(cat "$WORK/stdout")"
+assert_eq "Kotlin text callers explain the fallback" "structural-index: callers kotlinOnlyMarker answered by text search over 13 files in kotlin, swift, python, other" "$(cat "$WORK/stderr")"
+if ! grep -Fq 'package.json:' "$WORK/stdout"; then
+    pass "text callers require a word boundary"
+else
+    fail "text callers require a word boundary (got: $(cat "$WORK/stdout"))"
+fi
+
+"$INDEX" symbol kotlinOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "uncovered symbol exits 1" "1" "$status"
+assert_eq "uncovered symbol has empty stdout" "" "$(cat "$WORK/stdout")"
+assert_eq "uncovered symbol explains the missing backend" $'symbol not found: kotlinOnlyMarker\nstructural-index: no definition backend for kotlin, swift, python, other; not searched' "$(cat "$WORK/stderr")"
+
+"$INDEX" tests kotlinOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "Kotlin text tests exit 0" "0" "$status"
+assert_eq "Kotlin text tests use *Test.kt and src/*Test/ paths" $'src/BadgeTest/BadgeScenario.kt:3\nsrc/kotlin/BadgeScreenTest.kt:3' "$(cat "$WORK/stdout")"
+
+"$INDEX" tests swiftOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "Swift text tests exit 0" "0" "$status"
+assert_eq "Swift text tests use *Tests.swift and Tests/ paths" $'src/swift/BadgeViewTests.swift:6\nsrc/swift/Tests/BadgeScenario.swift:6' "$(cat "$WORK/stdout")"
+
+"$INDEX" tests python_only_marker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "Python text tests exit 0" "0" "$status"
+assert_eq "Python text tests use test_*.py, *_test.py, and tests/ paths" $'src/python/badge_test.py:6\nsrc/python/test_badge.py:6\nsrc/python/tests/badge_scenario.py:6' "$(cat "$WORK/stdout")"
+
+"$INDEX" callers otherOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "other text callers exit 0" "0" "$status"
+assert_eq "other text callers remain covered" "package.json:4" "$(cat "$WORK/stdout")"
+
+for query in callers tests; do
+    "$INDEX" "$query" nowhereTextMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+    status=$?
+    assert_eq "$query nowhere text name exits 1" "1" "$status"
+    assert_eq "$query nowhere text name has empty stdout" "" "$(cat "$WORK/stdout")"
+    assert_eq "$query nowhere text name has one stderr line" "symbol not found: nowhereTextMarker" "$(cat "$WORK/stderr")"
+done
+
 NO_TOOLCHAIN_TARGET="$WORK/no-toolchain-repo"
 mkdir -p "$NO_TOOLCHAIN_TARGET"
 cp -R "$FIXTURE/." "$NO_TOOLCHAIN_TARGET/"
@@ -144,6 +201,19 @@ if [ "$symbol_status" -eq 2 ] \
     pass "symbol still requires the TypeScript toolchain"
 else
     fail "symbol still requires the TypeScript toolchain (exit $symbol_status; stdout: $(cat "$WORK/stdout"); stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
+fi
+
+rm -rf "$NO_TOOLCHAIN_TARGET/.bd/index"
+env -u STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE \
+    "$INDEX" callers triple --repo "$NO_TOOLCHAIN_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+callers_status=$?
+if [ "$callers_status" -eq 2 ] \
+    && [ ! -s "$WORK/stdout" ] \
+    && grep -Fq "STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE" "$WORK/stderr" \
+    && [ "$(wc -l <"$WORK/stderr" | tr -d ' ')" -eq 1 ]; then
+    pass "indexed callers never fall through when the TypeScript toolchain is missing"
+else
+    fail "indexed callers never fall through when the TypeScript toolchain is missing (exit $callers_status; stdout: $(cat "$WORK/stdout"); stderr: $(tr '\n' ' ' <"$WORK/stderr"))"
 fi
 
 repo_backends="$("$INDEX" languages --repo "$REPO_ROOT" 2>"$WORK/stderr" | cut -f1,3)"

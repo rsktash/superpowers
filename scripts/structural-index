@@ -213,6 +213,48 @@ function isGoTestFile(fileName) {
   return fileName.endsWith("_test.go");
 }
 
+function isTextTestFile(language, fileName) {
+  if (language === "kotlin") {
+    return fileName.endsWith("Test.kt") || /(^|\/)src\/[^/]*Test\//.test(fileName);
+  }
+  if (language === "swift") {
+    return fileName.endsWith("Tests.swift") || /(^|\/)Tests\//.test(fileName);
+  }
+  if (language === "python") {
+    const baseName = path.posix.basename(fileName);
+    return (baseName.startsWith("test_") || baseName.endsWith("_test.py"))
+      && baseName.endsWith(".py")
+      || /(^|\/)tests\//.test(fileName);
+  }
+  return false;
+}
+
+function textAnswer(repo, files, roster, query, symbol) {
+  const uncovered = roster.filter((entry) => entry.backend === "none");
+  const candidates = [];
+  for (const entry of uncovered) {
+    for (const file of files[entry.id]) {
+      if (query === "tests" && !isTextTestFile(entry.id, file)) continue;
+      candidates.push(file);
+    }
+  }
+
+  const escaped = symbol.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const word = new RegExp(`(?<![A-Za-z0-9_])${escaped}(?![A-Za-z0-9_])`, "u");
+  const sites = [];
+  for (const file of candidates) {
+    const lines = fs.readFileSync(path.join(repo, file), "utf8").split("\n");
+    for (let index = 0; index < lines.length; index += 1) {
+      if (word.test(lines[index])) sites.push(`${file}:${index + 1}`);
+    }
+  }
+  return {
+    count: candidates.length,
+    ids: uncovered.map((entry) => entry.id),
+    sites: sites.sort(sortSites),
+  };
+}
+
 function indexProgram(ts, repo, program, tracked, rows) {
   const checker = program.getTypeChecker();
   const sourceFiles = program.getSourceFiles().filter((sourceFile) => tracked.has(path.resolve(sourceFile.fileName)));
@@ -975,7 +1017,26 @@ function main() {
       if (definition.name === args.symbol) definitions.push(definition);
     }
   }
-  if (definitions.length === 0) fail(`symbol not found: ${args.symbol}`, 1);
+  if (definitions.length === 0) {
+    const uncovered = roster.filter((entry) => entry.backend === "none");
+    const ids = uncovered.map((entry) => entry.id);
+    if (args.query === "symbol") {
+      const occurrences = textAnswer(args.repo, files, roster, "callers", args.symbol);
+      const detail = occurrences.sites.length > 0
+        ? `\nstructural-index: no definition backend for ${ids.join(", ")}; not searched`
+        : "";
+      fail(`symbol not found: ${args.symbol}${detail}`, 1);
+    }
+
+    const answer = textAnswer(args.repo, files, roster, args.query, args.symbol);
+    if (answer.sites.length === 0) fail(`symbol not found: ${args.symbol}`, 1);
+    for (const site of answer.sites) process.stdout.write(`${site}\n`);
+    process.stderr.write(
+      `structural-index: ${args.query} ${args.symbol} answered by text search over `
+      + `${answer.count} files in ${answer.ids.join(", ")}\n`,
+    );
+    return;
+  }
   for (const id of LANGUAGE_ORDER) {
     if (seconds && seconds[id] !== undefined) {
       process.stderr.write(`structural-index: regenerated ${LANGUAGE_NAMES[id]} index in ${seconds[id].toFixed(3)}s\n`);
