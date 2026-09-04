@@ -26,7 +26,7 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 **At execution entry**, resolve the root's newest marker — `bd comment list <root-id> --tag pre-flight --last 1` (tag filtering is applied before `--last`, so the marker cannot scroll out of view):
 
 - **No marker** → run the full review below over the epic spec plus ALL open beads, then write the marker.
-- **Marker present** → skip: one line citing it, then start. Whatever has landed since does not matter.
+- **Marker present** → skip: one line citing it, then start. Whatever has landed since does not matter. Dispatching a second pre-flight under an existing marker is a defect, not a re-check — the marker is part of the epic gate, read before any pre-flight agent is composed.
 
 A body rewritten after the marker is the rewriter's job — writing-plans' citation lint runs at write time — never a trigger for a second pre-flight.
 
