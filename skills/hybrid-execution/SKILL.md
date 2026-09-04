@@ -9,16 +9,18 @@ Execute a plan task-by-task, routing each task to the mode its plan annotation n
 
 **Why hybrid:** per-task routing keeps ceremony proportional and this session's context clean.
 
-**This skill owns routing and scheduling.** The per-task procedure for `inline` lives in this skill's own Inline Task Procedure section below; the per-task procedure for `subagent/<tier>` — claim, BASE recording, dispatch, review package, termination evidence — lives in subagent-driven-development's Loop. Follow each exactly as written. What this skill adds on top is *when* those steps run: The Loop below pipelines each task's review against the next task's implementation.
+**This skill owns routing and scheduling.** Follow each per-task procedure exactly as written; what this skill adds on top is *when* those steps run — The Loop below pipelines each task's review against the next task's implementation.
 
 - `inline` → the Inline Task Procedure below
-- `subagent/<tier>` → superpowers-beads:subagent-driven-development, The Loop (per-task procedure), scheduled per The Loop below
+- `subagent/<tier>` → superpowers-beads:subagent-driven-development, The Loop: claim, BASE recording, dispatch, review package, termination evidence — scheduled per The Loop below
 
 **bd conventions:** Read `skills/shared/bd-defaults.md` once per session, skip if already read.
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
 **Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans. Two exemptions: an open child whose title starts with `Decide:` is a decision bead, exempt from the `exec:` check, and must be the dependency of at least one open task (`bd get <id> rdeps` non-empty) — otherwise it is an orphan fork and the gate stops on it; an open child carrying an open owner question (`bd question list` names it) is parked on the owner, hidden by `bd ready`, and exempt the same way. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
+
+**Lane step:** with the gate passed, take this epic's lane per `skills/shared/plan-lane.md`, mode `subagent`, before the first claim.
 
 ## The Loop
 

@@ -15,6 +15,8 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans. Two exemptions: an open child whose title starts with `Decide:` is a decision bead, exempt from the `exec:` check, and must be the dependency of at least one open task (`bd get <id> rdeps` non-empty) — otherwise it is an orphan fork and the gate stops on it; an open child carrying an open owner question (`bd question list` names it) is parked on the owner, hidden by `bd ready`, and exempt the same way. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
 
+**Lane step:** with the gate passed, take this epic's lane per `skills/shared/plan-lane.md`, mode `subagent`, before the first claim.
+
 ## Pre-Flight Plan Review
 
 **Pre-flight runs ONCE per plan and never again.** Its one pass spends a reader on the semantic residue no script and no downstream gate can reach. Mechanical citation truth is not its job: writing-plans' citation lint already proved every cited path, symbol, string, and commit claim at `bd create` time.
@@ -56,15 +58,15 @@ After the last task, run the full test suite once — in this session's own shel
 
 ## Termination — what counts as "reviewed"
 
-**A review verdict is not evidence.** A subagent that reports "PASS / spec compliant / approved" has produced prose, and prose proves nothing on its own. Close a task only on output the model cannot fabricate:
+**A review verdict is not evidence.** A subagent reporting "PASS / spec compliant / approved" has produced prose, and prose proves nothing. Close a task only on output the model cannot fabricate:
 
 - the test command actually run, with its output visible
 - `git diff --name-only` showing which files changed
 - `grep` confirming a symbol exists, or is gone
 
-Run ONE review per task — a single reviewer subagent whose prompt covers spec compliance first (does the code match the task?), then quality (is it well-built?); spec findings outrank quality findings. Every claim in its report **terminates in a deterministic artifact you can see**, never in the reviewer's summary. The strongest such artifact is a falsification experiment run inside the disposable review worktree: break the thing a guard claims to cover, show the guard firing (or not), revert — "the test passes" alone cannot distinguish a working guard from a decorative one. Experiments live and die with the review worktree; the live tree and the reviewed commits are never touched. (Ruled 2026-07-12: the former cadence of two dispatches — a spec reviewer, then a quality reviewer — doubled review cost without a catch-rate gain; the quality half overlaps the end-of-plan whole-diff review.)
+Run ONE review per task: one reviewer subagent whose prompt covers spec compliance first (does the code match the task?), then quality (is it well-built?); spec findings outrank quality. Every claim in its report **terminates in a deterministic artifact you can see**, never in the reviewer's summary. The strongest such artifact is a falsification experiment inside the disposable review worktree: break the thing a guard claims to cover, show the guard firing (or not), revert — "the test passes" alone cannot distinguish a working guard from a decorative one. Experiments live and die with that worktree; the live tree and the reviewed commits are never touched. (Ruled 2026-07-12: the former two dispatches — spec reviewer, then quality reviewer — doubled cost without a catch-rate gain; the quality half overlaps the end-of-plan whole-diff review.)
 
-A confident verdict from a *parallel* reviewer is the weakest signal here, not the strongest. A capable model's mistakes are fluent and well-formatted, and parallel batches that partially cancel are a known surface for manufactured "success" — so independent re-running matters more, not less.
+A confident verdict from a *parallel* reviewer is the weakest signal here, not the strongest: a capable model's mistakes are fluent and well-formatted, and partially cancelling parallel batches are a known surface for manufactured "success" — independent re-running matters more, not less.
 
 **Verdicts are binary: PASS or FAIL.** A verdict carrying any unresolved spec or gate finding is FAIL, however phrased; it flips only after the fix lands and its check re-runs. Quality-only findings may ride a PASS.
 
