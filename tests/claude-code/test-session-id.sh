@@ -166,7 +166,12 @@ WORKDIR=$(mktemp -d)
 ENV_FILE=$(mktemp)
 : > "$ENV_FILE"
 SID="sess-ccc-333"
-run_hook_in "$WORKDIR" "$ENV_FILE" "$(session_start_payload "$SID")" >/dev/null
+out=$(run_hook_in "$WORKDIR" "$ENV_FILE" "$(session_start_payload "$SID")")
+if [ -z "$out" ]; then
+    pass "stdout empty on first run"
+else
+    fail "stdout empty on first run (got: $out)"
+fi
 out=$(run_hook_in "$WORKDIR" "$ENV_FILE" "$(session_start_payload "$SID")")
 rc=$?
 if [ "$rc" -eq 0 ]; then
@@ -186,7 +191,12 @@ else
     fail "repeat run under the same id does not double the line (found $count)"
 fi
 OTHER_SID="sess-ddd-444"
-run_hook_in "$WORKDIR" "$ENV_FILE" "$(session_start_payload "$OTHER_SID")" >/dev/null
+out=$(run_hook_in "$WORKDIR" "$ENV_FILE" "$(session_start_payload "$OTHER_SID")")
+if [ -z "$out" ]; then
+    pass "stdout empty on the different-id run"
+else
+    fail "stdout empty on the different-id run (got: $out)"
+fi
 count_other=$(grep -cF "export BD_SESSION_ID=${OTHER_SID}" "$ENV_FILE" || true)
 if [ "$count_other" -eq 1 ]; then
     pass "a later run under a different id appends its own line"
