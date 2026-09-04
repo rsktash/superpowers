@@ -2,6 +2,13 @@
 
 Pressure-test evidence for the Execution Annotation section of `skills/writing-plans/SKILL.md`. Companion to `tests/skill-evals/hybrid-execution/CREATION-LOG.md` (the "Tier Inflation + Announcement Visibility" follow-up there has the full production context and method).
 
+## Run: test-amend-mode-split.md — pending — Task 15 runs it
+
+- Trigger: a child task reaches its second review FAIL and writing-plans receives the root epic id plus that child id to perform the split.
+- Expected: choose sibling tasks under the epic, dep-link them, close the original as superseded, re-mint `plan-ready`, and create no child of a task.
+- Run result: pending — Task 15 runs it.
+- Action: the scenario guards planner-only decomposition at the amend-mode split boundary.
+
 ## Run: test-pressure-wave-tiering.md — baseline PASS, post-edit PASS
 
 - Trigger: a production plan annotated mechanical mirror/template tasks `subagent/capable` after a "parallel wave of capable agents" had been negotiated; the reasons still said "mechanical".
