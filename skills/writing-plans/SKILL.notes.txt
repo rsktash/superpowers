@@ -118,3 +118,13 @@ NOT CHANGED, deliberately: Drift Detectors and the Attention Map (scope fences, 
   re-dispatch; Input now names `$ARGUMENTS` as the root bead id, since a fork carries no
   conversation history. Verified no manual planner dispatch existed elsewhere (brainstorming only
   "invokes", which now auto-forks) — nothing to remove.
+
+### (2026-09-04) Amend mode restores planner-only decomposition after hand-filed plans.
+RULE CHANGE: writing-plans accepts a root epic plus named child ids, plans those children in
+  place, and splits an oversized child only into sibling tasks under the epic. The root's
+  Attention Map and `plan-ready` marker are refreshed before the forked planner returns its
+  receipt.
+
+INCIDENT: Release 1 and Release 2 in the beads tracker executed hand-filed plans instead of
+  planner products. The second-FAIL split clause also created children under a task, breaking
+  the flat planner-only decomposition rule. Amend mode gives both paths a planner-owned remedy.
