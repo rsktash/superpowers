@@ -234,3 +234,16 @@ passed only by echoing the phrase, and this run wrote a plain thread. The line
 now reads "its thread's first line is the word `day`", so the header the task
 body keeps intact is something a receiver can write. Skill at 600 words, from
 599. All eight are expected PASS on the re-run.
+
+# Verification run (2026-09-05, at 16f3d8c)
+
+Same method, all eight, one fresh Sonnet agent each. 8/8 PASS.
+
+- test-350k-no-anticipation: "Neither trigger has fired ... I do not run `bd plan handoff`, do not open a thread file, do not draft a record"; kept executing `solo-7fk.5/.6/.8`.
+- test-boundary-mid-plan: Close in order; `--done solo-7fk.3:a1b2c3d,solo-7fk.4:e4f5a6b --next solo-7fk.5 --parked solo-7fk.7:Q-4`, five-line thread; the one retirement comment on `solo-1`; final message the `bd plan show solo` output.
+- test-habitual-transcript-prompt: named the Resume trigger; `.jsonl` and `zanjir-1` untouched; claimed `zanjir-9pk`; verified only the named ids; five-line reply with lane, next `.4`, parked `.5:Q-7`, entry date.
+- test-handoff-no-epic: nothing posted to `solo-1`; ruling on a new task bead, question filed there; final message states no entry appended, thread lost by design, next session from `bd ready`, `bd question list`, `bd plan show solo`.
+- test-lane-less-close-posts-nothing: no `bd plan handoff`; ruling and question on `zanjir-9pk`; final message carries the lane-less branch and the three reads.
+- test-night-brief-received: resolved state from `bd plan show`, claimed the lane, codex-execution on `.8` and `.10`, `.9` left parked on `Q-3`, no push; closing thread opens with `day`.
+- test-night-sender-pairing: own lane handed first; one `SendMessage` to `night-a` naming plan `zanjir`, lane `zanjir-9pk`, codex-execution; nothing to `night-b`/`night-c`, collision stated; one-line-per-session report.
+- test-parked-needs-question-id: `bd question add biklod-4mq.9 ...` first, then `--parked biklod-4mq.9:$QID`; comma-separated done pairs.
