@@ -1,0 +1,337 @@
+#!/usr/bin/env node
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { createRequire } from "node:module";
+import { performance } from "node:perf_hooks";
+
+const SCHEMA = 1;
+const VALID_QUERIES = new Set(["symbol", "callers", "tests"]);
+
+function fail(message, status = 2) {
+  process.stderr.write(`${message}\n`);
+  process.exit(status);
+}
+
+function parseArguments(argv) {
+  const [query, symbol, ...flags] = argv;
+  if (!VALID_QUERIES.has(query) || !symbol) {
+    fail("usage: structural-index <symbol|callers|tests> <name> --repo <root> [--regen]");
+  }
+
+  let repo;
+  let regen = false;
+  for (let index = 0; index < flags.length; index += 1) {
+    if (flags[index] === "--repo" && flags[index + 1]) {
+      repo = flags[index + 1];
+      index += 1;
+    } else if (flags[index] === "--regen") {
+      regen = true;
+    } else {
+      fail(`unknown argument: ${flags[index]}`);
+    }
+  }
+  if (!repo) fail("missing required --repo <root>");
+  return { query, symbol, repo: fs.realpathSync(repo), regen };
+}
+
+function gitLines(repo, patterns) {
+  const output = execFileSync("git", ["-C", repo, "ls-files", "-z", "--", ...patterns]);
+  return output.toString("utf8").split("\0").filter(Boolean);
+}
+
+function targetHead(repo) {
+  return execFileSync("git", ["-C", repo, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+}
+
+function loadTypeScript(repo) {
+  const packageDirectories = new Set([repo]);
+  for (const packageFile of gitLines(repo, ["package.json", "**/package.json"])) {
+    packageDirectories.add(path.join(repo, path.dirname(packageFile)));
+  }
+
+  for (const directory of packageDirectories) {
+    const implementation = path.join(directory, "node_modules", "typescript", "lib", "typescript.js");
+    if (fs.existsSync(implementation)) {
+      return createRequire(import.meta.url)(implementation);
+    }
+  }
+  throw new Error(`TypeScript package not found under target repository: ${repo}`);
+}
+
+function definitionCandidates(ts, sourceFile) {
+  const definitions = [];
+
+  function add(name, node, nameNode, callable) {
+    const startOffset = node.getStart(sourceFile);
+    const endOffset = node.getEnd();
+    const start = sourceFile.getLineAndCharacterOfPosition(startOffset).line + 1;
+    const end = sourceFile.getLineAndCharacterOfPosition(endOffset - 1).line + 1;
+    definitions.push({ name, node, nameNode, callable, startOffset, endOffset, start, end });
+  }
+
+  function visit(node) {
+    if (ts.isFunctionDeclaration(node) && node.name) {
+      add(node.name.text, node, node.name, true);
+    } else if (ts.isMethodDeclaration(node) && node.name && ts.isIdentifier(node.name)) {
+      const owner = node.parent;
+      if (ts.isClassDeclaration(owner) && owner.name) {
+        add(`${owner.name.text}.${node.name.text}`, node, node.name, true);
+      }
+    } else if (ts.isVariableStatement(node)) {
+      for (const declaration of node.declarationList.declarations) {
+        if (!ts.isIdentifier(declaration.name)) continue;
+        const callable = Boolean(
+          declaration.initializer
+          && (ts.isArrowFunction(declaration.initializer) || ts.isFunctionExpression(declaration.initializer)),
+        );
+        add(declaration.name.text, node, declaration.name, callable);
+      }
+    } else if (
+      (ts.isClassDeclaration(node)
+        || ts.isInterfaceDeclaration(node)
+        || ts.isTypeAliasDeclaration(node)
+        || ts.isEnumDeclaration(node))
+      && node.name
+    ) {
+      add(node.name.text, node, node.name, false);
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return definitions;
+}
+
+function resolvedSymbol(ts, checker, symbol) {
+  if (!symbol) return undefined;
+  if (symbol.flags & ts.SymbolFlags.Alias) {
+    const target = checker.getAliasedSymbol(symbol);
+    return target.flags & ts.SymbolFlags.Unknown ? symbol : target;
+  }
+  return symbol;
+}
+
+function dynamicImportAliases(ts, checker, sourceFiles) {
+  const aliases = new Map();
+
+  function visit(node) {
+    if (ts.isBindingElement(node) && ts.isIdentifier(node.name) && ts.isObjectBindingPattern(node.parent)) {
+      const declaration = node.parent.parent;
+      const initializer = ts.isVariableDeclaration(declaration) ? declaration.initializer : undefined;
+      const importCall = initializer && ts.isAwaitExpression(initializer) ? initializer.expression : initializer;
+      if (initializer && importCall && ts.isCallExpression(importCall) && importCall.expression.kind === ts.SyntaxKind.ImportKeyword) {
+        const local = checker.getSymbolAtLocation(node.name);
+        const importedType = checker.getTypeAtLocation(initializer);
+        const importedName = node.propertyName && ts.isIdentifier(node.propertyName)
+          ? node.propertyName.text
+          : node.name.text;
+        const imported = checker.getPropertyOfType(importedType, importedName);
+        const target = resolvedSymbol(ts, checker, imported);
+        if (local && target) aliases.set(local, target);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  for (const sourceFile of sourceFiles) visit(sourceFile);
+  return aliases;
+}
+
+function isInvocation(ts, node) {
+  const parent = node.parent;
+  if (ts.isCallExpression(parent) && parent.expression === node) return true;
+  if (
+    ts.isPropertyAccessExpression(parent)
+    && parent.name === node
+    && ts.isCallExpression(parent.parent)
+    && parent.parent.expression === parent
+  ) return true;
+  return Boolean(
+    (ts.isJsxOpeningElement(parent) || ts.isJsxSelfClosingElement(parent))
+    && parent.tagName === node,
+  );
+}
+
+function isTestFile(fileName) {
+  return /(^|\/)__tests__(\/|$)/.test(fileName) || /\.(test|spec)\.[^/]+$/.test(fileName);
+}
+
+function indexProgram(ts, repo, program, tracked, rows) {
+  const checker = program.getTypeChecker();
+  const sourceFiles = program.getSourceFiles().filter((sourceFile) => tracked.has(path.resolve(sourceFile.fileName)));
+  const definitionsBySymbol = new Map();
+  const definitionLocations = new Set();
+
+  for (const sourceFile of sourceFiles) {
+    const relativeFile = path.relative(repo, sourceFile.fileName).split(path.sep).join("/");
+    const source = sourceFile.text;
+    for (const definition of definitionCandidates(ts, sourceFile)) {
+      const symbol = resolvedSymbol(ts, checker, checker.getSymbolAtLocation(definition.nameNode));
+      if (!symbol) continue;
+      const key = `${relativeFile}\0${definition.startOffset}\0${definition.endOffset}\0${definition.name}`;
+      if (!rows.has(key)) {
+        rows.set(key, {
+          name: definition.name,
+          file: relativeFile,
+          start: definition.start,
+          end: definition.end,
+          hash: crypto.createHash("sha256")
+            .update(source.slice(definition.startOffset, definition.endOffset))
+            .digest("hex")
+            .slice(0, 12),
+          callers: new Set(),
+          tests: new Set(),
+        });
+      }
+      const entries = definitionsBySymbol.get(symbol) ?? [];
+      entries.push({ key, callable: definition.callable });
+      definitionsBySymbol.set(symbol, entries);
+      definitionLocations.add(`${path.resolve(sourceFile.fileName)}\0${definition.nameNode.getStart(sourceFile)}`);
+    }
+  }
+
+  const aliases = dynamicImportAliases(ts, checker, sourceFiles);
+
+  function visitReference(sourceFile, node) {
+    if (ts.isIdentifier(node)) {
+      const location = `${path.resolve(sourceFile.fileName)}\0${node.getStart(sourceFile)}`;
+      if (!definitionLocations.has(location)) {
+        const local = checker.getSymbolAtLocation(node);
+        const symbol = aliases.get(local) ?? resolvedSymbol(ts, checker, local);
+        const definitions = definitionsBySymbol.get(symbol) ?? [];
+        if (definitions.length > 0) {
+          const relativeFile = path.relative(repo, sourceFile.fileName).split(path.sep).join("/");
+          const line = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
+          const site = `${relativeFile}:${line}`;
+          for (const definition of definitions) {
+            if (definition.callable && !isInvocation(ts, node)) continue;
+            rows.get(definition.key).callers.add(site);
+            if (isTestFile(relativeFile)) rows.get(definition.key).tests.add(site);
+          }
+        }
+      }
+    }
+    ts.forEachChild(node, (child) => visitReference(sourceFile, child));
+  }
+
+  for (const sourceFile of sourceFiles) visitReference(sourceFile, sourceFile);
+}
+
+function compilerPrograms(ts, repo, files, tracked) {
+  const programs = [];
+  for (const configFile of gitLines(repo, ["*tsconfig*.json"])) {
+    const absoluteConfig = path.join(repo, configFile);
+    const read = ts.readConfigFile(absoluteConfig, ts.sys.readFile);
+    if (read.error) continue;
+    const parsed = ts.parseJsonConfigFileContent(read.config, ts.sys, path.dirname(absoluteConfig), {
+      noEmit: true,
+      skipLibCheck: true,
+    }, absoluteConfig);
+    const configFiles = parsed.fileNames.filter((fileName) => tracked.has(path.resolve(fileName)));
+    if (configFiles.length > 0) programs.push(ts.createProgram(configFiles, parsed.options));
+  }
+
+  programs.push(ts.createProgram(files, {
+    allowImportingTsExtensions: true,
+    jsx: ts.JsxEmit.ReactJSX,
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    noEmit: true,
+    skipLibCheck: true,
+    target: ts.ScriptTarget.ES2022,
+  }));
+  return programs;
+}
+
+function sortSites(left, right) {
+  const leftSplit = left.lastIndexOf(":");
+  const rightSplit = right.lastIndexOf(":");
+  const byFile = left.slice(0, leftSplit).localeCompare(right.slice(0, rightSplit));
+  return byFile || Number(left.slice(leftSplit + 1)) - Number(right.slice(rightSplit + 1));
+}
+
+function generate(repo, head, indexDirectory) {
+  const started = performance.now();
+  const ts = loadTypeScript(repo);
+  const relativeFiles = gitLines(repo, ["*.ts", "*.tsx"]);
+  const files = relativeFiles.map((fileName) => path.resolve(repo, fileName));
+  const tracked = new Set(files);
+  const rows = new Map();
+
+  for (const program of compilerPrograms(ts, repo, files, tracked)) {
+    indexProgram(ts, repo, program, tracked, rows);
+  }
+
+  const definitions = [...rows.values()]
+    .map((row) => ({
+      ...row,
+      callers: [...row.callers].sort(sortSites),
+      tests: [...row.tests].sort(sortSites),
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name)
+      || left.file.localeCompare(right.file)
+      || left.start - right.start);
+
+  fs.mkdirSync(indexDirectory, { recursive: true });
+  const metadata = { schema: SCHEMA, commit: head, language: "typescript" };
+  const data = { schema: SCHEMA, language: "typescript", definitions };
+  const metadataPath = path.join(indexDirectory, "metadata.json");
+  const dataPath = path.join(indexDirectory, "typescript.json");
+  const suffix = `.tmp-${process.pid}`;
+  fs.writeFileSync(metadataPath + suffix, `${JSON.stringify(metadata, null, 2)}\n`);
+  fs.writeFileSync(dataPath + suffix, `${JSON.stringify(data, null, 2)}\n`);
+  fs.renameSync(dataPath + suffix, dataPath);
+  fs.renameSync(metadataPath + suffix, metadataPath);
+  return { data, seconds: (performance.now() - started) / 1000 };
+}
+
+function cachedIndex(indexDirectory, head) {
+  try {
+    const metadata = JSON.parse(fs.readFileSync(path.join(indexDirectory, "metadata.json"), "utf8"));
+    const data = JSON.parse(fs.readFileSync(path.join(indexDirectory, "typescript.json"), "utf8"));
+    if (metadata.schema === SCHEMA && metadata.commit === head && data.schema === SCHEMA) return data;
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
+function main() {
+  const args = parseArguments(process.argv.slice(2));
+  const head = targetHead(args.repo);
+  const indexDirectory = path.join(args.repo, ".bd", "index");
+  let data = args.regen ? undefined : cachedIndex(indexDirectory, head);
+  let regenerationSeconds;
+  if (!data) {
+    const generated = generate(args.repo, head, indexDirectory);
+    data = generated.data;
+    regenerationSeconds = generated.seconds;
+  }
+
+  const definitions = data.definitions.filter((definition) => definition.name === args.symbol);
+  if (definitions.length === 0) fail(`symbol not found: ${args.symbol}`, 1);
+  if (regenerationSeconds !== undefined) {
+    process.stderr.write(`structural-index: regenerated TypeScript index in ${regenerationSeconds.toFixed(3)}s\n`);
+  }
+
+  if (args.query === "symbol") {
+    for (const definition of definitions) {
+      process.stdout.write(`${definition.file}\t${definition.start}-${definition.end}\t${definition.hash}\n`);
+    }
+    return;
+  }
+
+  const sites = new Set();
+  for (const definition of definitions) {
+    for (const site of definition[args.query]) sites.add(site);
+  }
+  for (const site of [...sites].sort(sortSites)) process.stdout.write(`${site}\n`);
+}
+
+try {
+  main();
+} catch (error) {
+  fail(`structural-index: ${error.message}`);
+}

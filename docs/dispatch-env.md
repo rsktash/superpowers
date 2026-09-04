@@ -20,10 +20,24 @@ Run `bd` from the repo root only (`/Users/rustam/Projects/superpowers`); the wor
 Deterministic suite (run from the worktree root):
 
 ```
-cd tests/claude-code && for t in test-completion-gate test-gate-lint test-fail-streak-guard test-review-package; do ./$t.sh; done
+cd tests/claude-code && for t in test-completion-gate test-gate-lint test-fail-streak-guard test-review-package test-structural-index; do ./$t.sh; done
 ```
 
 The live runner `tests/claude-code/run-skill-tests.sh` invokes the Claude CLI and takes minutes per test; it is the controller's gate, never an implementer's.
+
+## Structural index
+
+Run the TypeScript structural index from the plugin worktree:
+
+```
+scripts/structural-index symbol <name> --repo <root> [--regen]
+scripts/structural-index callers <name> --repo <root> [--regen]
+scripts/structural-index tests <name> --repo <root> [--regen]
+```
+
+`symbol` prints one tab-separated `<file>\t<start>-<end>\t<hash>` line per definition. `callers` and `tests` print one `<file>:<line>` reference per line; `tests` limits those references to `*.test.*`, `*.spec.*`, and `__tests__` paths. Paths are relative to `<root>`, and the hash is the first 12 hexadecimal characters of SHA-256 over the definition span's source bytes. An unknown symbol exits 1, leaves stdout empty, and writes `symbol not found: <name>` as one stderr line.
+
+The generated files are `<root>/.bd/index/metadata.json` and `<root>/.bd/index/typescript.json`. The metadata records the target repository's HEAD. An absent index or changed HEAD regenerates it and reports wall time on stderr; reuse on the same HEAD is silent, and `--regen` forces regeneration. The TypeScript package is resolved from a tracked package directory inside the target repository.
 
 ## Worktree rules
 
