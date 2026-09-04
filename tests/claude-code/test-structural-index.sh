@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Test: structural-index TypeScript backend
+# Test: structural-index TypeScript and Go backends
 # Verifies exact definitions, semantic caller sets, test-only filtering,
-# cache regeneration, unknown-symbol behavior, and source-span hashing.
+# cache regeneration, unknown-symbol behavior, and source-span hashing
+# over both fixtures.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -25,11 +26,11 @@ assert_eq() {
 }
 
 assert_query() {
-    local query="$1" symbol="$2" expected="$3"
+    local query="$1" symbol="$2" expected="$3" target="${4:-$TARGET}"
     local out err status
     out="$WORK/stdout"
     err="$WORK/stderr"
-    "$INDEX" "$query" "$symbol" --repo "$TARGET" >"$out" 2>"$err"
+    "$INDEX" "$query" "$symbol" --repo "$target" >"$out" 2>"$err"
     status=$?
     if [ "$status" -ne 0 ]; then
         fail "$query $symbol exits 0 (got $status; stderr: $(tr '\n' ' ' <"$err"))"
@@ -186,6 +187,105 @@ fi
 cp "$WORK/unused.ts" "$TARGET/src/unused.ts"
 "$INDEX" symbol unused --repo "$TARGET" --regen >"$WORK/stdout" 2>"$WORK/stderr"
 assert_eq "reverting mutation restores span and hash" $'src/unused.ts\t1-3\t6594898741b7' "$(cat "$WORK/stdout")"
+
+echo ""
+echo "Go fixture: the same CLI contract over the Go backend"
+GO_FIXTURE="$REPO_ROOT/tests/fixtures/structural-index/go"
+GO_TARGET="$WORK/go-repo"
+mkdir -p "$GO_TARGET"
+cp -R "$GO_FIXTURE/." "$GO_TARGET/"
+
+git -C "$GO_TARGET" init -q
+git -C "$GO_TARGET" config user.name "Structural Index Test"
+git -C "$GO_TARGET" config user.email "structural-index@example.test"
+git -C "$GO_TARGET" add .
+git -C "$GO_TARGET" commit -qm "fixture"
+
+# Unknown-symbol behavior is identical when Go generation is required.
+"$INDEX" symbol missingGoSymbol --repo "$GO_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "Go cold-cache unknown symbol exits 1" "1" "$status"
+assert_eq "Go cold-cache unknown symbol has empty stdout" "" "$(cat "$WORK/stdout")"
+assert_eq "Go cold-cache unknown symbol has one stderr line" "symbol not found: missingGoSymbol" "$(cat "$WORK/stderr")"
+assert_eq "Go cold-cache unknown stderr line count" "1" "$(wc -l <"$WORK/stderr" | tr -d ' ')"
+rm -rf "$GO_TARGET/.bd/index"
+
+"$INDEX" symbol UnusedGuard --repo "$GO_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+status=$?
+assert_eq "Go first query exits 0" "0" "$status"
+assert_eq "symbol UnusedGuard output" $'guard.go\t3-5\t235c8b6d0041' "$(cat "$WORK/stdout")"
+if grep -Eq '^structural-index: regenerated Go index in [0-9]+\.[0-9]{3}s$' "$WORK/stderr"; then
+    pass "Go absent index reports regeneration wall time"
+else
+    fail "Go absent index reports regeneration wall time (got: $(cat "$WORK/stderr"))"
+fi
+
+go_layout="$(cd "$GO_TARGET" && find .bd/index -type f -print | LC_ALL=C sort)"
+assert_eq "Go index directory layout" $'.bd/index/go.json\n.bd/index/metadata.json' "$go_layout"
+go_head_sha="$(git -C "$GO_TARGET" rev-parse HEAD)"
+go_recorded_sha="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).commit)' "$GO_TARGET/.bd/index/metadata.json")"
+assert_eq "Go metadata records target HEAD" "$go_head_sha" "$go_recorded_sha"
+
+"$INDEX" symbol UnusedGuard --repo "$GO_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+assert_eq "Go same-HEAD query reuses index" "" "$(cat "$WORK/stderr")"
+
+# One literal assertion per symbol per query: spans, caller sets, test sets.
+assert_query symbol UnusedGuard $'guard.go\t3-5\t235c8b6d0041' "$GO_TARGET"
+assert_query symbol FormatBeadLine $'render.go\t3-5\t58da981d2dda' "$GO_TARGET"
+assert_query symbol BeadCard.Status $'bead.go\t9-11\t6a80a1aebbd5' "$GO_TARGET"
+assert_query symbol BeadStatus $'bead.go\t3-3\tdda4084765c9' "$GO_TARGET"
+assert_query symbol ValidateStatus $'status.go\t3-5\tfe07fd81f43f' "$GO_TARGET"
+
+assert_query callers UnusedGuard "" "$GO_TARGET"
+assert_query callers FormatBeadLine $'board/board.go:6\ncaller_a.go:4\ncaller_b.go:4' "$GO_TARGET"
+assert_query callers BeadCard.Status 'caller_a.go:4' "$GO_TARGET"
+assert_query callers BeadStatus $'bead.go:6\nbead.go:9\nboard/board.go:5' "$GO_TARGET"
+assert_query callers ValidateStatus 'status_test.go:6' "$GO_TARGET"
+
+assert_query tests UnusedGuard "" "$GO_TARGET"
+assert_query tests FormatBeadLine "" "$GO_TARGET"
+assert_query tests BeadCard.Status "" "$GO_TARGET"
+assert_query tests BeadStatus "" "$GO_TARGET"
+assert_query tests ValidateStatus 'status_test.go:6' "$GO_TARGET"
+
+# A changed target HEAD regenerates the Go index, then reuses silently.
+printf 'package fixture\n\nfunc ExtraAnchor() bool {\n\treturn true\n}\n' >"$GO_TARGET/extra.go"
+git -C "$GO_TARGET" add extra.go
+git -C "$GO_TARGET" commit -qm "change HEAD"
+"$INDEX" symbol UnusedGuard --repo "$GO_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+if grep -Eq '^structural-index: regenerated Go index in [0-9]+\.[0-9]{3}s$' "$WORK/stderr"; then
+    pass "Go changed HEAD regenerates index"
+else
+    fail "Go changed HEAD regenerates index (got: $(cat "$WORK/stderr"))"
+fi
+"$INDEX" symbol UnusedGuard --repo "$GO_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+assert_eq "Go changed-HEAD regeneration is reusable" "" "$(cat "$WORK/stderr")"
+
+# Forced regeneration observes a dirty-tree mutation to the symbol itself.
+cp "$GO_TARGET/guard.go" "$WORK/guard.go"
+node -e 'const fs=require("fs"),p=process.argv[1],s=fs.readFileSync(p,"utf8");fs.writeFileSync(p,s.replace(/\n}\n$/, "\n\tconst added = true\n}\n"))' "$GO_TARGET/guard.go"
+"$INDEX" symbol UnusedGuard --repo "$GO_TARGET" --regen >"$WORK/stdout" 2>"$WORK/stderr"
+go_mutated="$(cat "$WORK/stdout")"
+if printf '%s\n' "$go_mutated" | grep -Eq $'^guard.go\\t3-6\\t[0-9a-f]{12}$'; then
+    pass "Go mutation grows the definition span"
+else
+    fail "Go mutation grows the definition span (got: $go_mutated)"
+fi
+go_mutated_hash="${go_mutated##*$'\t'}"
+if [ "$go_mutated_hash" != "235c8b6d0041" ]; then
+    pass "Go mutation changes the source hash"
+else
+    fail "Go mutation changes the source hash"
+fi
+if grep -Eq '^structural-index: regenerated Go index in [0-9]+\.[0-9]{3}s$' "$WORK/stderr"; then
+    pass "Go --regen forces regeneration"
+else
+    fail "Go --regen forces regeneration (got: $(cat "$WORK/stderr"))"
+fi
+
+cp "$WORK/guard.go" "$GO_TARGET/guard.go"
+"$INDEX" symbol UnusedGuard --repo "$GO_TARGET" --regen >"$WORK/stdout" 2>"$WORK/stderr"
+assert_eq "Go reverting mutation restores span and hash" $'guard.go\t3-5\t235c8b6d0041' "$(cat "$WORK/stdout")"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then
