@@ -88,6 +88,14 @@ and stopped testing the inline exception at all. The sweep output is therefore
 given in the scenario as a single hit, and the Judging section checks that the
 agent uses it rather than skipping it.
 
+## Coordinator runs — 2026-09-05, skill text at `10395c8`
+
+Each run: one fresh Sonnet general-purpose agent, payload = the scenario file with `## Judging` stripped plus the full landed `skills/subagent-driven-development/SKILL.md`, no repository and no other tool.
+
+- `test-fully-specified-still-dispatched.md` — **PASS**: both defects went to the implementer's live session as one round, the response stating that Fix Routing bars the inline edit because "'small,' 'obvious,' and 'the reviewer already wrote the test' are not the test"; finding 3 was disposed as a proposal on the backlog line, and the fix was asked for as commits on top of the existing two.
+- `test-comment-wording-inline.md` — **PASS**: the controller applied the rewording inline as a mechanical edit with no design content, committed on top of the reviewed commit without amending, re-ran the named `grep` check to clear the verdict, and named the single-hit sibling sweep as what discharged the obligation that licenses the inline edit.
+- Action: none. No fix round.
+
 ---
 
 *Created: 2026-09-05*
