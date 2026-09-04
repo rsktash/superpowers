@@ -40,5 +40,13 @@ inside the disposable review worktree; the reviewed commits are never
 amended. Every experiment appears in the verdict as: what you broke, what
 caught it (or didn't), and the revert.
 
+A finding this review files goes in without `--topic` first so bd prints the
+catalogue and the slug is picked from it — never minted; none fits → file
+with `--topic pending-<task-id>` for now, a slug the coordinator resolves at
+Close, until bd stores pending topic statements itself, at which point
+pending is bd's own typed state in place of that slug and an unresolved one
+still gets a slug from the coordinator at Close — a finding never ends with
+no topic.
+
 **Images:** never the same image twice, and at most two image reads per
 dispatch. Capture further visual evidence to files and report the paths.

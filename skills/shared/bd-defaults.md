@@ -36,6 +36,7 @@ Decisions live as typed records; comments carry narrative, status, and evidence 
 - `bd question add <id> "<text>"` — an unresolved decision. The bead leaves `bd ready` until the question ends: `bd question answer <q-id> --ruling <id>|--finding <id>` (mutually exclusive, kind-checked; a finding answers a question a verifiable fact resolved — forks end only in rulings) or `bd question close <q-id> --reason moot|duplicate|superseded --note "<why>"`. Filing is open to all actors; answer and close refuse `BD_ACTOR=executor` — an executor cannot unblock its own bead.
 - `bd question list` — the open blocked frontier, read-only, open to all actors.
 - `bd finding add <id> "<text>" [--evidence "<refs>"]` — an evidence-backed observation or deviation. Open to all actors.
+- **Topic pick.** Both add commands require `--topic <slug>`; omit it and bd prints the catalogue for the bead's areas and refuses — read it and pick an existing slug, never mint one; none fits → `--topic pending-<task-id>` for now, a slug the coordinator resolves at Close, until bd stores pending topic statements itself, at which point pending is bd's own typed state in place of that slug and an unresolved one still gets a slug from the coordinator at Close — a finding never ends with no topic.
 
 Executors export `BD_ACTOR=executor` before any bd write; coordinators set `coordinator` or leave it unset.
 

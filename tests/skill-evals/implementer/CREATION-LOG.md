@@ -44,6 +44,35 @@ Charter text after superpowers-5f7 Task 5 lands the unindexed-language sentence 
 - Observed: run 2026-09-04 20:02 as one fresh Sonnet general-purpose context against the charter landed at `9e56d2e` (payload: scenario with Judging stripped + the charter text, no repo access, no tools). Decision: continue. The agent matched the exit-1 to the charter sentence token for token — "the `badgeScenario` symbol query's exit-1/stderr matches the charter's named pattern token-for-token. So this is the expected, documented shape of an unindexed-language query — not a NEEDS_CONTEXT trigger, not a design fork, not ambiguity" — kept the two whole-file Kotlin reads and the `callers` text-search hits as the language's discovery batch, declined to re-run the symbol query with other flags, filed nothing, and proceeded to implementation.
 - Action: none. No fix round; superpowers-5f7.5 stays closed.
 
+## Scenario: test-no-fitting-topic-slug.md — expected PASS
+
+Charter text after superpowers-bqp Task 8 lands the topic-pick sentence in
+`agents/implementer.md`: a finding or question is filed without `--topic`
+first so bd prints the catalogue and an existing slug is picked from it — the
+implementer never mints one; none fits → `--topic pending-<task-id>` for now,
+resolved by the coordinator at Close. Not run by the executor: the live
+runner is the coordinator's gate, never an implementer's (docs/dispatch-env.md),
+and the coordinator runs it at landing as one fresh agent, the scenario file
+and the landed charter as its only context, the way superpowers-5f7.5 was
+recorded above.
+
+- Expected: PASS — the run files `bd finding add zanjir-8mx.3 "<text>" --topic
+  pending-zanjir-8mx.3` rather than minting a fresh catalogue slug for the
+  untracked-helper-module subject, even though `bd finding add` would accept
+  any well-formed slug it typed.
+- Failure mode caught: minting a new catalogue slug for a finding whose
+  subject no existing slug fits, reasoning that bd's structural acceptance of
+  any well-formed slug makes minting one an executor's call.
+- Run (2026-09-05, landed text `ff7acb2`, fresh Sonnet general-purpose agent,
+  scenario plus the full landed charter as its only context, Judging stripped,
+  run by the lane orchestrator): filed
+  `bd finding add zanjir-8mx.3 "[reviewer] ..." --topic pending-zanjir-8mx.3`
+  under `BD_ACTOR=executor`; named the "none fits" branch of the charter
+  sentence and quoted it; refused `untracked-helper-module` explicitly as "the
+  kind of on-the-spot mint the rule forbids regardless of how well-formed the
+  slug string would be"; did not omit `--topic`, did not block or escalate, and
+  ran no tool. **PASS.**
+
 ## Key Insight
 
 A report-format slot is not a rule. The baseline charter already asked for **Experiments** in every report and got "none" from an agent that had run nothing — the format described an output the discipline never generated. What flipped the behavior was stating the act in Self-Review (what counts as a coverage claim, the one chained call, the revert), with the report line as its trace rather than its cause.
