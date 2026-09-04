@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
@@ -8,6 +9,8 @@ import { performance } from "node:perf_hooks";
 
 const SCHEMA = 1;
 const VALID_QUERIES = new Set(["symbol", "callers", "tests"]);
+const LANGUAGE_ORDER = ["typescript", "go"];
+const LANGUAGE_NAMES = { typescript: "TypeScript", go: "Go" };
 
 function fail(message, status = 2) {
   process.stderr.write(`${message}\n`);
@@ -158,6 +161,10 @@ function isTestFile(fileName) {
   return /(^|\/)__tests__(\/|$)/.test(fileName) || /\.(test|spec)\.[^/]+$/.test(fileName);
 }
 
+function isGoTestFile(fileName) {
+  return fileName.endsWith("_test.go");
+}
+
 function indexProgram(ts, repo, program, tracked, rows) {
   const checker = program.getTypeChecker();
   const sourceFiles = program.getSourceFiles().filter((sourceFile) => tracked.has(path.resolve(sourceFile.fileName)));
@@ -252,7 +259,19 @@ function sortSites(left, right) {
   return byFile || Number(left.slice(leftSplit + 1)) - Number(right.slice(rightSplit + 1));
 }
 
-function generate(repo, head, indexDirectory) {
+function normalizeDefinitions(rows) {
+  return rows
+    .map((row) => ({
+      ...row,
+      callers: [...new Set(row.callers)].sort(sortSites),
+      tests: [...new Set(row.tests)].sort(sortSites),
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name)
+      || left.file.localeCompare(right.file)
+      || left.start - right.start);
+}
+
+function generateTypeScript(repo) {
   const started = performance.now();
   const ts = loadTypeScript(repo);
   const relativeFiles = gitLines(repo, ["*.ts", "*.tsx"]);
@@ -264,34 +283,559 @@ function generate(repo, head, indexDirectory) {
     indexProgram(ts, repo, program, tracked, rows);
   }
 
-  const definitions = [...rows.values()]
-    .map((row) => ({
-      ...row,
-      callers: [...row.callers].sort(sortSites),
-      tests: [...row.tests].sort(sortSites),
-    }))
-    .sort((left, right) => left.name.localeCompare(right.name)
-      || left.file.localeCompare(right.file)
-      || left.start - right.start);
-
-  fs.mkdirSync(indexDirectory, { recursive: true });
-  const metadata = { schema: SCHEMA, commit: head, language: "typescript" };
-  const data = { schema: SCHEMA, language: "typescript", definitions };
-  const metadataPath = path.join(indexDirectory, "metadata.json");
-  const dataPath = path.join(indexDirectory, "typescript.json");
-  const suffix = `.tmp-${process.pid}`;
-  fs.writeFileSync(metadataPath + suffix, `${JSON.stringify(metadata, null, 2)}\n`);
-  fs.writeFileSync(dataPath + suffix, `${JSON.stringify(data, null, 2)}\n`);
-  fs.renameSync(dataPath + suffix, dataPath);
-  fs.renameSync(metadataPath + suffix, metadataPath);
-  return { data, seconds: (performance.now() - started) / 1000 };
+  return {
+    data: { schema: SCHEMA, language: "typescript", definitions: normalizeDefinitions([...rows.values()]) },
+    seconds: (performance.now() - started) / 1000,
+  };
 }
 
-function cachedIndex(indexDirectory, head) {
+const GO_GENERATOR_SOURCE = String.raw`package main
+
+import (
+	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"os"
+	"path"
+	"path/filepath"
+	"sort"
+	"strconv"
+	"strings"
+)
+
+type parsedFile struct {
+	rel     string
+	src     string
+	file    *ast.File
+	isTest  bool
+	pkgName string
+}
+
+type unit struct {
+	importPath string
+	pkgName    string
+	files      []*parsedFile
+	importable bool
+}
+
+type rowKey struct {
+	rel        string
+	start, end token.Pos
+	name       string
+}
+
+type siteKey struct {
+	rel string
+	pos token.Pos
+}
+
+type row struct {
+	name     string
+	file     string
+	start    int
+	end      int
+	hash     string
+	callable bool
+	callers  map[string]bool
+}
+
+type moduleInfo struct {
+	dir  string
+	path string
+}
+
+type unitInfo struct {
+	unit *unit
+	info *types.Info
+}
+
+type generator struct {
+	repo       string
+	fset       *token.FileSet
+	modules    []moduleInfo
+	units      []*unit
+	importable map[string]*unit
+	checked    map[string]bool
+	memo       map[string]*types.Package
+	loading    map[string]bool
+	rows       map[rowKey]*row
+	order      []*row
+	byObject   map[types.Object][]*row
+	defSites   map[siteKey]bool
+	infos      []*unitInfo
+}
+
+type parentWalker struct {
+	parent  ast.Node
+	parents map[ast.Node]ast.Node
+	g       *generator
+	pf      *parsedFile
+	info    *types.Info
+}
+
+func (w *parentWalker) Visit(n ast.Node) ast.Visitor {
+	if n == nil {
+		return nil
+	}
+	w.parents[n] = w.parent
+	if id, ok := n.(*ast.Ident); ok {
+		w.g.recordReference(w.pf, w.info, id, w.parent, w.parents)
+	}
+	return &parentWalker{parent: n, parents: w.parents, g: w.g, pf: w.pf, info: w.info}
+}
+
+func (g *generator) recordReference(pf *parsedFile, info *types.Info, id *ast.Ident, parent ast.Node, parents map[ast.Node]ast.Node) {
+	if g.defSites[siteKey{pf.rel, id.Pos()}] {
+		return
+	}
+	obj := info.Uses[id]
+	if obj == nil {
+		return
+	}
+	rows := g.byObject[obj]
+	if len(rows) == 0 {
+		return
+	}
+	callee := false
+	switch p := parent.(type) {
+	case *ast.CallExpr:
+		callee = p.Fun == id
+	case *ast.SelectorExpr:
+		if p.Sel == id {
+			if call, ok := parents[p].(*ast.CallExpr); ok {
+				callee = call.Fun == p
+			}
+		}
+	}
+	line := g.fset.Position(id.Pos()).Line
+	site := pf.rel + ":" + strconv.Itoa(line)
+	for _, r := range rows {
+		if r.callable && !callee {
+			continue
+		}
+		r.callers[site] = true
+	}
+}
+
+func receiverBase(expr ast.Expr) string {
+	switch t := expr.(type) {
+	case *ast.StarExpr:
+		return receiverBase(t.X)
+	case *ast.Ident:
+		return t.Name
+	case *ast.IndexExpr:
+		return receiverBase(t.X)
+	case *ast.IndexListExpr:
+		return receiverBase(t.X)
+	}
+	return ""
+}
+
+func (g *generator) addRow(pf *parsedFile, info *types.Info, name string, node ast.Node, nameNode *ast.Ident, callable bool) {
+	key := rowKey{pf.rel, node.Pos(), node.End(), name}
+	r, ok := g.rows[key]
+	if !ok {
+		start := g.fset.Position(node.Pos())
+		end := g.fset.Position(node.End() - 1)
+		endOffset := g.fset.Position(node.End()).Offset
+		sum := sha256.Sum256([]byte(pf.src[start.Offset:endOffset]))
+		r = &row{
+			name:     name,
+			file:     pf.rel,
+			start:    start.Line,
+			end:      end.Line,
+			hash:     hex.EncodeToString(sum[:])[:12],
+			callable: callable,
+			callers:  map[string]bool{},
+		}
+		g.rows[key] = r
+		g.order = append(g.order, r)
+	}
+	g.defSites[siteKey{pf.rel, nameNode.Pos()}] = true
+	if obj := info.Defs[nameNode]; obj != nil {
+		g.byObject[obj] = append(g.byObject[obj], r)
+	}
+}
+
+func (g *generator) collectDefinitions(u *unit, info *types.Info) {
+	for _, pf := range u.files {
+		ast.Inspect(pf.file, func(n ast.Node) bool {
+			switch d := n.(type) {
+			case *ast.FuncDecl:
+				name := d.Name.Name
+				if d.Recv != nil && len(d.Recv.List) > 0 {
+					base := receiverBase(d.Recv.List[0].Type)
+					if base == "" {
+						return true
+					}
+					name = base + "." + name
+				}
+				g.addRow(pf, info, name, d, d.Name, true)
+			case *ast.GenDecl:
+				switch d.Tok {
+				case token.TYPE:
+					for _, s := range d.Specs {
+						if ts, ok := s.(*ast.TypeSpec); ok {
+							node := ast.Node(d)
+							if d.Lparen.IsValid() {
+								node = ts
+							}
+							g.addRow(pf, info, ts.Name.Name, node, ts.Name, false)
+						}
+					}
+				case token.VAR, token.CONST:
+					for _, s := range d.Specs {
+						if vs, ok := s.(*ast.ValueSpec); ok {
+							node := ast.Node(d)
+							if d.Lparen.IsValid() {
+								node = vs
+							}
+							for i, id := range vs.Names {
+								callable := false
+								if i < len(vs.Values) {
+									_, callable = vs.Values[i].(*ast.FuncLit)
+								}
+								g.addRow(pf, info, id.Name, node, id, callable)
+							}
+						}
+					}
+				}
+			}
+			return true
+		})
+	}
+}
+
+func (g *generator) checkUnit(u *unit) *types.Package {
+	if g.checked[u.importPath] {
+		return g.memo[u.importPath]
+	}
+	g.checked[u.importPath] = true
+	info := &types.Info{
+		Defs: map[*ast.Ident]types.Object{},
+		Uses: map[*ast.Ident]types.Object{},
+	}
+	conf := types.Config{
+		Importer:    g,
+		Error:       func(error) {},
+		FakeImportC: true,
+	}
+	files := make([]*ast.File, 0, len(u.files))
+	for _, pf := range u.files {
+		files = append(files, pf.file)
+	}
+	pkg, _ := conf.Check(u.importPath, g.fset, files, info)
+	if u.importable && pkg != nil {
+		g.memo[u.importPath] = pkg
+	}
+	g.collectDefinitions(u, info)
+	g.infos = append(g.infos, &unitInfo{unit: u, info: info})
+	return pkg
+}
+
+func (g *generator) Import(importPath string) (*types.Package, error) {
+	if pkg, ok := g.memo[importPath]; ok {
+		return pkg, nil
+	}
+	if g.loading[importPath] {
+		return nil, fmt.Errorf("import cycle through %s", importPath)
+	}
+	u, ok := g.importable[importPath]
+	if !ok {
+		return nil, fmt.Errorf("import not resolved from source (tolerated): %s", importPath)
+	}
+	g.loading[importPath] = true
+	pkg := g.checkUnit(u)
+	delete(g.loading, importPath)
+	if pkg == nil {
+		return nil, fmt.Errorf("source check produced no package: %s", importPath)
+	}
+	g.memo[importPath] = pkg
+	return pkg, nil
+}
+
+func (g *generator) importPathFor(dir string) string {
+	for _, m := range g.modules {
+		if m.dir == dir {
+			return m.path
+		}
+		if m.dir == "." {
+			return m.path + "/" + dir
+		}
+		if strings.HasPrefix(dir, m.dir+"/") {
+			return m.path + dir[len(m.dir):]
+		}
+	}
+	return "~unresolved/" + dir
+}
+
+func parseModule(repo string, rel string) (moduleInfo, bool) {
+	content, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(rel)))
+	if err != nil {
+		return moduleInfo{}, false
+	}
+	for _, line := range strings.Split(string(content), "\n") {
+		fields := strings.Fields(strings.TrimSpace(line))
+		if len(fields) >= 2 && fields[0] == "module" {
+			return moduleInfo{dir: path.Dir(rel), path: fields[1]}, true
+		}
+	}
+	return moduleInfo{}, false
+}
+
+func (g *generator) buildUnits(files []*parsedFile) {
+	filesByDir := map[string][]*parsedFile{}
+	var dirs []string
+	for _, pf := range files {
+		dir := path.Dir(pf.rel)
+		if _, ok := filesByDir[dir]; !ok {
+			dirs = append(dirs, dir)
+		}
+		filesByDir[dir] = append(filesByDir[dir], pf)
+	}
+	sort.Strings(dirs)
+	for _, dir := range dirs {
+		pfs := filesByDir[dir]
+		dirPath := g.importPathFor(dir)
+		byPkg := map[string][]*parsedFile{}
+		var pkgNames []string
+		basePkg := ""
+		for _, pf := range pfs {
+			if _, ok := byPkg[pf.pkgName]; !ok {
+				pkgNames = append(pkgNames, pf.pkgName)
+			}
+			byPkg[pf.pkgName] = append(byPkg[pf.pkgName], pf)
+			if !pf.isTest && basePkg == "" {
+				basePkg = pf.pkgName
+			}
+		}
+		sort.Strings(pkgNames)
+		for _, pkgName := range pkgNames {
+			group := byPkg[pkgName]
+			if pkgName == basePkg {
+				var nonTest []*parsedFile
+				hasTests := false
+				for _, pf := range group {
+					if pf.isTest {
+						hasTests = true
+					} else {
+						nonTest = append(nonTest, pf)
+					}
+				}
+				if len(nonTest) > 0 {
+					u := &unit{importPath: dirPath, pkgName: pkgName, files: nonTest, importable: true}
+					g.units = append(g.units, u)
+					g.importable[dirPath] = u
+				}
+				if hasTests {
+					u := &unit{importPath: dirPath + " [test]", pkgName: pkgName, files: group}
+					g.units = append(g.units, u)
+				}
+			} else {
+				nonTest := false
+				for _, pf := range group {
+					if !pf.isTest {
+						nonTest = true
+					}
+				}
+				suffix := pkgName
+				if !nonTest {
+					suffix = pkgName + " test"
+				}
+				u := &unit{importPath: dirPath + " [" + suffix + "]", pkgName: pkgName, files: group}
+				g.units = append(g.units, u)
+			}
+		}
+	}
+}
+
+func (g *generator) walkReferences() {
+	for _, ui := range g.infos {
+		for _, pf := range ui.unit.files {
+			parents := map[ast.Node]ast.Node{}
+			ast.Walk(&parentWalker{parents: parents, g: g, pf: pf, info: ui.info}, pf.file)
+		}
+	}
+}
+
+func (g *generator) emit() {
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	for i, r := range g.order {
+		callable := 0
+		if r.callable {
+			callable = 1
+		}
+		fmt.Fprintf(out, "D\t%d\t%s\t%s\t%d\t%d\t%s\t%d\n", i, r.name, r.file, r.start, r.end, r.hash, callable)
+		sites := make([]string, 0, len(r.callers))
+		for site := range r.callers {
+			sites = append(sites, site)
+		}
+		sort.Strings(sites)
+		for _, site := range sites {
+			fmt.Fprintf(out, "C\t%d\t%s\n", i, site)
+		}
+	}
+}
+
+func run() error {
+	var input struct {
+		Repo    string
+		Files   []string
+		Modules []string
+	}
+	if err := json.NewDecoder(os.Stdin).Decode(&input); err != nil {
+		return err
+	}
+	g := &generator{
+		repo:       input.Repo,
+		fset:       token.NewFileSet(),
+		importable: map[string]*unit{},
+		checked:    map[string]bool{},
+		memo:       map[string]*types.Package{},
+		loading:    map[string]bool{},
+		rows:       map[rowKey]*row{},
+		byObject:   map[types.Object][]*row{},
+		defSites:   map[siteKey]bool{},
+	}
+	var files []*parsedFile
+	for _, rel := range input.Files {
+		content, err := os.ReadFile(filepath.Join(input.Repo, filepath.FromSlash(rel)))
+		if err != nil {
+			continue
+		}
+		f, _ := parser.ParseFile(g.fset, filepath.Join(input.Repo, filepath.FromSlash(rel)), content, parser.SkipObjectResolution)
+		if f == nil || f.Name == nil {
+			continue
+		}
+		files = append(files, &parsedFile{
+			rel:     rel,
+			src:     string(content),
+			file:    f,
+			isTest:  strings.HasSuffix(rel, "_test.go"),
+			pkgName: f.Name.Name,
+		})
+	}
+	for _, rel := range input.Modules {
+		if m, ok := parseModule(input.Repo, rel); ok {
+			g.modules = append(g.modules, m)
+		}
+	}
+	sort.Slice(g.modules, func(i, j int) bool {
+		return len(g.modules[i].dir) > len(g.modules[j].dir)
+	})
+	g.buildUnits(files)
+	for _, u := range g.units {
+		g.checkUnit(u)
+	}
+	g.walkReferences()
+	g.emit()
+	return nil
+}
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, "structural-index-go: "+err.Error())
+		os.Exit(1)
+	}
+}
+`;
+
+function generateGo(repo, goFiles) {
+  const started = performance.now();
+  const modules = gitLines(repo, ["go.mod", "**/go.mod"]);
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "structural-index-go-"));
+  let stdout;
+  try {
+    const sourcePath = path.join(directory, "main.go");
+    fs.writeFileSync(sourcePath, GO_GENERATOR_SOURCE);
+    stdout = execFileSync("go", ["run", sourcePath], {
+      input: JSON.stringify({ repo, files: goFiles, modules }),
+      maxBuffer: 256 * 1024 * 1024,
+    }).toString("utf8");
+  } catch (error) {
+    const detail = error.stderr ? `: ${error.stderr.toString("utf8").trim()}` : "";
+    throw new Error(`Go backend failed${detail || `: ${error.message}`}`);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+  const rows = [];
+  for (const line of stdout.split("\n")) {
+    if (!line) continue;
+    const fields = line.split("\t");
+    if (fields[0] === "D" && fields.length === 8) {
+      rows.push({
+        name: fields[2],
+        file: fields[3],
+        start: Number(fields[4]),
+        end: Number(fields[5]),
+        hash: fields[6],
+        callable: fields[7] === "1",
+        callers: new Set(),
+        tests: new Set(),
+      });
+    } else if (fields[0] === "C" && fields.length === 3) {
+      const row = rows[Number(fields[1])];
+      if (!row) throw new Error(`Go backend referenced unknown row: ${line}`);
+      row.callers.add(fields[2]);
+      const splitAt = fields[2].lastIndexOf(":");
+      if (isGoTestFile(fields[2].slice(0, splitAt))) row.tests.add(fields[2]);
+    } else {
+      throw new Error(`Go backend emitted an unexpected line: ${line}`);
+    }
+  }
+  return {
+    data: { schema: SCHEMA, language: "go", definitions: normalizeDefinitions(rows) },
+    seconds: (performance.now() - started) / 1000,
+  };
+}
+
+function generate(repo, head, indexDirectory, files) {
+  const data = {};
+  const seconds = {};
+  if (files.typescript.length > 0) {
+    const generated = generateTypeScript(repo);
+    data.typescript = generated.data;
+    seconds.typescript = generated.seconds;
+  }
+  if (files.go.length > 0) {
+    const generated = generateGo(repo, files.go);
+    data.go = generated.data;
+    seconds.go = generated.seconds;
+  }
+  fs.mkdirSync(indexDirectory, { recursive: true });
+  const metadata = { schema: SCHEMA, commit: head, languages: Object.keys(data) };
+  const suffix = `.tmp-${process.pid}`;
+  for (const id of Object.keys(data)) {
+    const dataPath = path.join(indexDirectory, `${id}.json`);
+    fs.writeFileSync(dataPath + suffix, `${JSON.stringify(data[id], null, 2)}\n`);
+    fs.renameSync(dataPath + suffix, dataPath);
+  }
+  const metadataPath = path.join(indexDirectory, "metadata.json");
+  fs.writeFileSync(metadataPath + suffix, `${JSON.stringify(metadata, null, 2)}\n`);
+  fs.renameSync(metadataPath + suffix, metadataPath);
+  return { data, seconds };
+}
+
+function cachedIndex(indexDirectory, head, files) {
   try {
     const metadata = JSON.parse(fs.readFileSync(path.join(indexDirectory, "metadata.json"), "utf8"));
-    const data = JSON.parse(fs.readFileSync(path.join(indexDirectory, "typescript.json"), "utf8"));
-    if (metadata.schema === SCHEMA && metadata.commit === head && data.schema === SCHEMA) return data;
+    const present = LANGUAGE_ORDER.filter((id) => files[id].length > 0);
+    if (metadata.schema !== SCHEMA || metadata.commit !== head) return undefined;
+    if (JSON.stringify(metadata.languages) !== JSON.stringify(present)) return undefined;
+    const data = {};
+    for (const id of present) {
+      const parsed = JSON.parse(fs.readFileSync(path.join(indexDirectory, `${id}.json`), "utf8"));
+      if (parsed.schema !== SCHEMA) return undefined;
+      data[id] = parsed;
+    }
+    return data;
   } catch {
     return undefined;
   }
@@ -302,18 +846,30 @@ function main() {
   const args = parseArguments(process.argv.slice(2));
   const head = targetHead(args.repo);
   const indexDirectory = path.join(args.repo, ".bd", "index");
-  let data = args.regen ? undefined : cachedIndex(indexDirectory, head);
-  let regenerationSeconds;
+  const files = {
+    typescript: gitLines(args.repo, ["*.ts", "*.tsx"]),
+    go: gitLines(args.repo, ["*.go"]),
+  };
+  let data = args.regen ? undefined : cachedIndex(indexDirectory, head, files);
+  let seconds;
   if (!data) {
-    const generated = generate(args.repo, head, indexDirectory);
+    const generated = generate(args.repo, head, indexDirectory, files);
     data = generated.data;
-    regenerationSeconds = generated.seconds;
+    seconds = generated.seconds;
   }
 
-  const definitions = data.definitions.filter((definition) => definition.name === args.symbol);
+  const definitions = [];
+  for (const id of LANGUAGE_ORDER) {
+    if (!data[id]) continue;
+    for (const definition of data[id].definitions) {
+      if (definition.name === args.symbol) definitions.push(definition);
+    }
+  }
   if (definitions.length === 0) fail(`symbol not found: ${args.symbol}`, 1);
-  if (regenerationSeconds !== undefined) {
-    process.stderr.write(`structural-index: regenerated TypeScript index in ${regenerationSeconds.toFixed(3)}s\n`);
+  for (const id of LANGUAGE_ORDER) {
+    if (seconds && seconds[id] !== undefined) {
+      process.stderr.write(`structural-index: regenerated ${LANGUAGE_NAMES[id]} index in ${seconds[id].toFixed(3)}s\n`);
+    }
   }
 
   if (args.query === "symbol") {
