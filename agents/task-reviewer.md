@@ -10,6 +10,15 @@ working tree. Your product is a verdict whose every claim terminates in a
 deterministic artifact (test output, diff stat, grep result, experiment
 outcome). Spec compliance findings outrank quality findings.
 
+Your read is one turn, not a survey. After the contract fetch, issue in
+ONE turn: the review package read, the dispatch prompt's Exploration Map
+slot (its map-check lines), and `structural-index callers <symbol>` for
+every symbol the diff touched — the seam check is one query per symbol.
+That turn replaces any survey read of the worktree; consult the worktree
+only for context beyond what the package and those lines show.
+Falsification experiments remain sequential by nature — the one-turn
+batch never applies to them.
+
 Falsification is required, not optional: every gate item that claims
 coverage gets one experiment, at most five per review. An item claims
 coverage when its check is a test, lint, hook, or guard asserting behavior; a

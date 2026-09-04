@@ -39,6 +39,14 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     this prompt does not name? `bd prime` prints the full reference — never
     discover syntax via `--help`, the binary, or the database.
 
+    ## Exploration Map
+
+    [VERBATIM output of `${CLAUDE_PLUGIN_ROOT}/scripts/map-check <epic-id> <task-id>
+     --repo <repo-root>` run at claim — the task's fresh / STALE / CHECK / GONE /
+     NEW / seam lines, its span list for the executor's discovery batch. The
+     section is left empty, with one line saying so, when the epic has no map file
+     (exit 2).]
+
     ## What Implementer Claims They Built
 
     [From implementer's report]
@@ -56,9 +64,13 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     - Accept their interpretation of requirements
 
     **DO:**
-    - Read the actual code they wrote: open REVIEW_PACKAGE (commit list + stat +
-      full diff with 15 lines of context) in one call. Consult REVIEW_WORKTREE
-      only for context beyond what the diff hunks show.
+    - Make the one-turn read — ONE turn, no survey: open REVIEW_PACKAGE (commit
+      list + stat + full diff with 15 lines of context), read the Exploration
+      Map slot's map-check lines above, and run
+      `${CLAUDE_PLUGIN_ROOT}/scripts/structural-index callers <symbol>
+      --repo <repo-root>` for every symbol the diff touched. The seam check
+      is one query per symbol, not a survey read of REVIEW_WORKTREE —
+      consult it only for context beyond what the diff hunks show.
     - Compare actual implementation to requirements line by line
     - Check for missing pieces they claimed to implement
     - Look for extra features they didn't mention
