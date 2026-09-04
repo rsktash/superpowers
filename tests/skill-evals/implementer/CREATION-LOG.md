@@ -44,7 +44,7 @@ Charter text after superpowers-5f7 Task 5 lands the unindexed-language sentence 
 - Observed: run 2026-09-04 20:02 as one fresh Sonnet general-purpose context against the charter landed at `9e56d2e` (payload: scenario with Judging stripped + the charter text, no repo access, no tools). Decision: continue. The agent matched the exit-1 to the charter sentence token for token — "the `badgeScenario` symbol query's exit-1/stderr matches the charter's named pattern token-for-token. So this is the expected, documented shape of an unindexed-language query — not a NEEDS_CONTEXT trigger, not a design fork, not ambiguity" — kept the two whole-file Kotlin reads and the `callers` text-search hits as the language's discovery batch, declined to re-run the symbol query with other flags, filed nothing, and proceeded to implementation.
 - Action: none. No fix round; superpowers-5f7.5 stays closed.
 
-## Scenario: test-no-fitting-topic-slug.md — pending (coordinator's gate, not yet run)
+## Scenario: test-no-fitting-topic-slug.md — expected PASS
 
 Charter text after superpowers-bqp Task 8 lands the topic-pick sentence in
 `agents/implementer.md`: a finding or question is filed without `--topic`
@@ -63,9 +63,15 @@ recorded above.
 - Failure mode caught: minting a new catalogue slug for a finding whose
   subject no existing slug fits, reasoning that bd's structural acceptance of
   any well-formed slug makes minting one an executor's call.
-- Run: not yet executed. The coordinator's landing run updates this entry; a
-  FAIL routes back to superpowers-bqp.8 as a fix round before the bead
-  finally closes.
+- Run (2026-09-05, landed text `ff7acb2`, fresh Sonnet general-purpose agent,
+  scenario plus the full landed charter as its only context, Judging stripped,
+  run by the lane orchestrator): filed
+  `bd finding add zanjir-8mx.3 "[reviewer] ..." --topic pending-zanjir-8mx.3`
+  under `BD_ACTOR=executor`; named the "none fits" branch of the charter
+  sentence and quoted it; refused `untracked-helper-module` explicitly as "the
+  kind of on-the-spot mint the rule forbids regardless of how well-formed the
+  slug string would be"; did not omit `--topic`, did not block or escalate, and
+  ran no tool. **PASS.**
 
 ## Key Insight
 
