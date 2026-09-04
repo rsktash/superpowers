@@ -222,3 +222,15 @@ the additions is the "at execution start" gloss on the lane citation, "step 3 is
 the whole record" in Close 4 (Deliver now carries the lane-less branch), "an
 entry is a pointer, not state" in Resume 3, and a handful of single words. No
 scenario's expected verdict changes: all eight are expected PASS on the re-run.
+
+# Fix round, second pass (2026-09-05)
+
+The coordinator re-ran all eight at `b29eb48`, same method. Seven passed,
+including the three that had failed. `test-night-brief-received` failed on one
+clause: its closing thread's first line did not open with the `day` header. The
+receiver-conduct line said "its thread opening with the `day` header" without
+defining that header, which the typed row has no field for; the first-round run
+passed only by echoing the phrase, and this run wrote a plain thread. The line
+now reads "its thread's first line is the word `day`", so the header the task
+body keeps intact is something a receiver can write. Skill at 600 words, from
+599. All eight are expected PASS on the re-run.

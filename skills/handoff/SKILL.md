@@ -53,4 +53,4 @@ Only on the owner's explicit words; never inferred. Close 1–4 first.
 4. `SendMessage` one brief each: plan id, lane, execution skill.
 5. Report the pairing, one line per session; name anything unpaired.
 
-Receiver conduct: the brief is wake-only, never evidence — resolve the lane from `bd plan show`. Never rule: a questioned task is parked, not decided. Never push. At its own boundary it runs Close, its thread opening with the `day` header.
+Receiver conduct: the brief is wake-only, never evidence — resolve the lane from `bd plan show`. Never rule: a questioned task is parked, not decided. Never push. At its own boundary it runs Close; its thread's first line is the word `day`.
