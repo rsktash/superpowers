@@ -4,7 +4,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 context: fork
 ---
 
-# Writing Plans — budget 2417 words
+# Writing Plans — budget 2684 words
 
 ## Overview
 
@@ -30,10 +30,11 @@ Complete in order:
 2. **Map file structure** — what is created/modified, each file's responsibility
 3. **Decompose into task beads** — thin directive bodies per Task Structure
 4. **Lint every body** — `node <skill-dir>/scripts/lint-citations.mjs <body-file> --repo <root>` must exit 0 before its `bd create`. A body that fails the lint is not created; fix or delete the claim.
-5. **Attention Map** onto the root epic body
-6. **Write the `plan-ready` marker and STOP** — `bd label rm <root-id> plan-ready:<prior-sha>` if re-planning, then `bd label add <root-id> plan-ready:<short-sha>` (`bd children` is the task record). Return the receipt.
+5. **Write the exploration map** — symbol and seam rows per **Exploration Map**, into `docs/beads/<epic-id>.map.md` in the target repo
+6. **Attention Map** onto the root epic body
+7. **Write the `plan-ready` marker and STOP** — `bd label rm <root-id> plan-ready:<prior-sha>` if re-planning, then `bd label add <root-id> plan-ready:<short-sha>` (`bd children` is the task record). Return the receipt.
 
-Full mode runs steps 1–6. Amend mode runs steps 3–6 for the named children only, applying the Amend Mode rules during decomposition.
+Full mode runs steps 1–7. Amend mode runs steps 3–7 for the named children only, applying the Amend Mode rules during decomposition.
 
 **Terminal step:** planning ends at the marker. Do NOT invoke an execution skill — the execution mode is the owner's decision, taken at the coordinator's pickup against the receipt. The execution skills' epic gate checks this marker.
 
@@ -120,6 +121,10 @@ symbol: reusedThing @ its/home.ts
 
 Every gate item is an outcome you observe, machine-verifiable — "test_validate_jwt_expired passes", never "works correctly" — and falsifiable against under-doing: write it so under-coverage fails ("every variant has its own assertion"), because a fluent executor will satisfy the literal minimum convincingly. Gates collectively exercise the regime the artifact exists to survive — the second page, the full buffer — never only the one-of-everything case; and at least one item names what must stay intact, checked on that same regime. Mechanisms ("flag X is set", "Y is called") belong in steps, not gates. Visual work's gate names what the owner verifies against pixels.
 
+## Exploration Map
+
+Write the exploration map to `docs/beads/<epic-id>.map.md` in the target repo. Its rows follow `| Task | Symbol | File | Hash | Note | Source |`, with Task holding the task number. Every symbol a task body cites in a `symbol:` citation, and every symbol a task creates or restructures, gets a row. A seam between two tasks gets its own row — `N→M | seam: <what> | — | — | <one sentence> | planner` — naming the interface the consumer reads from the tree. Callers and tests rows are never stored, because the index answers them at dispatch. The Hash cell holds exactly one of two values: the 12-hex hash `scripts/structural-index symbol` prints for that symbol at the planning commit, with Source `index`; or the literal token `new` for a symbol no definition resolves at the planning commit — a symbol a task of this plan creates — with Source `planner`. There is no whole-file or line-range hash: a file whose symbols the index cannot resolve earns no map row at all, and the task body's Files list and citations remain that file's only record (R-B: symbol-keyed). Nobody edits hashes, no bead is written to maintain the map, and freshness is `scripts/map-check`'s output at dispatch (R-B, R-C). Append one pointer line to the epic body — `Exploration map: docs/beads/<epic-id>.map.md`. Commit the map with the plan.
+
 ## Attention Map
 
 After creating all task beads, append to the root epic body a table telling each executor its concern and its non-concern — the record hybrid-parallel reads for wave eligibility:
@@ -158,6 +163,7 @@ Rewrite each named child's body to the Task Structure template.
 Lint each named child's rewritten body with the citation lint before updating the child.
 Label each named child `exec:<mode>` and also `review:trivial-deterministic` when it earns that label.
 Add each named child to the epic body's `## Attention Map` table as its own row.
+Append the named child's rows to the epic's map file.
 Re-mint `plan-ready` on the root epic after all named children are planned.
 When a named child is too big for one task, create replacement sibling tasks under the root epic, dep-link them, and close the original as superseded.
 A task never gets children.
@@ -175,4 +181,4 @@ Write the marker on the root bead and stop:
 bd label add <root-id> plan-ready:$(git rev-parse --short HEAD)
 ```
 
-Return the receipt, plus any open decision beads and `NEEDS_RULING` if so. A receipt carrying prose reintroduces the residency the venue split removed. The marker's consumer is the execution skills' epic gate — a run finding none routes back to planning.
+Return the receipt, the exploration map path `docs/beads/<epic-id>.map.md` among its items, plus any open decision beads and `NEEDS_RULING` if so. A receipt carrying prose reintroduces the residency the venue split removed. The marker's consumer is the execution skills' epic gate — a run finding none routes back to planning.

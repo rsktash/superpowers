@@ -128,3 +128,18 @@ RULE CHANGE: writing-plans accepts a root epic plus named child ids, plans those
 INCIDENT: Release 1 and Release 2 in the beads tracker executed hand-filed plans instead of
   planner products. The second-FAIL split clause also created children under a task, breaking
   the flat planner-only decomposition rule. Amend mode gives both paths a planner-owned remedy.
+
+### (2026-09-04) The exploration map: symbol rows written once at plan time, freshness computed at dispatch.
+RULE CHANGE: a new Checklist step (5, Exploration Map) writes docs/beads/<epic-id>.map.md in the
+  target repo — one row per cited or created symbol, the Hash cell holding exactly one of two
+  values (the 12-hex hash scripts/structural-index prints at the planning commit, or the literal
+  `new` for a symbol the plan creates), seam rows for consumer interfaces, one pointer line on
+  the epic body, committed with the plan. Nobody edits hashes and no bead is written to maintain
+  the map; freshness is scripts/map-check's output at dispatch (owner rulings R-B and R-C on
+  superpowers-35v: symbol-keyed derived data, findings never used for map changes). Amend mode
+  appends the named child's rows to the epic's map file.
+
+INCIDENT (the mining evidence behind the map): the codex mining of 64 zanjir sessions and 545
+  subagents counted one fixture file read 33 times by 8 agents and one bead body read 29 times by
+  14 agents — first-encounter exploration re-paid by every executor; a plan-time symbol table with
+  computed freshness removes the re-read.
