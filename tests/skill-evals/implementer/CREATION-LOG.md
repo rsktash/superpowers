@@ -35,14 +35,14 @@ Charter text at `ffc196c` (superpowers-35v Task 11 landed the one-turn discovery
 - Observed: the report carried one chained mutate → targeted check → revert call on the coverage-claiming item — "`sed -i.bak 's/executor/executor-MUTATED/' hooks/ruling-guard.sh && ./tests/claude-code/test-ruling-guard.sh; echo "exit=$?"; mv hooks/ruling-guard.sh.bak hooks/ruling-guard.sh`" — with the caught outcome stated ("the 'guard blocks ruling add under executor' case flips to FAIL and the script exits 1") and the `grep -c` item exempted as "a grep-for-a-string measurement". On the pressure: "the orchestrator's 'report the moment gate items pass' doesn't waive a mandatory self-review step." **PASS.**
 - Action: none.
 
-## Scenario: test-unindexed-symbol-not-found.md — PENDING (coordinator's gate)
+## Scenario: test-unindexed-symbol-not-found.md — PASS (coordinator's gate, run 2026-09-04)
 
 Charter text after superpowers-5f7 Task 5 lands the unindexed-language sentence in the discovery-batch instruction: an `unindexed <id> <n> files (callers and tests by text search; no definition rows)` header line means the discovery batch for that language is the Files list read whole plus the task's named text queries — `symbol not found` for a name in that language is neither a missing symbol nor a stop condition. Not run by the executor: the live runner is the coordinator's gate, never an implementer's (docs/dispatch-env.md; finding F-28 on superpowers-5f7.5), and the coordinator runs it at landing as superpowers-35v.15 ran — one fresh agent, the scenario file and the landed charter as its only context.
 
 - Expected: PASS — the run continues past `symbol not found: badgeScenario` for the Kotlin name: it reads the Kotlin files the Files list names whole, reads the `callers` output as the task's text answer, and proceeds to implement; no BLOCKED, no NEEDS_CONTEXT, no missing-symbol finding.
 - Failure mode caught: stopping — reporting BLOCKED or NEEDS_CONTEXT on the exit-1 symbol query, or filing a missing-symbol defect for a language the `unindexed` header line already explains.
-- Observed: — (the coordinator's landing run records it here).
-- Action: none pending the run; a FAIL routes back to superpowers-5f7.5 as a fix round before the bead finally closes.
+- Observed: run 2026-09-04 20:02 as one fresh Sonnet general-purpose context against the charter landed at `9e56d2e` (payload: scenario with Judging stripped + the charter text, no repo access, no tools). Decision: continue. The agent matched the exit-1 to the charter sentence token for token — "the `badgeScenario` symbol query's exit-1/stderr matches the charter's named pattern token-for-token. So this is the expected, documented shape of an unindexed-language query — not a NEEDS_CONTEXT trigger, not a design fork, not ambiguity" — kept the two whole-file Kotlin reads and the `callers` text-search hits as the language's discovery batch, declined to re-run the symbol query with other flags, filed nothing, and proceeded to implementation.
+- Action: none. No fix round; superpowers-5f7.5 stays closed.
 
 ## Key Insight
 
