@@ -21,7 +21,9 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
     2. `export BD_ACTOR=executor` (your bd writes are findings and questions;
        rulings are refused to you). File either without `--topic` first so bd
        prints the catalogue and pick an existing slug from it — never mint
-       one; none fits → `--topic pending-<bead-id>` for now, a slug the
+       one; none fits → the pending placeholder derived from the bead id by
+       the slugify rule in `skills/shared/bd-defaults.md` — `superpowers-bqp.8`
+       becomes `--topic pending-superpowers-bqp-8` — for now, a slug the
        coordinator resolves at Close, until bd stores pending topic
        statements itself, at which point pending is bd's own typed state in
        place of that slug and an unresolved one still gets a slug from the
