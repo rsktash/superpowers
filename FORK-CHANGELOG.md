@@ -7,6 +7,57 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.48] - 2026-09-04
+
+Net `skills/` word delta: **+1,410** (44,747 → 46,157; writing-plans +561;
+codex-execution +313 — `SKILL.md` +170 and `dispatch-prompt.md` +143;
+subagent-driven-development +405 — `SKILL.md` +257, `implementer-prompt.md` +56, and
+`reviewer-prompt.md` +92; hybrid-execution +131). The corpus grows: the planner-only epic gate
+and amend path, the exploration-map contract, and the one-turn discovery, verification,
+pre-flight, and review batches cost more words than deletion of the legacy-plan paths removed.
+No compaction pass ran in this epic.
+
+**Planner products become an execution gate.** subagent-driven-development, hybrid-execution,
+and codex-execution now reject an epic without children, a `plan-ready:` label, an Attention
+Map, or an `exec:` label on every open child. An open `Decide:` child is exempt from the
+`exec:` check only when it blocks an open task; an orphan decision still stops the gate.
+writing-plans owns decomposition: its amend mode plans named children in place and splits an
+oversized task only into sibling tasks under the root epic. A recorded `[pre-flight]` marker is
+final for that plan; execution skips the review when the marker exists and treats a second
+pre-flight as a defect rather than a freshness check.
+
+**A structural index feeds a symbol-keyed exploration map.** `scripts/structural-index` answers
+`symbol`, `callers`, and `tests` for TypeScript and Go and caches a HEAD-keyed index under the
+target repository. Ruling R-23 chose compiler APIs: the TypeScript compiler API and Go's
+`go/parser` plus `go/types`. writing-plans records each task's indexed or new symbols and its
+cross-task seams in `docs/beads/<epic-id>.map.md`; `scripts/map-check` resolves the task rows at
+dispatch and prints the six `fresh`, `STALE`, `CHECK`, `GONE`, `NEW`, and `seam` line shapes.
+Freshness is computed, never written, and no bead write maintains the map.
+
+**Discovery and verification become one-turn batches.** The writing-plans task template, the
+implementer and reviewer charters, the implementer, reviewer, and pre-flight prompts, and the
+Codex dispatch prompt issue their independent reads and index queries together. Implementers
+open the map-selected spans and named discovery queries before the first edit, then run and
+report all acceptance-gate commands together. Reviewers read the review package and map spans
+and run one `callers` query per touched symbol in one turn; pre-flight reads the epic and every
+in-scope open child as one batch.
+
+**The whole-diff review fixed map-check's error boundary and NEW-row span selection.** A valid
+mix of map lines exits 0, an invalid argument or structural-index failure exits 1, and a missing
+or unparseable map or invalid Hash cell exits 2. A `NEW` row now prints a created span only when
+the symbol resolves in that row's own File cell; a same-named definition in another file no
+longer supplies the span.
+
+**Ruling R-26 settles the Q-4 TypeScript toolchain path.** `structural-index` first resolves a
+tracked package directory inside the target repository, then uses
+`STRUCTURAL_INDEX_TYPESCRIPT_PACKAGE`, and exits 2 naming that variable when neither provides
+`lib/typescript.js`. The deterministic suite requires the variable, and `docs/dispatch-env.md`
+now states the prerequisite and the resolution order.
+
+**superpowers-35v stays open after this release.** Task 3's migration sweep is parked on
+zanjir-tracker questions, and Task 14's measurement is pending. The follow-on spec
+superpowers-5f7, structural-index coverage for Kotlin, Swift, and Python, is filed and unplanned.
+
 ## [1.4.47] - 2026-09-02
 
 Net `skills/` word delta: **+610** (`skills/shared/model-tiers.md` +469, new — the tier doctrine
