@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# SessionStart hook: exports BD_SESSION_ID into the shell every later bd
+# lane verb and `bd session close` need. hooks/session-start stays
+# unwired (R-51) -- this script owns none of its context injection or
+# side effects; it only ever writes the one export line.
+#
+# Fails OPEN: missing jq, unparseable/empty stdin, a missing session_id,
+# or an unset/empty CLAUDE_ENV_FILE all exit 0 with no output.
+set -uo pipefail
+
+command -v jq >/dev/null 2>&1 || exit 0
+input="$(cat)" || exit 0
+[ -n "$input" ] || exit 0
+
+session_id="$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)" || exit 0
+[ -n "$session_id" ] || exit 0
+
+[ -n "${CLAUDE_ENV_FILE:-}" ] || exit 0
+
+line="export BD_SESSION_ID=${session_id}"
+if [ -f "$CLAUDE_ENV_FILE" ] && grep -qF "$line" "$CLAUDE_ENV_FILE" 2>/dev/null; then
+  exit 0
+fi
+
+echo "$line" >> "$CLAUDE_ENV_FILE"
+exit 0
