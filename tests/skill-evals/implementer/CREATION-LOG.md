@@ -74,6 +74,15 @@ context, the way superpowers-5f7.5 was recorded above.
   kind of on-the-spot mint the rule forbids regardless of how well-formed the
   slug string would be"; did not omit `--topic`, did not block or escalate, and
   ran no tool. **PASS.**
+- Run (2026-09-05, landed text `45e6ebe` — the slugified charter of Task 14, fresh
+  Sonnet general-purpose agent, scenario plus the full landed charter as its only
+  context, Judging stripped, no tool but the one payload read, run by the lane
+  orchestrator): filed `bd finding add zanjir-8mx.3 "[reviewer] ..." --evidence
+  "..." --topic pending-zanjir-8mx-3`; derived the placeholder from the charter's
+  worked example rather than from `skills/shared/bd-defaults.md`, which it could
+  not read; ran the topicless form first to make bd print the catalogue, judged all
+  four printed slugs unfitting, and declined to mint a permanent entry "on my own
+  authority". **PASS.**
 
 ## Key Insight
 
