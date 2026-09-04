@@ -3,7 +3,7 @@ name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
 ---
 
-# Subagent-Driven Development — budget 3789 words
+# Subagent-Driven Development — budget 3813 words
 
 Execute a plan by dispatching a fresh subagent per task, reviewing each task's output before moving to the next.
 
@@ -30,7 +30,7 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 A body rewritten after the marker is the rewriter's job — writing-plans' citation lint runs at write time — never a trigger for a second pre-flight.
 
-Run the review as ONE READ-ONLY subagent per epic: the in-scope plan enters that agent's context, never yours. Its prompt: read the epic and the in-scope open children, check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. These are the semantic residue a script cannot reach:
+Run the review as ONE READ-ONLY subagent per epic: the in-scope plan enters that agent's context, never yours. Its prompt: fetch the epic and every in-scope open child in one call (`bd show <root-id> <id1> <id2> … --full`), then read `docs/beads/<epic-id>.map.md` when it exists — both reads in one turn — then check the five classes below — against each other AND against the current tree — return findings only, no edits, no bd writes. These are the semantic residue a script cannot reach:
 
 1. **Tasks that contradict each other or the spec** — two tasks disagreeing on an interface, format, or decision, or a task drifting from what the spec says.
 2. **Anything a task ASKS FOR that a reviewer would flag as a defect** — the plan mandating a bug (e.g. a pinned target type over a documented source with no adapter named between them).
