@@ -3,7 +3,7 @@ name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
 ---
 
-# Subagent-Driven Development — budget 3699 words
+# Subagent-Driven Development — budget 3740 words
 
 Execute a plan by dispatching a fresh subagent per task, reviewing each task's output before moving to the next.
 
@@ -42,7 +42,7 @@ A finding may not itself rest on a prediction of rendered behavior: its reading-
 
 Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one: one batched question costs one interruption instead of five. If the review turns up nothing, say so in one line and start.
 
-A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; it goes through writing-plans (or a decision bead) before it can be claimed.
+A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; route the root epic id plus the bead id to writing-plans amend mode before it can be claimed.
 
 ## The Loop
 
@@ -83,10 +83,10 @@ A reviewer's finding is a claim, not a verdict. Reviewer citations — file:line
 - **Findings that conflict with the plan's recorded decisions escalate to your human partner** — don't silently apply a suggestion that contradicts a decision already made for this plan.
 - **Filing threshold — a defect (per Authority triage) is fixed in the round (Fix Routing) or triaged by severity, never filed by default.** Propose a standalone bead only for: wrong behavior a user can hit, security, data loss, or something that blocks current work. Everything else is one comment line on the project's backlog bead (`bd comment add <backlog-id> "<one line>"`).
 - **Where a filing lands:** under the executing epic ONLY if it blocks that epic's own acceptance — a defect in what the epic built, or a gap that makes its gates unmeetable — dep-linked as a blocker. Everything else goes to the backlog line or, past the severity bar, a standalone bead outside the epic. The epic's close-set is its plan batch plus its own blockers, nothing else — that is what lets a five-task epic close at five.
-- **A finding deferred as a bead is labeled `needs-plan` at creation** (`-l needs-plan`). It carries a gate but no steps — the label keeps `bd ready` from surfacing it as dispatchable until writing-plans turns it into a task or a decision bead resolves it.
+- **A finding deferred as a bead is labeled `needs-plan` at creation** (`-l needs-plan`). It carries a gate but no steps — the label keeps `bd ready` from surfacing it as dispatchable; route the root epic id plus the bead id to writing-plans amend mode.
 - **The session's completion report lists every bead it created**, each with its one-line severity justification — filing visibility without mid-run stops.
 - **Fix Routing — who applies a defect.** A defect whose fix is fully specified by the finding itself — dead code, a comment's wording, a test the reviewer already wrote and watched pass — is applied by the controller, inline on the current diff: commit, re-run the one check, done. A round back to the implementer is justified only by the implementer knowing something the controller doesn't — a design call, a non-obvious code path, a fix the finding doesn't fully specify — never by preferring the work happen elsewhere. When a round IS dispatched, it carries ALL outstanding defects for the task — and no proposals; a round per finding is pure ceremony. (Fixes land as commits on top of the reviewed ones either way.) A controller-applied fix carries the implementer's full obligations — including the sibling-site sweep for the defect class; a fix whose sweep spans surfaces the finding didn't enumerate is not "fully specified" — dispatch it.
-- **A second FAIL splits the task — after an authority audit.** Before splitting or dispatching anything further, re-walk every open finding's authority chain end to end: a finding whose asserted authority exists solely in an agent-authored comment — not independently traceable to a gate item, normative clause, convention, or verbatim owner message — is struck, not fixed, and the round count usually collapses with it. What survives splits along the task's file map (per writing-plans' Task Size) into child beads — no third same-shape round; the redo unit must shrink before any further round.
+- **A second FAIL routes the split through writing-plans amend mode — after an authority audit.** Before routing or dispatching anything further, re-walk every open finding's authority chain end to end: a finding whose asserted authority exists solely in an agent-authored comment — not independently traceable to a gate item, normative clause, convention, or verbatim owner message — is struck, not fixed, and the round count usually collapses with it. Send what survives to amend mode with the root epic id plus the task id; amend mode is the only actor that performs the split, creating replacement sibling tasks under the root epic along the task's file map (per writing-plans' Task Size) and closing the original as superseded. No third same-shape round; the redo unit must shrink before any further round.
 
 ## Coordination Gate
 

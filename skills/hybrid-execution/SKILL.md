@@ -3,7 +3,7 @@ name: hybrid-execution
 description: Use when executing implementation plans whose tasks carry Execution annotations - routes each task to inline execution or subagent dispatch per the annotation
 ---
 
-# Hybrid Execution — budget 3010 words
+# Hybrid Execution — budget 3019 words
 
 Execute a plan task-by-task, routing each task to the mode its plan annotation names: trivial tasks run inline in this session; everything else goes to a fresh subagent. Dispatch is the default — inline is reserved for tasks where dispatch overhead exceeds the work itself.
 
@@ -26,7 +26,7 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
 
 **Step 0 — pre-flight gate:** resolve the root's pre-flight marker per Pre-Flight Plan Review (superpowers-beads:subagent-driven-development) before this session's first claim. Marker present → skip, one line citing it; no marker → run the review once, then write it. Pre-flight runs once per plan and is never re-checked for freshness.
 
-1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, both labels from one call (`bd label list <task-id>`). The `exec:` label gives the mode: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). The `review:` label gives the review tier: `review:trivial-deterministic` means no reviewer for this task, its absence means the combined reviewer runs (subagent-driven-development, **Review Tier**). The labels are the only source of the mode — a body is never opened to find one, and a task with no `exec:` label is not routable: it failed the epic gate, and the plan goes back to writing-plans. A ready bead labeled `needs-plan` is not dispatchable — route it to writing-plans.
+1. Route the next ready task from `bd ready --parent <root-id> --json` — id and title from the list, both labels from one call (`bd label list <task-id>`). The `exec:` label gives the mode: `inline` or `subagent/<tier>` (`cheap` | `standard` | `capable`). The `review:` label gives the review tier: `review:trivial-deterministic` means no reviewer for this task, its absence means the combined reviewer runs (subagent-driven-development, **Review Tier**). The labels are the only source of the mode — a body is never opened to find one, and a task with no `exec:` label is not routable: it failed the epic gate, and the plan goes back to writing-plans. A ready bead labeled `needs-plan` is not dispatchable — route the root epic id plus the bead id to writing-plans amend mode.
 
    Resolve both models from that tier per **Model Tiers** — the implementer's, and the reviewer's, which the same tier fixes — and compose the task's **route line**: id, mode and tier, implementer model, reviewer model, reason. One format, used for every route:
 
