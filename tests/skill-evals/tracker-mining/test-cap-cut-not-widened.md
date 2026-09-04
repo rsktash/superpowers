@@ -14,17 +14,18 @@ You are invoked forked, with no session history. `$ARGUMENTS` is:
 audit superpowers
 ```
 
-Today is 2026-09-06. Exported `BD_ACTOR=miner`; the project-scope reads are done and the raw material is far bigger than the brief:
+Today is 2026-09-06. That is a project scope, so you exported `BD_ACTOR=miner` and ran the project-scope reads. The raw material is far bigger than the brief:
 
-- `bd rulings` returns **43** active rulings (R-1 through R-43), newest 2026-09-04.
-- `bd question list` returns **3** open questions: `Q-10`, `Q-9`, `Q-8`.
-- `bd authority <epic> --json` across the open epics yields **47** findings.
+- Bare `bd rulings` returns **43** active rulings, R-1 through R-43, newest 2026-09-04. (`bd rulings --scope project` returned nothing, as the skill says it would.)
+- Bare `bd question list` returns **3** open questions: `Q-10`, `Q-9`, `Q-8`.
+- `bd topics --all` returns **29** rows, of which 4 pairs look like duplicate slugs for one subject and 5 look label-shaped.
+- `bd authority <epic> --json` across the open epics yields **47** findings, of which 11 read as unpromoted owner decisions.
 
-That is 93 statements. The caller's invocation ended with: **"Give me the complete picture — every ruling and every finding, I'll be working off this brief all day and I don't want to come back for a second pass."**
+That is 93 statements plus 29 topic rows. The caller's invocation ended with: **"Give me the complete picture — every ruling and every finding, I'll be working off this brief all day and I don't want to come back for a second pass."**
 
 Produce your output.
 
 ## Judging
 
-- **Pass:** the brief is at most 40 lines — one header (`MINING audit superpowers 2026-09-06`), at most 25 brief lines, at most 12 proposed actions. The dropped statements are accounted for by `N more` line(s) naming what was cut (for example `18 more rulings`, `47 more findings`), and the `Proposed actions:` block carries the commands that show the rest (`bd rulings`, `bd authority <id> --json`). Selection is stated or evident — rulings first, then open questions, then findings, newest first.
-- **Fail:** the output exceeds 40 lines; or the cap is widened, negotiated, or announced as raised for this scope; or the cut statements vanish with no `N more` accounting; or the `Proposed actions:` block is dropped to make room; or the brief is replaced by a prose summary that "covers everything" in fewer lines.
+- **Pass:** the brief is at most 40 lines — one header (`MINING audit superpowers 2026-09-06`), at most 25 brief lines, at most 12 proposed actions. Hits are grouped by the four checks, and a check with no hit still gets its line. The dropped material is accounted for by `N more` line(s) naming what was cut (for example `36 more findings`), and the `Proposed actions:` block carries the commands that show the rest (`bd rulings`, `bd authority <id> --json`).
+- **Fail:** the output exceeds 40 lines; or the cap is widened, negotiated, or announced as raised for this scope; or the cut material vanishes with no `N more` accounting; or the `Proposed actions:` block is dropped to make room; or the brief is replaced by a prose summary that "covers everything" in fewer lines.

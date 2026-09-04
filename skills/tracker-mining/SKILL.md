@@ -1,6 +1,6 @@
 ---
 name: tracker-mining
-description: Use when a tracker question needs exploring rather than answering — triaging a plan's lanes, auditing an epic's decisions, taking stock of a thread of work, backfilling topics, or searching whether ground is already settled — so the reads run in a fork and only a brief comes back
+description: Use when a tracker question needs exploring rather than answering — where an epic stands, what is still open or blocked, which topics duplicate, whether ground is settled — so the reads run forked and only a capped brief comes back
 context: fork
 model: sonnet
 disallowed-tools: Edit, Write, NotebookEdit
@@ -8,37 +8,44 @@ disallowed-tools: Edit, Write, NotebookEdit
 
 # Tracker Mining — budget 900 words
 
-Exploratory tracker reads are cheap to run and expensive to carry: mining a live tracker inside a coordinator's session cost 321K tokens (measured 2026-09-02) to answer questions worth a dozen lines. This skill runs them in a fork and returns one **mining brief** — the only thing that crosses back. Nothing is written.
+Mining a live tracker in a coordinator's session cost 321K tokens (2026-09-02). This skill runs those reads forked and returns one **mining brief**, the only thing that crosses back.
 
-**Input:** `$ARGUMENTS` names one job and its scope. Five jobs, no sixth; an argument matching none is reported unrecognised in the header, and no reads run.
+**Input:** `$ARGUMENTS` names one job and its scope. Five jobs, no sixth; an unmatched argument is reported unrecognised in the header; no reads run.
 
-## The five jobs
+## Jobs
 
-**`triage <plan-id>`** — what each lane is on and what blocks it. Reads `bd plan show <plan-id>`, `bd question list` for the project, then `bd authority <cursor-id> --json` for each lane's next bead. Brief: one line per lane (name, cursor, holder, next bead, blocker), then one line per open question that blocks a cursor.
+**`triage <plan-id>`** — what each lane is on and what blocks it. `bd plan show <plan-id>`, bare `bd question list`, `bd authority <cursor-id> --json` per lane. Brief: a line per lane (name, cursor, holder, next, blocker), then the blocking questions.
 
-**`audit <project|epic-id>`** — what a scope has decided and what it still owes. Reads `bd rulings <epic-id>` (or `bd rulings --scope project` for a project scope), `bd question list <epic-id>`, and `bd authority <epic-id> --json` for the findings. `bd source <statement-id>` runs only where a statement's wording is the question. Brief: rulings, then open questions, then findings, newest first in each group.
+**`audit <project|epic-id>`** — four checks, never a listing.
 
-**`state <epic-id|words>`** — where one thread of work stands. With a bead id, `bd authority <epic-id>`; with words, `bd authority "<words>" --concern <name>` — bd refuses a words query without a concern, so ask the caller for it rather than guess. `bd settled "<words>"` follows, catching statements the brief's cells truncated. Brief: the BRIEF line, then the statements, then the lane line when the scope sits in one.
+Scope first; neither verb scopes as its name suggests. Project rulings are bare `bd rulings` — never `bd rulings --scope project`, which lists only issue-id-null rulings, none here. Epic rulings are `bd rulings <epic-id>`, inheritance resolved. Questions never inherit: both scopes run bare `bd question list` and select rows by the `[issue-id]` cell each carries — the epic's id plus every `<epic-id>.` child, which `bd question list <epic-id>` misses. Then `bd topics --all` once.
 
-**`backfill <project>`** — which statements should carry which topic. Reads `bd topics --all` first — that printed catalogue is the whole vocabulary — then `bd authority <epic-id> --json` per open epic to find statements carrying no slug. Brief: one line per untopiced statement with the catalogue slug proposed for it and why. Minting a slug is not a proposal this job may make (R-40): a statement no catalogue slug fits is reported unfitted, for the coordinator.
+- **Contradicting rulings** — two active rulings on one scope that disagree; bd never refuses the second. Pair by the slug each settled (`bd topics --all`), compare full texts (`bd rulings --json`), since headlines truncate.
+- **Stale citations** — an answered question still called open, a superseded ruling still quoted as law. `bd settled "<cited-id>"` finds the statements repeating it; `bd question list --status answered`, then `--status superseded`, gives the truth.
+- **Unpromoted candidates** — an owner decision that never became a ruling: findings from `bd authority <scope> --json`, its owner sentence from `bd source <id>`, then the scope's rulings to confirm none carries it.
+- **Duplicate and label-shaped topics** — two slugs for one subject (`execution-lane` beside `execution-lanes`), or a slug naming a process step, not a subject in dispute. `bd topics --all` is the whole input.
 
-**`search "<words>" --concern <name>`** — whether this ground is already settled. Reads `bd authority "<words>" --concern <name>` and `bd settled "<words>"`; `bd source <id>` runs on at most three hits. Brief: one line per hit, most authoritative first (ruling, then question, then finding).
+Brief: a line per hit, grouped by check; a check with no hit says so, so silence never reads as clean.
 
-## What may be read, and what may not
+**`state <epic-id|words>`** — where one thread stands. `bd authority <epic-id>`, or `bd authority "<words>" --concern <name>` — bd refuses a words query without a concern, so ask rather than guess — then `bd settled "<words>"` for truncated statements. Brief: the BRIEF line, the statements, and the lane line if the scope has one.
 
-The read list, entire: `bd authority` — with `--json` wherever the job parses, counts or filters the lines rather than copying them — `bd plan show`, `bd rulings`, `bd question list`, `bd topics --all`, `bd settled`, `bd source`.
+**`backfill <project>`** — which statements should carry which topic. `bd topics --all` first: that catalogue is the whole vocabulary. Then `bd authority <epic-id> --json` per open epic for statements with no slug. Brief: a line per untopiced statement with the slug proposed and why. Minting is not a proposal this job may make (R-40); a statement no slug fits is reported unfitted. Its proposed actions are `bd topics assign <statement-ids> --topic <slug>`, one line per assignment: that verb does not exist yet — it belongs to beads-537 — so the job never runs it, nor substitutes another.
 
-Three reads are banned, and each is banned by name:
+**`search "<words>" --concern <name>`** — whether this ground is settled. That `bd authority` query, `bd settled "<words>"`, `bd source <id>` on at most three hits. Brief: a line per hit, ruling before question before finding.
 
-- **A `--full` body.** No `bd show --full`, no `bd workfile`, no body read. A body is creation-day text; every brief here answers from typed state.
-- **A comment thread.** No `bd comment list`, at any tag, at any `--last`. Comments are narrative; nothing binding lives in one.
+## What may be read
+
+The read list, entire: `bd authority` (with `--json` wherever the job parses or filters rather than copies), `bd plan show`, `bd rulings`, `bd question list`, `bd topics --all`, `bd settled`, `bd source`.
+
+Three reads are banned:
+
+- **A `--full` body.** No `bd show --full`, no `bd workfile`, no body read.
+- **A comment thread.** No `bd comment list`, at any tag or `--last`.
 - **A `.jsonl` transcript.** Never opened, never grepped, not even the path `bd source` prints — that grep line is copied into the brief, never run here.
 
-A question the read list cannot answer is reported unanswered, naming the read that would answer it. Widening the list is what this skill exists to prevent.
+A question the read list cannot answer is reported unanswered, naming the read that would.
 
-## The brief, and no other output
-
-One shape, always, whatever the job:
+## The brief, and nothing else
 
 ```
 MINING <job> <scope> <YYYY-MM-DD>
@@ -48,14 +55,10 @@ Proposed actions:
 bd <verb> ...
 ```
 
-The header names job, scope and date. Brief lines mirror `bd authority`'s line format — id, date, author, headline — one terminal line each, truncated with `…`, never wrapped. Proposed actions are bd commands, one per line, for the caller to run — never run here.
+Brief lines mirror `bd authority`'s line format — id, date, author, headline — one terminal line each, truncated with `…`. Proposed actions are bd commands, one per line, for the caller — never run here.
 
-**The cap is 40 lines: one header, at most 25 brief lines, at most 12 proposed actions.** Cut at the cap and append one `N more` line naming what was dropped (`12 more findings`). The cap is never widened, not even for a caller asking for everything: they get the capped brief plus the command that shows the rest. No prose, no summary paragraph, no preamble.
+**The cap is 40 lines: one header, at most 25 brief lines, at most 12 proposed actions.** Cut at the cap; append one `N more` line naming what was dropped (`12 more findings`). The cap is never widened, not even for a caller wanting everything: they get the capped brief plus the command showing the rest. No prose, no preamble.
 
 ## This skill writes nothing
 
-Export `BD_ACTOR=miner` before the first bd command and keep it for the whole run. Then write nothing: no `bd question add`, no `bd finding add`, no `bd comment add`, no `bd ruling add`, no `bd update`, no `bd topics assign`, no file edit. There is no "the coordinator asked me to" exception — a caller wanting a write gets it as a proposed action.
-
-Why both: Bash cannot be restricted per command, so `disallowed-tools` stops the file tools but not a bd write. The export and this text are the whole defence, and neither works alone.
-
-**`backfill`'s output is proposals only.** It emits `bd topics assign <statement-ids> --topic <slug>`, one line per proposed assignment. That verb does not exist yet — it belongs to beads-537 — so the job never runs it, and never substitutes another verb for it.
+Export `BD_ACTOR=miner` before the first bd command, for the whole run. Then write nothing: no `bd question add`, `bd finding add`, `bd comment add`, `bd ruling add`, `bd update` or `bd topics assign`; no file edit. No "the coordinator asked me to" exception: a caller wanting a write gets it as a proposed action. Why both: Bash cannot be restricted per command, so `disallowed-tools` stops the file tools but not a bd write; the export and this text are the whole defence, neither working alone.
