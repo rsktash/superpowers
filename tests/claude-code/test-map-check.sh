@@ -254,13 +254,18 @@ assert_grep "new row prints NEW created since planning with its span" \
 
 echo ""
 echo "Phase F: unindexed languages — header lines precede every row line"
-# The mixed clone tracks Kotlin files and the Kotlin backend now generates
-# them, so the map's index queries need the Kotlin toolchain.
+# The mixed clone tracks Kotlin and Swift files and both backends now
+# generate them, so the map's index queries need both toolchains.
 kotlin_toolchain="${STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN:-}"
+swift_toolchain="${STRUCTURAL_INDEX_SWIFT_TOOLCHAIN:-}"
 if [ -z "$kotlin_toolchain" ] \
     || [ ! -d "$kotlin_toolchain/node_modules/tree-sitter" ] \
     || [ ! -d "$kotlin_toolchain/node_modules/tree-sitter-kotlin" ]; then
     echo "[SKIP] STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN unset or incomplete; mixed-fixture map assertions skipped"
+elif [ -z "$swift_toolchain" ] \
+    || [ ! -d "$swift_toolchain/node_modules/tree-sitter" ] \
+    || [ ! -d "$swift_toolchain/node_modules/tree-sitter-swift" ]; then
+    echo "[SKIP] STRUCTURAL_INDEX_SWIFT_TOOLCHAIN unset or incomplete; mixed-fixture map assertions skipped"
 else
     MIXED_TARGET="$WORK/mixed-repo"
     mkdir -p "$MIXED_TARGET"
@@ -293,41 +298,41 @@ EOF
     MAP_STATUS=$?
     assert_status "mixed-epic run exits 0" 0 "$MAP_STATUS"
     assert_eq "mixed run prints one header per uncovered language in roster order, then the unchanged row lines" \
-        "unindexed swift 3 files (callers and tests by text search; no definition rows)
-unindexed python 4 files (callers and tests by text search; no definition rows)
+        "unindexed python 4 files (callers and tests by text search; no definition rows)
 fresh renderBadge $rb_file:$rb_span
 NEW kotlinOnlyMarker src/kotlin/BadgeScreen.kt:3-3 (created since planning)
 seam 1→2 row lines follow the headers" \
         "$(cat "$WORK/stdout")"
-    assert_eq "exactly two header lines print on the mixed clone" "2" "$(grep -c '^unindexed ' "$WORK/stdout")"
+    assert_eq "exactly one header line prints on the mixed clone" "1" "$(grep -c '^unindexed ' "$WORK/stdout")"
     assert_not_grep "other never prints a header line" '^unindexed other' "$(cat "$WORK/stdout")"
-    assert_not_grep "an indexed language never prints a header line" '^unindexed kotlin' "$(cat "$WORK/stdout")"
+    assert_not_grep "an indexed language never prints a header line: kotlin" '^unindexed kotlin' "$(cat "$WORK/stdout")"
+    assert_not_grep "an indexed language never prints a header line: swift" '^unindexed swift' "$(cat "$WORK/stdout")"
 fi
 
 echo ""
-echo "Phase F2: a swift-only repository — header line then seam line, exit 0"
-SWIFT_TARGET="$WORK/swift-repo"
-mkdir -p "$SWIFT_TARGET/src" "$SWIFT_TARGET/docs/beads"
-printf 'func badgeView(_ label: String) -> String {\n    renderBadge(label)\n}\n' >"$SWIFT_TARGET/src/BadgeView.swift"
-printf 'func badgeViewTests() -> String {\n    renderBadge("test")\n}\n' >"$SWIFT_TARGET/src/BadgeViewTests.swift"
-cat >"$SWIFT_TARGET/docs/beads/swift-epic.map.md" <<'EOF'
-# swift-epic exploration map
+echo "Phase F2: a python-only repository — header line then seam line, exit 0"
+PYTHON_TARGET="$WORK/python-repo"
+mkdir -p "$PYTHON_TARGET/src" "$PYTHON_TARGET/docs/beads"
+printf 'def badge_view(label):\n    return renderBadge(label)\n' >"$PYTHON_TARGET/src/badge_view.py"
+printf 'def badge_scenario():\n    return renderBadge("scenario")\n' >"$PYTHON_TARGET/src/badge_scenario.py"
+cat >"$PYTHON_TARGET/docs/beads/python-epic.map.md" <<'EOF'
+# python-epic exploration map
 
 | Task | Symbol | File | Hash | Note | Source |
 |------|--------|------|------|------|--------|
 | 1→2 | seam: only row | — | — | no indexed language is not an error | planner |
 EOF
-git -C "$SWIFT_TARGET" init -q
-git -C "$SWIFT_TARGET" config user.name "Map Check Test"
-git -C "$SWIFT_TARGET" config user.email "map-check@example.test"
-git -C "$SWIFT_TARGET" add .
-git -C "$SWIFT_TARGET" commit -qm "swift-only fixture"
+git -C "$PYTHON_TARGET" init -q
+git -C "$PYTHON_TARGET" config user.name "Map Check Test"
+git -C "$PYTHON_TARGET" config user.email "map-check@example.test"
+git -C "$PYTHON_TARGET" add .
+git -C "$PYTHON_TARGET" commit -qm "python-only fixture"
 
-PATH="$SANDBOX_BIN" "$MAP_CHECK" swift-epic 1 --repo "$SWIFT_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+PATH="$SANDBOX_BIN" "$MAP_CHECK" python-epic 1 --repo "$PYTHON_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
 MAP_STATUS=$?
-assert_status "swift-only run exits 0" 0 "$MAP_STATUS"
-assert_eq "swift-only run prints the swift header then the seam line" \
-    "unindexed swift 2 files (callers and tests by text search; no definition rows)
+assert_status "python-only run exits 0" 0 "$MAP_STATUS"
+assert_eq "python-only run prints the python header then the seam line" \
+    "unindexed python 2 files (callers and tests by text search; no definition rows)
 seam 1→2 no indexed language is not an error" \
     "$(cat "$WORK/stdout")"
 

@@ -72,7 +72,7 @@ git -C "$MIXED_TARGET" config user.email "structural-index@example.test"
 git -C "$MIXED_TARGET" add .
 git -C "$MIXED_TARGET" commit -qm "mixed fixture"
 
-mixed_roster=$'typescript\t1\tcompiler\ngo\t1\tcompiler\nkotlin\t3\tcompiler\nswift\t3\tnone\npython\t4\tnone\nother\t3\tnone'
+mixed_roster=$'typescript\t1\tcompiler\ngo\t1\tcompiler\nkotlin\t3\tcompiler\nswift\t3\tcompiler\npython\t4\tnone\nother\t3\tnone'
 "$INDEX" languages --repo "$MIXED_TARGET" --regen >"$WORK/stdout" 2>"$WORK/stderr"
 status=$?
 assert_eq "mixed languages regeneration exits 0" "0" "$status"
@@ -85,7 +85,7 @@ assert_eq "mixed languages cache hit is byte-identical" "$mixed_roster" "$(cat "
 assert_eq "mixed languages cache hit is silent" "" "$(cat "$WORK/stderr")"
 
 metadata="$MIXED_TARGET/.bd/index/metadata.json"
-expected_metadata_roster='[{"id":"typescript","count":1,"backend":"compiler"},{"id":"go","count":1,"backend":"compiler"},{"id":"kotlin","count":3,"backend":"compiler"},{"id":"swift","count":3,"backend":"none"},{"id":"python","count":4,"backend":"none"},{"id":"other","count":3,"backend":"none"}]'
+expected_metadata_roster='[{"id":"typescript","count":1,"backend":"compiler"},{"id":"go","count":1,"backend":"compiler"},{"id":"kotlin","count":3,"backend":"compiler"},{"id":"swift","count":3,"backend":"compiler"},{"id":"python","count":4,"backend":"none"},{"id":"other","count":3,"backend":"none"}]'
 if [ -f "$metadata" ]; then
     recorded_roster="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).roster))' "$metadata")"
 else
@@ -114,12 +114,18 @@ fi
 echo ""
 echo "Uncovered languages: compiler precedence and text answers"
 # Every query below regenerates each compiler language the mixed clone
-# tracks, kotlin included; without the Kotlin toolchain the section skips.
+# tracks, kotlin and swift included; without either toolchain the section
+# skips.
 kotlin_toolchain="${STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN:-}"
+swift_toolchain="${STRUCTURAL_INDEX_SWIFT_TOOLCHAIN:-}"
 if [ -z "$kotlin_toolchain" ] \
     || [ ! -d "$kotlin_toolchain/node_modules/tree-sitter" ] \
     || [ ! -d "$kotlin_toolchain/node_modules/tree-sitter-kotlin" ]; then
     echo "[SKIP] STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN unset or incomplete; mixed-fixture query assertions skipped"
+elif [ -z "$swift_toolchain" ] \
+    || [ ! -d "$swift_toolchain/node_modules/tree-sitter" ] \
+    || [ ! -d "$swift_toolchain/node_modules/tree-sitter-swift" ]; then
+    echo "[SKIP] STRUCTURAL_INDEX_SWIFT_TOOLCHAIN unset or incomplete; mixed-fixture query assertions skipped"
 else
     "$INDEX" callers renderBadge --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     status=$?
@@ -156,23 +162,43 @@ else
     assert_eq "Kotlin compiler tests exit 0" "0" "$status"
     assert_eq "Kotlin compiler tests use *Test.kt and src/*Test/ paths" $'src/BadgeTest/BadgeScenario.kt:3\nsrc/kotlin/BadgeScreenTest.kt:3' "$(cat "$WORK/stdout")"
 
-    # The text-answer path keeps a subject with no backend: swift.
+    # Once the Swift backend defines swiftOnlyMarker, the answer comes from
+    # the compiler data alone: the declaration site and non-Swift files are
+    # absent and no text-answer stderr line is written.
     "$INDEX" callers swiftOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     status=$?
-    assert_eq "Swift text callers exit 0" "0" "$status"
-    assert_eq "Swift text callers use sorted word-boundary hits" $'src/swift/BadgeView.swift:5\nsrc/swift/BadgeView.swift:10\nsrc/swift/BadgeViewTests.swift:6\nsrc/swift/Tests/BadgeScenario.swift:6' "$(cat "$WORK/stdout")"
-    assert_eq "Swift text callers explain the fallback" "structural-index: callers swiftOnlyMarker answered by text search over 10 files in swift, python, other" "$(cat "$WORK/stderr")"
+    assert_eq "Swift compiler callers exit 0" "0" "$status"
+    assert_eq "Swift compiler callers exclude the declaration site" $'src/swift/BadgeView.swift:10\nsrc/swift/BadgeViewTests.swift:6\nsrc/swift/Tests/BadgeScenario.swift:6' "$(cat "$WORK/stdout")"
+    assert_eq "Swift compiler callers are silent" "" "$(cat "$WORK/stderr")"
+    if ! grep -Fq 'package.json:' "$WORK/stdout"; then
+        pass "Swift compiler callers exclude non-Swift files"
+    else
+        fail "Swift compiler callers exclude non-Swift files (got: $(cat "$WORK/stdout"))"
+    fi
 
     "$INDEX" symbol swiftOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     status=$?
-    assert_eq "uncovered symbol exits 1" "1" "$status"
-    assert_eq "uncovered symbol has empty stdout" "" "$(cat "$WORK/stdout")"
-    assert_eq "uncovered symbol explains the missing backend" $'symbol not found: swiftOnlyMarker\nstructural-index: no definition backend for swift, python, other; not searched' "$(cat "$WORK/stderr")"
+    assert_eq "Swift symbol query exits 0" "0" "$status"
+    assert_eq "Swift symbol returns the definition span" $'src/swift/BadgeView.swift\t5-7\t091a1c96c991' "$(cat "$WORK/stdout")"
+    assert_eq "Swift symbol query is silent" "" "$(cat "$WORK/stderr")"
 
     "$INDEX" tests swiftOnlyMarker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     status=$?
-    assert_eq "Swift text tests exit 0" "0" "$status"
-    assert_eq "Swift text tests use *Tests.swift and Tests/ paths" $'src/swift/BadgeViewTests.swift:6\nsrc/swift/Tests/BadgeScenario.swift:6' "$(cat "$WORK/stdout")"
+    assert_eq "Swift compiler tests exit 0" "0" "$status"
+    assert_eq "Swift compiler tests use *Tests.swift and Tests/ paths" $'src/swift/BadgeViewTests.swift:6\nsrc/swift/Tests/BadgeScenario.swift:6' "$(cat "$WORK/stdout")"
+
+    # The text-answer path keeps a subject with no backend: python.
+    "$INDEX" callers python_only_marker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+    status=$?
+    assert_eq "Python text callers exit 0" "0" "$status"
+    assert_eq "Python text callers use sorted word-boundary hits" $'src/python/badge_test.py:6\nsrc/python/badge_view.py:5\nsrc/python/badge_view.py:10\nsrc/python/test_badge.py:6\nsrc/python/tests/badge_scenario.py:6' "$(cat "$WORK/stdout")"
+    assert_eq "Python text callers explain the fallback" "structural-index: callers python_only_marker answered by text search over 7 files in python, other" "$(cat "$WORK/stderr")"
+
+    "$INDEX" symbol python_only_marker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+    status=$?
+    assert_eq "uncovered symbol exits 1" "1" "$status"
+    assert_eq "uncovered symbol has empty stdout" "" "$(cat "$WORK/stdout")"
+    assert_eq "uncovered symbol explains the missing backend" $'symbol not found: python_only_marker\nstructural-index: no definition backend for python, other; not searched' "$(cat "$WORK/stderr")"
 
     "$INDEX" tests python_only_marker --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     status=$?
@@ -243,7 +269,7 @@ fi
 
 repo_backends="$("$INDEX" languages --repo "$REPO_ROOT" 2>"$WORK/stderr" | cut -f1,3)"
 status=$?
-expected_repo_backends=$'typescript\tcompiler\ngo\tcompiler\nkotlin\tcompiler\nswift\tnone\npython\tnone\nother\tnone'
+expected_repo_backends=$'typescript\tcompiler\ngo\tcompiler\nkotlin\tcompiler\nswift\tcompiler\npython\tnone\nother\tnone'
 if [ "$status" -eq 0 ] && [ "$repo_backends" = "$expected_repo_backends" ]; then
     pass "repository roster contains every language and backend"
 else

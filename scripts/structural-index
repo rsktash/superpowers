@@ -890,6 +890,7 @@ const LANGUAGE_GENERATORS = {
   typescript: (repo) => generateTypeScript(repo),
   go: (repo, files) => generateGo(repo, files),
   kotlin: (repo, files) => generateKotlin(repo, files),
+  swift: (repo, files) => generateSwift(repo, files),
 };
 
 // The tree-sitter Node binding ships a 32 KiB input buffer; the largest
@@ -1041,6 +1042,193 @@ function generateKotlin(repo, kotlinFiles) {
 
   return {
     data: { schema: SCHEMA, language: "kotlin", definitions: normalizeDefinitions(rows) },
+    seconds: (performance.now() - started) / 1000,
+  };
+}
+
+// The tree-sitter Node binding ships a 32 KiB input buffer; every parse
+// passes a 1 MiB buffer (measured in the superpowers-5f7.7 trial).
+const SWIFT_PARSE_OPTIONS = { bufferSize: 1024 * 1024 };
+
+function loadSwiftToolchain(repo) {
+  const modulePaths = (directory) => [
+    path.join(directory, "node_modules", "tree-sitter"),
+    path.join(directory, "node_modules", "tree-sitter-swift"),
+  ];
+  const holds = (entries) => entries.every((entry) => fs.existsSync(entry));
+
+  const packageDirectories = new Set([repo]);
+  for (const packageFile of gitLines(repo, ["package.json", "**/package.json"])) {
+    packageDirectories.add(path.join(repo, path.dirname(packageFile)));
+  }
+  const require = createRequire(import.meta.url);
+  for (const directory of packageDirectories) {
+    const entries = modulePaths(directory);
+    if (holds(entries)) return entries.map((entry) => require(entry));
+  }
+
+  const fallbackDirectory = process.env.STRUCTURAL_INDEX_SWIFT_TOOLCHAIN;
+  if (fallbackDirectory) {
+    const entries = modulePaths(path.resolve(fallbackDirectory));
+    if (!holds(entries)) {
+      throw new Error(
+        `Swift toolchain not found via STRUCTURAL_INDEX_SWIFT_TOOLCHAIN: ${fallbackDirectory} `
+        + "(expected node_modules/tree-sitter and node_modules/tree-sitter-swift inside it)",
+      );
+    }
+    return entries.map((entry) => require(entry));
+  }
+  throw new Error(
+    `Swift toolchain not found under target repository: ${repo}; `
+    + "set STRUCTURAL_INDEX_SWIFT_TOOLCHAIN to a directory holding "
+    + "node_modules/tree-sitter and node_modules/tree-sitter-swift",
+  );
+}
+
+function swiftNearest(node, types) {
+  for (let current = node; current; current = current.parent) {
+    if (types.has(current.type)) return current;
+  }
+  return null;
+}
+
+function swiftDirectChild(node, type) {
+  return node.namedChildren.find((child) => child.type === type) ?? null;
+}
+
+function swiftHeadKeyword(node) {
+  const firstLine = node.text.split("\n", 1)[0];
+  const match = firstLine.match(/\b(struct|class|enum|protocol|actor|extension)\b/);
+  return match ? match[1] : null;
+}
+
+function swiftContainerName(node) {
+  const nameNode = swiftDirectChild(node, "type_identifier")
+    ?? swiftDirectChild(node, "user_type")?.namedChildren.find((child) => child.type === "type_identifier")
+    ?? null;
+  return nameNode?.text ?? null;
+}
+
+function swiftDeclaration(node) {
+  if (node.type === "function_declaration") {
+    const nameNode = swiftDirectChild(node, "simple_identifier");
+    if (!nameNode) return null;
+    const container = swiftNearest(node.parent, new Set(["class_declaration"]));
+    if (!container) return { name: nameNode.text, nameNode, callable: true };
+    const containerName = swiftContainerName(container);
+    // A function inside a container that declares no nameable scope (an
+    // extension of a non-identifier type, for example) earns no row.
+    if (!containerName) return { name: null, nameNode, callable: true };
+    return { name: `${containerName}.${nameNode.text}`, nameNode, callable: true };
+  }
+  if (node.type === "class_declaration") {
+    const nameNode = swiftDirectChild(node, "type_identifier");
+    if (!nameNode) return null;
+    // struct and class carry type rows; enum, protocol, actor, and extension
+    // names resolve only as references (measured in the superpowers-5f7.7
+    // trial).
+    const keyword = swiftHeadKeyword(node);
+    if (keyword !== "struct" && keyword !== "class") return null;
+    return { name: nameNode.text, nameNode, callable: false };
+  }
+  if (node.type === "property_declaration") {
+    // A property inside a function or closure body is local: it earns no
+    // row (the trial measured only file- and type-scope properties).
+    if (swiftNearest(node.parent, new Set(["function_declaration", "closure_expression"]))) return null;
+    const pattern = swiftDirectChild(node, "pattern");
+    const nameNode = pattern?.namedChildren.find((child) => child.type === "simple_identifier") ?? null;
+    return nameNode ? { name: nameNode.text, nameNode, callable: false } : null;
+  }
+  return null;
+}
+
+function swiftIsCallee(node) {
+  const parent = node.parent;
+  if (!parent) return false;
+  if (parent.type === "call_expression" && parent.namedChildren[0] === node) return true;
+  // A prefix operator between the callee and its call (`!done(...)`) wraps
+  // the callee; the trial looked through that wrapper.
+  if (parent.type === "prefix_expression" && parent.namedChildren[parent.namedChildren.length - 1] === node) {
+    const grandparent = parent.parent;
+    if (grandparent?.type === "call_expression" && grandparent.namedChildren[0] === parent) return true;
+  }
+  if (parent.type === "navigation_suffix" && parent.namedChildren[parent.namedChildren.length - 1] === node) {
+    const navigation = parent.parent;
+    if (navigation?.type === "navigation_expression") {
+      const grandparent = navigation.parent;
+      if (grandparent?.type === "call_expression" && grandparent.namedChildren[0] === navigation) return true;
+    }
+  }
+  return false;
+}
+
+function generateSwift(repo, swiftFiles) {
+  const started = performance.now();
+  const [Parser, Swift] = loadSwiftToolchain(repo);
+  const parser = new Parser();
+  parser.setLanguage(Swift);
+
+  const rows = [];
+  const rowsByBareName = new Map();
+  const parsedFiles = [];
+  for (const file of swiftFiles) {
+    const source = fs.readFileSync(path.join(repo, file), "utf8");
+    const tree = parser.parse(source, null, SWIFT_PARSE_OPTIONS);
+    const nameOffsets = new Set();
+
+    for (const node of tree.rootNode.descendantsOfType([
+      "function_declaration",
+      "class_declaration",
+      "property_declaration",
+    ])) {
+      const declaration = swiftDeclaration(node);
+      if (!declaration) continue;
+      nameOffsets.add(declaration.nameNode.startIndex);
+      if (!declaration.name) continue;
+      const end = node.endPosition.column === 0 && node.endIndex > node.startIndex
+        ? node.endPosition.row
+        : node.endPosition.row + 1;
+      const row = {
+        name: declaration.name,
+        file,
+        start: node.startPosition.row + 1,
+        end,
+        hash: crypto.createHash("sha256")
+          .update(source.slice(node.startIndex, node.endIndex))
+          .digest("hex")
+          .slice(0, 12),
+        callable: declaration.callable,
+        callers: new Set(),
+        tests: new Set(),
+      };
+      rows.push(row);
+      const bareName = declaration.name.split(".").pop();
+      const list = rowsByBareName.get(bareName) ?? [];
+      list.push(row);
+      rowsByBareName.set(bareName, list);
+    }
+
+    parsedFiles.push({ file, tree, nameOffsets });
+  }
+
+  // References resolve against every definition, so the walk runs only
+  // after all files contributed their rows.
+  for (const { file, tree, nameOffsets } of parsedFiles) {
+    for (const node of tree.rootNode.descendantsOfType(["simple_identifier", "type_identifier"])) {
+      const candidates = rowsByBareName.get(node.text);
+      if (!candidates || nameOffsets.has(node.startIndex)) continue;
+      if (swiftNearest(node.parent, new Set(["import_declaration"]))) continue;
+      const site = `${file}:${node.startPosition.row + 1}`;
+      for (const row of candidates) {
+        if (row.callable && !swiftIsCallee(node)) continue;
+        row.callers.add(site);
+        if (isTextTestFile("swift", file)) row.tests.add(site);
+      }
+    }
+  }
+
+  return {
+    data: { schema: SCHEMA, language: "swift", definitions: normalizeDefinitions(rows) },
     seconds: (performance.now() - started) / 1000,
   };
 }
