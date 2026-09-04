@@ -254,10 +254,13 @@ assert_grep "new row prints NEW created since planning with its span" \
 
 echo ""
 echo "Phase F: unindexed languages — header lines precede every row line"
-# The mixed clone tracks Kotlin and Swift files and both backends now
-# generate them, so the map's index queries need both toolchains.
+# The mixed clone tracks Kotlin, Swift, and Python files and all three
+# backends now generate them, so the map's index queries need every
+# toolchain. Python is the last compiler language; only other stays
+# uncovered, and other never prints a header line.
 kotlin_toolchain="${STRUCTURAL_INDEX_KOTLIN_TOOLCHAIN:-}"
 swift_toolchain="${STRUCTURAL_INDEX_SWIFT_TOOLCHAIN:-}"
+python_toolchain="${STRUCTURAL_INDEX_PYTHON_TOOLCHAIN:-}"
 if [ -z "$kotlin_toolchain" ] \
     || [ ! -d "$kotlin_toolchain/node_modules/tree-sitter" ] \
     || [ ! -d "$kotlin_toolchain/node_modules/tree-sitter-kotlin" ]; then
@@ -266,6 +269,9 @@ elif [ -z "$swift_toolchain" ] \
     || [ ! -d "$swift_toolchain/node_modules/tree-sitter" ] \
     || [ ! -d "$swift_toolchain/node_modules/tree-sitter-swift" ]; then
     echo "[SKIP] STRUCTURAL_INDEX_SWIFT_TOOLCHAIN unset or incomplete; mixed-fixture map assertions skipped"
+elif [ -z "$python_toolchain" ] \
+    || [ ! -f "$python_toolchain/bin/python3" ]; then
+    echo "[SKIP] STRUCTURAL_INDEX_PYTHON_TOOLCHAIN unset or incomplete; mixed-fixture map assertions skipped"
 else
     MIXED_TARGET="$WORK/mixed-repo"
     mkdir -p "$MIXED_TARGET"
@@ -297,43 +303,42 @@ EOF
     PATH="$SANDBOX_BIN" "$MAP_CHECK" mixed-epic 1 --repo "$MIXED_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
     MAP_STATUS=$?
     assert_status "mixed-epic run exits 0" 0 "$MAP_STATUS"
-    assert_eq "mixed run prints one header per uncovered language in roster order, then the unchanged row lines" \
-        "unindexed python 4 files (callers and tests by text search; no definition rows)
-fresh renderBadge $rb_file:$rb_span
+    assert_eq "mixed run prints the unchanged row lines with no unindexed header" \
+        "fresh renderBadge $rb_file:$rb_span
 NEW kotlinOnlyMarker src/kotlin/BadgeScreen.kt:3-3 (created since planning)
 seam 1→2 row lines follow the headers" \
         "$(cat "$WORK/stdout")"
-    assert_eq "exactly one header line prints on the mixed clone" "1" "$(grep -c '^unindexed ' "$WORK/stdout")"
+    assert_eq "no header line prints on the mixed clone" "0" "$(grep -c '^unindexed ' "$WORK/stdout")"
     assert_not_grep "other never prints a header line" '^unindexed other' "$(cat "$WORK/stdout")"
     assert_not_grep "an indexed language never prints a header line: kotlin" '^unindexed kotlin' "$(cat "$WORK/stdout")"
     assert_not_grep "an indexed language never prints a header line: swift" '^unindexed swift' "$(cat "$WORK/stdout")"
+    assert_not_grep "an indexed language never prints a header line: python" '^unindexed python' "$(cat "$WORK/stdout")"
 fi
 
 echo ""
-echo "Phase F2: a python-only repository — header line then seam line, exit 0"
-PYTHON_TARGET="$WORK/python-repo"
-mkdir -p "$PYTHON_TARGET/src" "$PYTHON_TARGET/docs/beads"
-printf 'def badge_view(label):\n    return renderBadge(label)\n' >"$PYTHON_TARGET/src/badge_view.py"
-printf 'def badge_scenario():\n    return renderBadge("scenario")\n' >"$PYTHON_TARGET/src/badge_scenario.py"
-cat >"$PYTHON_TARGET/docs/beads/python-epic.map.md" <<'EOF'
-# python-epic exploration map
+echo "Phase F2: an other-only repository — no header line, exit 0"
+OTHER_TARGET="$WORK/other-repo"
+mkdir -p "$OTHER_TARGET/src" "$OTHER_TARGET/docs/beads"
+printf 'renderBadge: mentioned in prose\n' >"$OTHER_TARGET/src/notes.md"
+printf '{"marker": "otherOnlyMarker"}\n' >"$OTHER_TARGET/src/data.json"
+cat >"$OTHER_TARGET/docs/beads/other-epic.map.md" <<'EOF'
+# other-epic exploration map
 
 | Task | Symbol | File | Hash | Note | Source |
 |------|--------|------|------|------|--------|
 | 1→2 | seam: only row | — | — | no indexed language is not an error | planner |
 EOF
-git -C "$PYTHON_TARGET" init -q
-git -C "$PYTHON_TARGET" config user.name "Map Check Test"
-git -C "$PYTHON_TARGET" config user.email "map-check@example.test"
-git -C "$PYTHON_TARGET" add .
-git -C "$PYTHON_TARGET" commit -qm "python-only fixture"
+git -C "$OTHER_TARGET" init -q
+git -C "$OTHER_TARGET" config user.name "Map Check Test"
+git -C "$OTHER_TARGET" config user.email "map-check@example.test"
+git -C "$OTHER_TARGET" add .
+git -C "$OTHER_TARGET" commit -qm "other-only fixture"
 
-PATH="$SANDBOX_BIN" "$MAP_CHECK" python-epic 1 --repo "$PYTHON_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
+PATH="$SANDBOX_BIN" "$MAP_CHECK" other-epic 1 --repo "$OTHER_TARGET" >"$WORK/stdout" 2>"$WORK/stderr"
 MAP_STATUS=$?
-assert_status "python-only run exits 0" 0 "$MAP_STATUS"
-assert_eq "python-only run prints the python header then the seam line" \
-    "unindexed python 2 files (callers and tests by text search; no definition rows)
-seam 1→2 no indexed language is not an error" \
+assert_status "other-only run exits 0" 0 "$MAP_STATUS"
+assert_eq "other-only run prints the seam line with no header line" \
+    "seam 1→2 no indexed language is not an error" \
     "$(cat "$WORK/stdout")"
 
 echo ""

@@ -891,6 +891,7 @@ const LANGUAGE_GENERATORS = {
   go: (repo, files) => generateGo(repo, files),
   kotlin: (repo, files) => generateKotlin(repo, files),
   swift: (repo, files) => generateSwift(repo, files),
+  python: (repo, files) => generatePython(repo, files),
 };
 
 // The tree-sitter Node binding ships a 32 KiB input buffer; the largest
@@ -1229,6 +1230,311 @@ function generateSwift(repo, swiftFiles) {
 
   return {
     data: { schema: SCHEMA, language: "swift", definitions: normalizeDefinitions(rows) },
+    seconds: (performance.now() - started) / 1000,
+  };
+}
+
+// The Python backend runs the standard-library ast + symtable parser
+// through the resolved interpreter (approved in R-35 and measured in the
+// superpowers-5f7.8 trial: 13/13 exact spans, 93.22%/100% callers); no
+// grammar or binding is vendored.
+const PYTHON_GENERATOR_SOURCE = String.raw`import ast
+import hashlib
+import json
+import symtable
+import sys
+
+
+def locals_of(table):
+    # Imported names (symtable marks them local) alias the imported symbol,
+    # so they do not shadow module-level symbols of the same name.
+    names = set()
+    for symbol in table.get_symbols():
+        if symbol.is_local() and not symbol.is_imported():
+            names.add(symbol.get_name())
+    return names
+
+
+def child_table(table, name):
+    symbol = table.lookup(name)
+    if symbol is not None and symbol.is_local() and symbol.get_namespace() is not None:
+        namespaces = symbol.get_namespaces()
+        return namespaces[0] if namespaces else None
+    return None
+
+
+class DefinitionCollector(ast.NodeVisitor):
+    def __init__(self, file, line_starts, source_bytes, rows):
+        self.file = file
+        self.line_starts = line_starts
+        self.source_bytes = source_bytes
+        self.rows = rows
+        self.class_stack = []
+        self.scope_stack = ["module"]
+
+    def _add(self, name, node, callable_):
+        start = self.line_starts[node.lineno - 1] + node.col_offset
+        end = self.line_starts[node.end_lineno - 1] + node.end_col_offset
+        self.rows.append({
+            "name": name,
+            "file": self.file,
+            "start": node.lineno,
+            "end": node.end_lineno,
+            "hash": hashlib.sha256(self.source_bytes[start:end]).hexdigest()[:12],
+            "callable": callable_,
+        })
+
+    def visit_ClassDef(self, node):
+        # A class nested in a class declares no nameable module scope: no row.
+        if not self.class_stack:
+            self._add(node.name, node, False)
+        self.class_stack.append(node.name)
+        self.scope_stack.append("class")
+        self.generic_visit(node)
+        self.scope_stack.pop()
+        self.class_stack.pop()
+
+    def _visit_func(self, node):
+        if self.scope_stack[-1] == "class":
+            self._add(self.class_stack[-1] + "." + node.name, node, True)
+        elif self.scope_stack[-1] == "module":
+            self._add(node.name, node, True)
+        # A function nested in a function is local: it earns no row.
+        self.scope_stack.append("function")
+        self.generic_visit(node)
+        self.scope_stack.pop()
+
+    visit_FunctionDef = _visit_func
+    visit_AsyncFunctionDef = _visit_func
+
+    def _visit_assign(self, node):
+        # Only module-level assignments name constants; class attributes and
+        # function locals earn no rows.
+        if not self.class_stack and self.scope_stack[-1] == "module":
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for target in targets:
+                if isinstance(target, ast.Name):
+                    self._add(target.id, node, False)
+        self.generic_visit(node)
+
+    visit_Assign = _visit_assign
+    visit_AnnAssign = _visit_assign
+
+
+class ReferenceCollector(ast.NodeVisitor):
+    def __init__(self, file, module_functions, methods, values, callers):
+        self.file = file
+        self.module_functions = module_functions
+        self.methods = methods
+        self.values = values
+        self.callers = callers
+        self.scope_stack = []
+        self.scope_kinds = []
+
+    def _shadowed(self, name):
+        # Function scopes shadow their nested references (the closure
+        # chain), and a class scope shadows only code written directly in
+        # its body: method bodies never see the class namespace as an
+        # enclosing scope. The module scope is scope_stack[0]; module-level
+        # locals are the module globals, so it never shadows.
+        last = len(self.scope_stack) - 1
+        for index in range(1, len(self.scope_stack)):
+            if self.scope_kinds[index] == "class" and index != last:
+                continue
+            if name in self.scope_stack[index][1]:
+                return True
+        return False
+
+    def _push_scope(self, name, kind):
+        if not self.scope_stack:
+            return False
+        table = child_table(self.scope_stack[-1][0], name)
+        if table is None:
+            return False
+        self.scope_stack.append((table, locals_of(table)))
+        self.scope_kinds.append(kind)
+        return True
+
+    def visit_ClassDef(self, node):
+        pushed = self._push_scope(node.name, "class")
+        self.generic_visit(node)
+        if pushed:
+            self.scope_stack.pop()
+            self.scope_kinds.pop()
+
+    def _visit_func(self, node):
+        pushed = self._push_scope(node.name, "function")
+        self.generic_visit(node)
+        if pushed:
+            self.scope_stack.pop()
+            self.scope_kinds.pop()
+
+    visit_FunctionDef = _visit_func
+    visit_AsyncFunctionDef = _visit_func
+
+    def visit_Call(self, node):
+        func = node.func
+        if isinstance(func, ast.Name):
+            if not self._shadowed(func.id):
+                for index in self.module_functions.get(func.id, ()):
+                    self.callers[index].add(f"{self.file}:{func.lineno}")
+        elif isinstance(func, ast.Attribute):
+            # Receiver types are invisible without a type checker: method
+            # matching stays lexical (accepted in the measured trial).
+            for index in self.methods.get(func.attr, ()):
+                self.callers[index].add(f"{self.file}:{func.lineno}")
+        self.generic_visit(node)
+
+    def visit_Name(self, node):
+        # Classes and module-level constants answer any semantic load:
+        # instantiation, decorator application, annotation, base class, use.
+        if isinstance(node.ctx, ast.Load) and not self._shadowed(node.id):
+            for index in self.values.get(node.id, ()):
+                self.callers[index].add(f"{self.file}:{node.lineno}")
+
+
+def run():
+    request = json.loads(sys.stdin.read())
+    rows = []
+    parsed = []
+    for rel in request["files"]:
+        try:
+            with open(request["repo"] + "/" + rel, "rb") as handle:
+                source_bytes = handle.read()
+            source = source_bytes.decode("utf-8")
+            tree = ast.parse(source, filename=rel)
+            table = symtable.symtable(source, rel, "exec")
+        except (OSError, UnicodeDecodeError, SyntaxError, ValueError):
+            continue
+        line_starts = [0]
+        for line in source.split("\n"):
+            line_starts.append(line_starts[-1] + len(line.encode("utf-8")) + 1)
+        collector = DefinitionCollector(rel, line_starts, source_bytes, rows)
+        collector.visit(tree)
+        parsed.append((rel, tree, table))
+
+    module_functions = {}
+    methods = {}
+    values = {}
+    for index, row in enumerate(rows):
+        if row["callable"]:
+            if "." in row["name"]:
+                methods.setdefault(row["name"].split(".")[-1], []).append(index)
+            else:
+                module_functions.setdefault(row["name"], []).append(index)
+        else:
+            values.setdefault(row["name"], []).append(index)
+
+    callers = [set() for _ in rows]
+    # References resolve against every definition, so the walk runs only
+    # after all files contributed their rows.
+    for rel, tree, table in parsed:
+        walker = ReferenceCollector(rel, module_functions, methods, values, callers)
+        walker.scope_stack.append((table, locals_of(table)))
+        walker.scope_kinds.append("module")
+        walker.visit(tree)
+
+    lines = []
+    for index, row in enumerate(rows):
+        lines.append(
+            "D\t%d\t%s\t%s\t%d\t%d\t%s\t%d"
+            % (index, row["name"], row["file"], row["start"], row["end"], row["hash"], 1 if row["callable"] else 0)
+        )
+    for index, sites in enumerate(callers):
+        for site in sorted(sites):
+            lines.append("C\t%d\t%s" % (index, site))
+    if lines:
+        sys.stdout.write("\n".join(lines) + "\n")
+
+
+def main():
+    try:
+        run()
+    except Exception as error:
+        sys.stderr.write(f"structural-index-python: {error}\n")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
+`;
+
+function loadPythonToolchain(repo) {
+  const projectDirectories = new Set();
+  for (const projectFile of gitLines(repo, [
+    "pyproject.toml",
+    "**/pyproject.toml",
+    "requirements*.txt",
+    "**/requirements*.txt",
+  ])) {
+    projectDirectories.add(path.join(repo, path.dirname(projectFile)));
+  }
+  for (const directory of projectDirectories) {
+    for (const venvName of [".venv", "venv"]) {
+      const interpreter = path.join(directory, venvName, "bin", "python3");
+      if (fs.existsSync(interpreter)) return interpreter;
+    }
+  }
+
+  const fallbackDirectory = process.env.STRUCTURAL_INDEX_PYTHON_TOOLCHAIN;
+  if (fallbackDirectory) {
+    const interpreter = path.join(path.resolve(fallbackDirectory), "bin", "python3");
+    if (fs.existsSync(interpreter)) return interpreter;
+    throw new Error(
+      `Python toolchain not found via STRUCTURAL_INDEX_PYTHON_TOOLCHAIN: ${fallbackDirectory} `
+      + "(expected bin/python3 inside it)",
+    );
+  }
+  throw new Error(
+    `Python toolchain not found under target repository: ${repo}; `
+    + "set STRUCTURAL_INDEX_PYTHON_TOOLCHAIN to a directory holding bin/python3",
+  );
+}
+
+function generatePython(repo, pythonFiles) {
+  const started = performance.now();
+  const interpreter = loadPythonToolchain(repo);
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "structural-index-python-"));
+  let stdout;
+  try {
+    const sourcePath = path.join(directory, "generate.py");
+    fs.writeFileSync(sourcePath, PYTHON_GENERATOR_SOURCE);
+    stdout = execFileSync(interpreter, [sourcePath], {
+      input: JSON.stringify({ repo, files: pythonFiles }),
+      maxBuffer: 256 * 1024 * 1024,
+    }).toString("utf8");
+  } catch (error) {
+    const detail = error.stderr ? `: ${error.stderr.toString("utf8").trim()}` : "";
+    throw new Error(`Python backend failed${detail || `: ${error.message}`}`);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+  const rows = [];
+  for (const line of stdout.split("\n")) {
+    if (!line) continue;
+    const fields = line.split("\t");
+    if (fields[0] === "D" && fields.length === 8) {
+      rows.push({
+        name: fields[2],
+        file: fields[3],
+        start: Number(fields[4]),
+        end: Number(fields[5]),
+        hash: fields[6],
+        callable: fields[7] === "1",
+        callers: new Set(),
+        tests: new Set(),
+      });
+    } else if (fields[0] === "C" && fields.length === 3) {
+      const row = rows[Number(fields[1])];
+      if (!row) throw new Error(`Python backend referenced unknown row: ${line}`);
+      row.callers.add(fields[2]);
+      if (isTextTestFile("python", fields[2].slice(0, fields[2].lastIndexOf(":")))) row.tests.add(fields[2]);
+    } else {
+      throw new Error(`Python backend emitted an unexpected line: ${line}`);
+    }
+  }
+  return {
+    data: { schema: SCHEMA, language: "python", definitions: normalizeDefinitions(rows) },
     seconds: (performance.now() - started) / 1000,
   };
 }
