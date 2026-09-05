@@ -7,9 +7,10 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
-## [1.4.49] - 2026-09-05
+## [1.4.52] - 2026-09-05
 
-Net `skills/` word delta: **+2,218** (46,157 → 48,375; shared +909 — `plan-lane.md`
+Net `skills/` word delta: **+2,003** (46,416 → 48,419, measured after merging main at
+45b1920; the per-file breakdown that follows is against the pre-merge base 46,157: shared +909 — `plan-lane.md`
 +740 (new file) and `bd-defaults.md` +169; tracker-mining +899 (new skill, `SKILL.md`);
 subagent-driven-development +202 — `implementer-prompt.md` +151 and `reviewer-prompt.md`
 +51; codex-execution +177 — `dispatch-prompt.md` +154 and `SKILL.md` +23; hybrid-execution
@@ -53,6 +54,57 @@ plus a shared `feature:<slug>` label at spec creation, readable back with
 **`docs/dispatch-env.md` gained a roster-runbook template for the per-repository language
 roster and a per-backend span-start note, and its deterministic-suite loop now also runs
 `test-session-id` and `test-fork-model`.**
+## [1.4.51] - 2026-09-05
+
+Net `skills/` word delta: **+4** (46,412 → 46,416; `skills/handoff/SKILL.md`
++10, `skills/subagent-driven-development/SKILL.md` -6).
+
+**The poll-to-completion premise is removed from the plugin's skill and agent
+copies.** The rules-overlap audit of 2026-09-05 found the clause "a live
+background child at stop is a silent stall, no completion notification / a
+backgrounded command is polled to completion before your turn ends" resting
+on a false premise: the harness Bash and Agent tool definitions both state
+that a background job re-invokes its parent when it exits, and every agent
+dispatched on 2026-09-05 notified an idle parent. The owner approved removing
+the premise everywhere it is copied; the rules corpus and its
+lane-orchestrator charter were corrected in agent-rules commit 01ddb71, and
+this release brings the plugin copies into line: `agents/lane-orchestrator.md`
+is replaced byte-for-byte from the corrected corpus source, and the poll
+instruction in `skills/subagent-driven-development/SKILL.md` and
+`skills/handoff/SKILL.md` is replaced with the re-invocation fact. The drain
+rule stays — a child that exits after its parent stopped reports to nobody —
+only the stated reason and the "poll to completion" instruction go.
+
+## [1.4.50] - 2026-09-05
+
+Net `skills/` word delta: **+0** (46,412 → 46,412; no `skills/` file changed).
+
+**The lane-orchestrator and miner agent declarations ship with the plugin.**
+Both moved out of the rules corpus at `~/.claude/agents/` into `agents/
+lane-orchestrator.md` and `agents/miner.md` so the super orchestrator's
+dispatch resolves them wherever the plugin is installed, not only on the
+machine that authored them. The corpus copies stay in place until every
+installation carries the plugin copy (a later corpus commit removes them).
+`skills/handoff/SKILL.md` was checked for a lane-record passage to name
+`superpowers-beads:lane-orchestrator` in; it describes only the generic
+session-boundary handoff (a `bd comment` record on an anchor bead), never a
+lane's typed `bd plan handoff`, so no edit landed there.
+
+## [1.4.49] - 2026-09-05
+
+Net `skills/` word delta: **+40** (46,372 → 46,412; subagent-driven-development
++40 — `implementer-prompt.md` +20, `reviewer-prompt.md` +20).
+
+**Read discipline lands in the implementer and reviewer charters and dispatch
+templates.** A 2026-09-05 transcript study of 2,493 subagents found tool
+results over 2k tokens, re-read on every later turn, held 2.08B amplified
+tokens. The implementer and task-reviewer agent charters gain a **Read
+discipline** block: read ranges, never a whole file or a bare `cat`; a test
+or build run reports the failing lines, never the full log; send a large
+result to a file and query it. The subagent-driven-development implementer
+and reviewer dispatch prompts each gain one sentence carrying the same rule.
+The read-guard hook itself is paused by the owner and does not land in this
+release.
 
 ## [1.4.48] - 2026-09-04
 
