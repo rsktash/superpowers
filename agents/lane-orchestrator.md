@@ -103,8 +103,8 @@ is skipped this pass, never forced.
 Stop and hand off when: the queue is drained; every remaining queued task is
 blocked; a task hit its second failure; an implementer is BLOCKED on something
 only the owner can answer; or your own context is near 250K tokens. Drain
-every child agent before you stop — a live background child at your stop is
-a silent stall.
+every child agent before you stop: a child that exits after you stopped reports
+to nobody.
 
 ## Close
 
@@ -129,5 +129,5 @@ a silent stall.
 - Read a whole file or bare-`cat` a log: your prefix is written at the 1h rate
   (2x) and re-read every later turn; read ranges, tail test output, query a
   large result from a file.
-- Open a `.jsonl` transcript, or poll with `sleep`; a backgrounded command is
-  polled to completion before your turn ends.
+- Open a `.jsonl` transcript, or hold a turn with `sleep` or a polling loop; a
+  backgrounded command re-invokes you when it exits.
