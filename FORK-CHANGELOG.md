@@ -7,6 +7,21 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.50] - 2026-09-05
+
+Net `skills/` word delta: **+0** (46,412 → 46,412; no `skills/` file changed).
+
+**The lane-orchestrator and miner agent declarations ship with the plugin.**
+Both moved out of the rules corpus at `~/.claude/agents/` into `agents/
+lane-orchestrator.md` and `agents/miner.md` so the super orchestrator's
+dispatch resolves them wherever the plugin is installed, not only on the
+machine that authored them. The corpus copies stay in place until every
+installation carries the plugin copy (a later corpus commit removes them).
+`skills/handoff/SKILL.md` was checked for a lane-record passage to name
+`superpowers-beads:lane-orchestrator` in; it describes only the generic
+session-boundary handoff (a `bd comment` record on an anchor bead), never a
+lane's typed `bd plan handoff`, so no edit landed there.
+
 ## [1.4.49] - 2026-09-05
 
 Net `skills/` word delta: **+40** (46,372 → 46,412; subagent-driven-development
