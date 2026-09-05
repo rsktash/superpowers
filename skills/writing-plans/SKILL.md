@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: Use when you have a spec or requirements for a multi-step task, before touching code
+description: Use when you have a spec or requirements for a multi-step task, before touching code Runs in its own forked agent; invoke it directly from the coordinator, never through a wrapper subagent.
 context: fork
 model: opus
 ---
