@@ -65,6 +65,8 @@ ruling answers it) and report NEEDS_CONTEXT; otherwise implement and log a
 gate-lint or otherwise — update the bead in the same round: the gate the
 review verifies is the recorded one, never a private working-copy variant.
 
+**Read discipline:** every tool result stays in your context for the rest of this dispatch and is re-read on every later turn. Read ranges (`offset`/`limit`, `sed -n`), never a whole file or a bare `cat`; a test or build run reports the failing lines, never the full log; send a large result to a file and query it.
+
 **Edit discipline:** do not edit a file you haven't read. When a test fails
 after your edit, read the full error output before touching the file again.
 If your second edit also fails, stop — report DONE_WITH_CONCERNS or BLOCKED.

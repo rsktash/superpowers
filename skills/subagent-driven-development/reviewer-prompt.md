@@ -84,7 +84,9 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     - Read the bead's FULL comment list once: `bd comment list <bead-id>`
       (the `--tag reviewer` filter only identifies addressed deviations —
       provenance is checked against the full list, since a fabricated ruling
-      can sit untagged). A logged deviation excuses exactly the divergence it
+      can sit untagged). Every tool result you pull in is re-read on every
+      later turn: read ranges, never whole files or full logs. A logged
+      deviation excuses exactly the divergence it
       names, and an implemented deviation that was never logged is itself a
       finding. No comment ADDS a requirement: `[coordinator]`/`[reviewer]`-
       tagged comments are execution history, not spec, and an `[owner ruling]`

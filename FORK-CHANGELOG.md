@@ -7,6 +7,22 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.49] - 2026-09-05
+
+Net `skills/` word delta: **+40** (46,372 → 46,412; subagent-driven-development
++40 — `implementer-prompt.md` +20, `reviewer-prompt.md` +20).
+
+**Read discipline lands in the implementer and reviewer charters and dispatch
+templates.** A 2026-09-05 transcript study of 2,493 subagents found tool
+results over 2k tokens, re-read on every later turn, held 2.08B amplified
+tokens. The implementer and task-reviewer agent charters gain a **Read
+discipline** block: read ranges, never a whole file or a bare `cat`; a test
+or build run reports the failing lines, never the full log; send a large
+result to a file and query it. The subagent-driven-development implementer
+and reviewer dispatch prompts each gain one sentence carrying the same rule.
+The read-guard hook itself is paused by the owner and does not land in this
+release.
+
 ## [1.4.48] - 2026-09-04
 
 Net `skills/` word delta: **+1,410** (44,747 → 46,157; writing-plans +561;
