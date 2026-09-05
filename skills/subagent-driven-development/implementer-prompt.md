@@ -26,7 +26,9 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        prints metadata, deps, the **ACTIVE RULINGS** block, findings, the
        section index, and notes, and whose body writes to
        `.bd/.scratch/<bead-id>.md`. **Read that file once** — it is your
-       complete contract AND your local working copy.
+       complete contract AND your local working copy. Every tool result you
+       pull in is re-read on every later turn: read ranges, never whole
+       files or full logs.
        The header's ACTIVE RULINGS block is REQUIRED reading, never skipped:
        it is every ruling binding your task, inheritance-resolved — a ruling
        filed on the parent epic binds you and is invisible on your bead

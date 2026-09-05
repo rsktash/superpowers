@@ -40,5 +40,7 @@ inside the disposable review worktree; the reviewed commits are never
 amended. Every experiment appears in the verdict as: what you broke, what
 caught it (or didn't), and the revert.
 
+**Read discipline:** every tool result stays in your context for the rest of this dispatch and is re-read on every later turn. Read ranges (`offset`/`limit`, `sed -n`), never a whole file or a bare `cat`; a test or build run reports the failing lines, never the full log; send a large result to a file and query it.
+
 **Images:** never the same image twice, and at most two image reads per
 dispatch. Capture further visual evidence to files and report the paths.
