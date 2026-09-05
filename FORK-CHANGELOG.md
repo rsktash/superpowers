@@ -7,6 +7,53 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.49] - 2026-09-05
+
+Net `skills/` word delta: **+2,218** (46,157 → 48,375; shared +909 — `plan-lane.md`
++740 (new file) and `bd-defaults.md` +169; tracker-mining +899 (new skill, `SKILL.md`);
+subagent-driven-development +202 — `implementer-prompt.md` +151 and `reviewer-prompt.md`
++51; codex-execution +177 — `dispatch-prompt.md` +154 and `SKILL.md` +23; hybrid-execution
++23 (`SKILL.md`); brainstorming +4 (`SKILL.md`); handoff +2 (`SKILL.md`); writing-plans +2
+(`SKILL.md`)). The corpus grows: a new shared lane step, a new read-only mining skill, and
+typed handoff, fork, and topic machinery cost more words than the whole-section rewrites
+that paid for part of them displaced — hybrid-execution's duplicate inline/subagent bullet
+map, codex-execution's redundant Common-mistakes row, and handoff's trimmed Night prose
+among them. No dedicated compaction pass ran beyond those rewrites.
+
+**writing-plans files a genuine fork as a bylined `bd question add` from the exported
+`BD_ACTOR=planner` actor, dep-linking every blocked task to the `Decide:` bead its outcome
+must settle, and the forked skill now pins its own `model:` line so it never inherits the
+parent session's model.**
+
+**The three execution skills claim their epic's lane through the shared
+`skills/shared/plan-lane.md` step right after the epic gate, and the handoff skill's Close
+and Resume post a typed `bd plan handoff` row — done ids with commits, next id, parked ids
+each with a question id — in place of the retired anchor-bead comment.**
+
+**A new minimal `hooks/session-id` SessionStart hook appends
+`export BD_SESSION_ID=<session_id>` to `$CLAUDE_ENV_FILE` on every session source including
+resume, with none of the disabled `hooks/session-start`'s side effects.**
+
+**A new read-only `tracker-mining` skill audits and triages a tracker into one capped mining
+brief — a header line, up to 25 `bd authority`-format lines, and up to 12 proposed `bd`
+commands — and never writes to it.**
+
+**Fix Routing now sends every review defect back to the implementer's own live session in
+one round with no proposals, reserving the controller's inline hand only for a mechanical
+edit with no design content, re-running the named check at the fix tip.**
+
+**Every dispatched charter and prompt now teaches the topic pick — file with an existing
+`--topic <slug>` from the printed catalogue, or `--topic pending-<task-id>` with its dots
+collapsed to hyphens when nothing fits — and never mint one.**
+
+**brainstorming now links a new epic to its predecessor with a `--type related` dependency
+plus a shared `feature:<slug>` label at spec creation, readable back with
+`bd authority <epic-id> --depth 3`.**
+
+**`docs/dispatch-env.md` gained a roster-runbook template for the per-repository language
+roster and a per-backend span-start note, and its deterministic-suite loop now also runs
+`test-session-id` and `test-fork-model`.**
+
 ## [1.4.48] - 2026-09-04
 
 Net `skills/` word delta: **+1,410** (44,747 → 46,157; writing-plans +561;
