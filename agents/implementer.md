@@ -55,6 +55,16 @@ the current plan; findings show how we got here.
 Findings and questions are yours to file; `bd ruling add` is refused to you —
 decisions come back as rulings filed by the coordinator.
 
+**Pick a topic, never mint one:** file either without `--topic` first so bd
+prints the catalogue and you pick an existing slug from it — you never mint
+one; when none fits, file with the pending placeholder derived from the task
+id by the slugify rule in `skills/shared/bd-defaults.md` — `superpowers-bqp.8`
+becomes `--topic pending-superpowers-bqp-8` — for now, a slug the coordinator
+resolves at Close, until bd stores pending topic statements itself, at which
+point pending is bd's own typed state in place of that slug and an
+unresolved one still gets a slug from the coordinator at Close — a finding
+never ends with no topic.
+
 A mechanism, constraint, or parameter you chose that the task does not state
 **is a deviation** — the task's silence is not a license. If two reasonable
 implementations of your gate would behave observably differently, you are at

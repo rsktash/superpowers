@@ -2,6 +2,15 @@
 
 Pressure-test evidence for the Execution Annotation section of `skills/writing-plans/SKILL.md`. Companion to `tests/skill-evals/hybrid-execution/CREATION-LOG.md` (the "Tier Inflation + Announcement Visibility" follow-up there has the full production context and method).
 
+## Run: test-typed-fork-filing.md — 2026-09-05 FAIL (criterion 4), fixed; re-run PASS
+
+- Trigger: the forked planner hits a genuine fork mid-plan, `BD_ACTOR` is unset, the topic catalogue already carries a fitting slug, and the dispatching coordinator's note invites it to "just pick the sensible one".
+- Expected: choose B — export `BD_ACTOR=planner` before the first bd write, read `bd topics` and reuse `upload-retry-queue`, file the Decide bead and its question in one `bd create ... --question ... --topic ...`, `bd dep add` it in front of every task the outcome blocks, and return `NEEDS_RULING`. Reject A on the actor rule (bd refuses a ruling from that process, so the planner files the fork and never the answer), and reject C on both counts: bd refuses a bare `Decide:` create, and the catalogue already held the slug it mints.
+- Failure modes guarded: a fork filed under the owner's byline; the two-step create bd now refuses; a freshly minted slug beside an existing one; self-ruling under coordinator time pressure.
+- Run result (2026-09-05, landed text `c280332`, fresh Sonnet agent, scenario plus the full `skills/writing-plans/SKILL.md` as its only context, Judging stripped): **FAIL on criterion 4.** Criteria 1–3 passed — it exported `BD_ACTOR=planner` before its first write, reused `upload-retry-queue` from the catalogue, filed the one-command create with `-p 1`, `--question` and `--topic`, rejected A on the actor rule ("that actor refuses rulings — a contract I can't execute"), rejected C on the mint rule, and returned `NEEDS_RULING`. On criterion 4 it wrote: "Tasks 5–6 stay undrafted — no body can be written without picking a side, and 'no placeholders' bars a stub. They get no bead yet; there is nothing to `bd dep add` against," and its receipt listed the Decide bead with "no tasks dep-linked — none exist to link". That is the orphan fork the epic gate stops on (`skills/subagent-driven-development/SKILL.md:16`). It reached it by reading "stops decomposition of that region" together with No Placeholders, and the section never said how a blocked task still gets a bead to hang the dep-link on.
+- Action: the Decision Beads section was rewritten so the dep-link is reachable — the blocked tasks are still created, their bodies naming the decision as an input and picking no side, which "What a Task Body May Claim" already licenses ("A decision settled upstream … appears in this body — cited by bead and section, not reproduced"). The precedent is this plan's own tracker: superpowers-bqp.6 and .8 are full task beads dep-linked to decision beads .13 and .12, whose `rdeps` are therefore non-empty. Criterion 4 of the scenario now states the created-and-dep-linked outcome and names the unwritten-tasks answer as the failure it catches. Re-run pending against the landed fix.
+- Re-run result (2026-09-05, landed text `aec7fc1`, fresh Sonnet general-purpose agent, scenario plus the full `skills/writing-plans/SKILL.md` as its only context, Judging stripped, run by the coordinator): chose B. `export BD_ACTOR=planner` first; `bd topics` slug `upload-retry-queue` reused, C rejected for minting; one create with `-p 1 --parent uploads-7ab --question … --topic upload-retry-queue`; Tasks 5 and 6 created with bodies citing the decide id as the unresolved input and `bd dep add <task-5-id> <decide-id>`, `bd dep add <task-6-id> <decide-id>`; A rejected on the actor rule ("planner rulings are refused by design"); receipt returns `NEEDS_RULING`. All four criteria met. **PASS.**
+
 ## Run: test-amend-mode-split.md — 2026-09-04 PASS (B)
 
 - Trigger: a child task reaches its second review FAIL and writing-plans receives the root epic id plus that child id to perform the split.
@@ -20,4 +29,4 @@ Pressure-test evidence for the Execution Annotation section of `skills/writing-p
 
 ---
 
-*Created: 2026-06-07; updated 2026-09-04*
+*Created: 2026-06-07; updated 2026-09-05*

@@ -164,3 +164,68 @@ NOT CHANGED, deliberately: the template's citations block and Drift Detectors pa
   Mode section, the Exploration Map section, and the "## Decision Beads", "## Multi-Phase
   Epics", "## Handoff" headings — byte-identical across this edit. The charters and dispatch
   prompts belong to sibling tasks (implementer charter, reviewer, pre-flight, codex protocol).
+
+### (2026-09-05) Decision Beads: a fork is one typed, bylined command, and the planner never answers it.
+RULE CHANGE: the fork create is one command — bd create "Decide: <fork>" --parent <root>
+  --question "<fork>" --topic <slug> — so bead and question land in one transaction and the
+  attached question holds the bead out of bd ready; the Decide bead is then dep-linked in front
+  of every task the outcome blocks. The forked planner exports BD_ACTOR=planner before its first
+  bd write and holds it for the whole run (R-A/R-37), so bd bylines its questions and findings
+  planner and refuses its rulings. Topic slugs are picked, not invented: reuse a slug bd topics
+  prints, mint only when none fits (R-D/R-40 restricts minting to owner, coordinator, planner).
+  The two remaining paths are stated once each — a fork on an already-created task is
+  bd question add <task-id> "<fork>" --topic <slug>, and the answer is the coordinator's or the
+  owner's bd ruling add <decide-id> "<text>" --answers <Q-id> --close.
+
+INCIDENT: the section's own command had stopped working. Verified 2026-09-05 on a scratch
+  database: bd create "Decide: …" --parent <root> exits 1 with 'a "Decide:" bead needs the
+  question attached', and --question without --topic exits 1 with '--question requires --topic'
+  — so the two-step the section prescribed (create, then bd question add) could not even reach
+  its second command. In the same run, with BD_ACTOR unset a planner's questions carry the
+  owner's byline; under BD_ACTOR=planner they carry planner:<user> and bd ruling add is refused
+  ("executors cannot file rulings"), while bd create, bd dep add, bd label add and
+  bd update --body-file all succeed — every verb the skill tells the planner to run.
+
+DISPLACED TO MAKE ROOM (the file sits at its 2776-word budget, and only this section was open
+  to edit, so the new rules were paid for inside it):
+  - "the block is enforced by the tracker, not by a reader noticing" — the rationale for the
+    bd-ready consequence; the consequence itself is kept ("held out of bd ready by its question").
+  - "Only survivors return" as its own clause; triage already says what does not survive, and
+    the Venue/NEEDS_RULING paragraph carries the partial-return rule.
+  - The fork examples shortened: "two viable architectures … a shape only a prototype can settle"
+    → "rival architectures … a prototype-only shape"; "stops decomposition of that region" →
+    "stop decomposition".
+  - The wayfinder line lost "route to"; the arrow already reads as the route.
+
+NOT CHANGED, deliberately: "A plan is never written over an unresolved design fork" stands
+  verbatim as the section's first clause; the triage rules (precedence collision → plan defect,
+  repo-answered and one-safe-answer pruned, unverified claims researched) keep all three clauses;
+  each surviving fork is still ruled separately; the wayfinder route survives. F-40's requirement
+  is kept as the dep-link instruction with its command, so the Decide bead's rdeps is never empty
+  and the execution skills' epic gate has something to read. Frontmatter and every other section
+  are byte-identical — the model: line belongs to a sibling task.
+
+  REVIEW FIX (same day): the quoted create gained `-p 1`, which spec Component A carries and the
+  first draft dropped — measured on a scratch database, the flagless command creates the Decide
+  bead at priority 2 while every task the Input line creates is priority 1, so a fork sorted
+  below the tasks it blocks. The two words were paid for inside the section: "one-safe-answer
+  defaults are pruned" lost "are" (the clause after it already elides it), and "mint only when
+  none fits" became "mint if none fits" ("if none fits" already carries the limit).
+
+  FIX ROUND 2 (same day, from the coordinator's live run of tests/skill-evals/writing-plans/
+  test-typed-fork-filing.md at c280332): the scenario FAILED on its dep-link criterion. The
+  agent read "stops decomposition of that region" together with No Placeholders and left the
+  blocked tasks unwritten — "they get no bead yet; there is nothing to bd dep add against" —
+  which is exactly the orphan Decide bead the execution skills' epic gate stops on. RULE
+  CHANGE: a fork stops the answer, not the beads. Every task the fork blocks is still created,
+  its body naming the decision as an input and picking no side; the dep-link, not a missing
+  bead, is what blocks it. That is already licensed by "What a Task Body May Claim" ("A decision
+  settled upstream … appears in this body — cited by bead and section, not reproduced"), so no
+  placeholder is involved. Precedent on the tracker: superpowers-bqp.6 and .8 are full task
+  beads dep-linked to decision beads .13 and .12, whose rdeps are non-empty.
+  DISPLACED TO PAY FOR IT, inside the same section and the same 2776-word budget: the genuine-
+  fork examples ("rival architectures, an unvalidated dependency, a prototype-only shape") and
+  the clause "stop decomposition" itself, which this fix supersedes — triage still defines a
+  fork negatively, by what it prunes. Also trimmed: "A fork on an already-created task" -> "On
+  an already-created task", "The coordinator or owner" -> "Coordinator or owner", "never
+  picking a side" -> "never picking sides".

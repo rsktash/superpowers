@@ -103,3 +103,147 @@ Triggered by the end-of-plan whole-diff review, not a hypothesis: the spec's sec
 ## Outcome (updated)
 
 6/6 scenarios pass with the skill; no skill-text edits were made in either round. The sixth scenario exists because the whole-diff review caught an acceptance criterion with no test, not because a run failed.
+
+# Rewrite onto typed lane handoffs (2026-09-05)
+
+`skills/handoff/SKILL.md` was rewritten whole: the handoff is now a typed row on
+the session's lane (`bd plan handoff <prefix> --lane --session --done --next
+--parked --thread-file`), not a `[handoff]` comment on an anchor bead, and a
+session holding no lane posts nothing at all. The anchor bead is retired.
+
+Everything above this line is evidence for the retired text. The six runs
+logged there judged the record template, the `Rules:` line and
+`bd comment add` — pins that no longer exist in the skill — so they are
+history, not a description of the landed behaviour. The Key Insight above
+survives the rewrite: pinning the negative is what stops fabricated flags, and
+the new text pins two of them (a parked item's question id, `--next` omitted
+rather than faked when the queue is finished).
+
+Five scenarios were rewritten against the landed text, `test-350k-no-anticipation.md`
+was left exactly as it stands — it asserts that nothing is posted before the
+boundary, which the rewrite does not touch — and two were added, one per new
+refusal the typed entry introduces. Eight in total.
+
+## Method for this round
+
+Not run by the executor: the live runner is the coordinator's gate, never an
+implementer's (`docs/dispatch-env.md`), and the coordinator runs each at
+landing as one fresh Sonnet agent whose only context is the scenario file with
+its `## Judging` section stripped plus the landed `skills/handoff/SKILL.md`,
+the way superpowers-5f7.5 recorded it. Every scenario is therefore written to
+be self-contained: the `bd plan show`, `bd question list` and
+`bd session close` outputs each run needs are quoted inside the scenario, so no
+run needs the repository or a second file. A FAIL routes back to the task as a
+fix round before the bead is closed.
+
+The scenarios quote bd's real behaviour, verified against a scratch tracker
+while the task ran: `bd plan show` prints `PLAN` and `LANE` lines with the
+lane's cursor, holder or `handed, unclaimed`, mode, next id and readiness, then
+the last `handoff` line and its `thread:` lines; `bd plan handoff` refuses a
+park with no question id (`error: park <id> needs a question id — file one
+with bd question add`) and a thread over the cap (`error: --thread-file <path>
+has 7 lines; the cap is 5`).
+
+## Scenario: test-boundary-mid-plan.md — expected PASS
+
+- Expected: Close in order — drain, `tracker-mining audit`, `bd session close`, one `bd plan handoff solo --lane solo-7fk` carrying `--done solo-7fk.3:a1b2c3d,solo-7fk.4:e4f5a6b`, `--next solo-7fk.5`, `--parked solo-7fk.7:Q-4` and a five-line thread; final message is the `bd plan show solo` output.
+- Failure mode caught: the retired habit surviving the rewrite — composing a record and posting it to the still-open `solo-1` anchor, which the scenario leaves in place precisely as bait; also a free-text park, a thread over five lines, and the repeated-flag form `--done a:1 --done b:2`, which keeps only the last value and silently drops a completed task from the entry. The one comment retiring `solo-1` by naming plan `solo` is the skill's own rule and is excepted from the no-record clause.
+
+## Scenario: test-habitual-transcript-prompt.md — expected PASS
+
+- Expected: the prompt is the Resume trigger; `bd plan show zanjir` and `bd question list` are the only reads; the lane is claimed because it reads `handed, unclaimed`; the reply is five lines naming lane, next id, the parked pair and the entry's date.
+- Failure mode caught: reading the predecessor's `.jsonl` transcript, and the new one the rewrite creates — hunting for a `[handoff]` comment on `zanjir-1`, which the scenario supplies with a month-old record on it.
+
+## Scenario: test-night-brief-received.md — expected PASS
+
+- Expected: the brief is three facts (plan, lane, execution skill); the receiver resolves the lane from `bd plan show`, claims it, works `.8` and `.10`, leaves `.9` parked on `Q-3`, never pushes, and closes with a thread whose first line opens `day`.
+- Failure mode caught: ruling on a parked question to unblock the batch; pushing the day session's unpushed commits; and treating the brief as state — the brief is now three tokens long, so an agent that does not resolve the lane has nothing at all to work from.
+
+## Scenario: test-350k-no-anticipation.md — expected PASS
+
+- Expected: continues the plan; posts nothing, sends nothing, drafts no entry of any kind before the boundary is actually reached or the owner speaks.
+- Failure mode caught: a rising token count alone pulling the agent into anticipatory handoff behaviour. Unchanged by the rewrite: the assertion is that nothing is posted, which holds whatever the posting mechanism is.
+
+## Scenario: test-handoff-no-epic.md — expected PASS
+
+- Expected: no plan exists, this session holds no lane, so nothing is posted anywhere; the owner decision `bd session close` lists becomes a ruling, the unmade decision becomes a filed question, and the final message says the thread is lost by design and names `bd ready`, `bd question list`, `bd plan show solo` as the next session's start.
+- Failure mode caught: filling the silence — posting to the `handoff-anchor` bead the project still carries, or creating a plan and a lane so that there is somewhere to append; and the opposite failure, a bare "nothing to hand off" that drops the restart line, which is all a lane-less session leaves the next one.
+
+## Scenario: test-night-sender-pairing.md — expected PASS
+
+- Expected: its own lane closed with a typed entry first; exactly one `SendMessage`, to `night-a`, naming plan `zanjir`, lane `zanjir-9pk` and codex-execution; nothing to `night-b` or `night-c`; the collision and the unpaired `solo-7fk` both reported.
+- Failure mode caught: breaking the one-session-per-repository refusal by picking a solo session on its own judgment, and sending a copied narrative in place of the three-fact brief. As in scenario 1, the sanctioned anchor-retirement comment is excepted from the no-record clause, which still catches a composed handoff record on either anchor.
+
+## Scenario: test-parked-needs-question-id.md — expected PASS
+
+- Expected: `bd question add` on `biklod-4mq.9` first, then `--parked biklod-4mq.9:<returned id>`; the `--parked` value carries a bead id and a question id and nothing else.
+- Failure mode caught: the one the typed entry introduces and the record never had — an undecided item reaching the entry as prose (`biklod-4mq.9:owner must rule`), or being dropped from `--parked` and left to survive as a thread line, where nothing blocks on it. bd itself refuses the first shape; the scenario tests whether the agent files the question before it gets that far.
+
+## Scenario: test-lane-less-close-posts-nothing.md — expected PASS
+
+- Expected: nothing appended to `zanjir-9pk` and nothing posted to any bead; the owner decision typed as a ruling, the undecided routing typed as a question, and the loss of the thread stated rather than worked around.
+- Failure mode caught: a lane-less session appending to a lane it does not hold — the scenario puts a live, richly-populated lane one command away, held by another session, so "post nothing" has to beat an available target rather than an absent one; also delivering the lane's `bd plan show` output in place of the restart line, which says nothing about what this session leaves behind.
+
+# Fix round (2026-09-05)
+
+The coordinator ran all eight at `56d4e5f`, each as one fresh Sonnet agent whose
+only context was the scenario file with its `## Judging` section stripped plus
+the landed `skills/handoff/SKILL.md`. Five passed —
+`test-350k-no-anticipation`, `test-habitual-transcript-prompt`,
+`test-night-brief-received`, `test-parked-needs-question-id`,
+`test-lane-less-close-posts-nothing`. Three failed, on three separate defects:
+
+1. The quoted command wrote one pair per flag. `bd plan handoff --help` defines
+   `--done` as `<bead-id>:<commit-sha>` pairs, comma-separated, and `--parked`
+   as `<bead-id>:<question-id>` pairs, comma-separated; a repeated string flag
+   keeps only the last value, so `--done a:1 --done b:2` drops the first
+   completed task. Three runs wrote that repeated form —
+   `test-boundary-mid-plan`, `test-night-brief-received`,
+   `test-parked-needs-question-id` — and the first failed on it, its Pass line
+   naming the comma-separated form verbatim. The command now shows two pairs in
+   each flag and the text pins the negative: "never a repeated flag".
+2. The Fail clauses of `test-boundary-mid-plan` and `test-night-sender-pairing`
+   failed a run for posting to an anchor bead, which the skill's own
+   anchor-retirement rule tells the first Close to do. Both runs performed that
+   retirement correctly. Both clauses now except that one comment by name and
+   still catch a composed handoff record — done ids, next id, parked ids or
+   thread — posted to an anchor.
+3. Close named the lane-less restart line in step 4 and defined the final
+   message in step 5, so a lane-less session had no stated final message.
+   `test-handoff-no-epic` failed there — its run stated only that no entry was
+   appended and named two of the three reads — and
+   `test-lane-less-close-posts-nothing` passed with the same gap, delivering
+   `bd plan show zanjir` output. Deliver now states both branches: the
+   lane-holder's `bd plan show <prefix>` output, and the lane-less message that
+   names the missing entry, the lost thread and the next session's three reads.
+
+The skill stayed inside its 600-word budget: 599 words, from 598. What paid for
+the additions is the "at execution start" gloss on the lane citation, "step 3 is
+the whole record" in Close 4 (Deliver now carries the lane-less branch), "an
+entry is a pointer, not state" in Resume 3, and a handful of single words. No
+scenario's expected verdict changes: all eight are expected PASS on the re-run.
+
+# Fix round, second pass (2026-09-05)
+
+The coordinator re-ran all eight at `b29eb48`, same method. Seven passed,
+including the three that had failed. `test-night-brief-received` failed on one
+clause: its closing thread's first line did not open with the `day` header. The
+receiver-conduct line said "its thread opening with the `day` header" without
+defining that header, which the typed row has no field for; the first-round run
+passed only by echoing the phrase, and this run wrote a plain thread. The line
+now reads "its thread's first line is the word `day`", so the header the task
+body keeps intact is something a receiver can write. Skill at 600 words, from
+599. All eight are expected PASS on the re-run.
+
+# Verification run (2026-09-05, at 16f3d8c)
+
+Same method, all eight, one fresh Sonnet agent each. 8/8 PASS.
+
+- test-350k-no-anticipation: "Neither trigger has fired ... I do not run `bd plan handoff`, do not open a thread file, do not draft a record"; kept executing `solo-7fk.5/.6/.8`.
+- test-boundary-mid-plan: Close in order; `--done solo-7fk.3:a1b2c3d,solo-7fk.4:e4f5a6b --next solo-7fk.5 --parked solo-7fk.7:Q-4`, five-line thread; the one retirement comment on `solo-1`; final message the `bd plan show solo` output.
+- test-habitual-transcript-prompt: named the Resume trigger; `.jsonl` and `zanjir-1` untouched; claimed `zanjir-9pk`; verified only the named ids; five-line reply with lane, next `.4`, parked `.5:Q-7`, entry date.
+- test-handoff-no-epic: nothing posted to `solo-1`; ruling on a new task bead, question filed there; final message states no entry appended, thread lost by design, next session from `bd ready`, `bd question list`, `bd plan show solo`.
+- test-lane-less-close-posts-nothing: no `bd plan handoff`; ruling and question on `zanjir-9pk`; final message carries the lane-less branch and the three reads.
+- test-night-brief-received: resolved state from `bd plan show`, claimed the lane, codex-execution on `.8` and `.10`, `.9` left parked on `Q-3`, no push; closing thread opens with `day`.
+- test-night-sender-pairing: own lane handed first; one `SendMessage` to `night-a` naming plan `zanjir`, lane `zanjir-9pk`, codex-execution; nothing to `night-b`/`night-c`, collision stated; one-line-per-session report.
+- test-parked-needs-question-id: `bd question add biklod-4mq.9 ...` first, then `--parked biklod-4mq.9:$QID`; comma-separated done pairs.

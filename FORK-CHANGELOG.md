@@ -7,6 +7,52 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.52] - 2026-09-05
+
+Net `skills/` word delta: **+2,123** (46,416 → 48,539, measured after merging main at
+45b1920 and applying the whole-diff review fixes; per-directory, against the pre-merge base 46,372:
+shared +909 — `plan-lane.md` +740 (new file) and `bd-defaults.md` +169; tracker-mining +899
+(new skill, `SKILL.md`); subagent-driven-development +97 — `implementer-prompt.md` +95 and
+`SKILL.md` +2; codex-execution +94; brainstorming +4; handoff +2; writing-plans +2;
+hybrid-execution -4). The corpus grows: a new shared lane step, a new read-only mining skill, and
+typed handoff, fork, and topic machinery cost more words than the whole-section rewrites
+that paid for part of them displaced — hybrid-execution's duplicate inline/subagent bullet
+map, codex-execution's redundant Common-mistakes row, and handoff's trimmed Night prose
+among them. No dedicated compaction pass ran beyond those rewrites.
+
+**writing-plans files a genuine fork as a bylined `bd create … --question` (`bd question add`
+only on an already-created task) from the exported `BD_ACTOR=planner` actor, dep-linking every blocked task to the `Decide:` bead its outcome
+must settle, and the forked skill now pins its own `model:` line so it never inherits the
+parent session's model.**
+
+**The three execution skills claim their epic's lane through the shared
+`skills/shared/plan-lane.md` step right after the epic gate, and the handoff skill's Close
+posts a typed `bd plan handoff` row (Resume reads it and claims the lane) — done ids with commits, next id, parked ids
+each with a question id — in place of the retired anchor-bead comment.**
+
+**A new minimal `hooks/session-id` SessionStart hook appends
+`export BD_SESSION_ID=<session_id>` to `$CLAUDE_ENV_FILE` on every session source including
+resume, with none of the disabled `hooks/session-start`'s side effects.**
+
+**A new read-only `tracker-mining` skill audits and triages a tracker into one capped mining
+brief — a header line, up to 25 `bd authority`-format lines, and up to 12 proposed `bd`
+commands — and never writes to it.**
+
+**Fix Routing now sends every review defect back to the implementer's own live session in
+one round with no proposals, reserving the controller's inline hand only for a mechanical
+edit with no design content, re-running the named check at the fix tip.**
+
+**Every dispatched charter and prompt now teaches the topic pick — file with an existing
+`--topic <slug>` from the printed catalogue, or `--topic pending-<task-id>` with its dots
+collapsed to hyphens when nothing fits — and never mint one.**
+
+**brainstorming now links a new epic to its predecessor with a `--type related` dependency
+plus a shared `feature:<slug>` label at spec creation, readable back with
+`bd authority <epic-id> --depth 3`.**
+
+**`docs/dispatch-env.md` gained a roster-runbook template for the per-repository language
+roster and a per-backend span-start note, and its deterministic-suite loop now also runs
+`test-session-id` and `test-fork-model`.**
 ## [1.4.51] - 2026-09-05
 
 Net `skills/` word delta: **+4** (46,412 → 46,416; `skills/handoff/SKILL.md`

@@ -1,0 +1,3 @@
+I've lost the thread on the superpowers epic. Somewhere back in the tracker there are rulings from a couple of sessions ago about who's allowed to mint a topic slug, at least two open questions I think are blocking a lane, and a pile of findings from the pre-flight round.
+
+Can you go dig through the tracker and tell me where that epic actually stands - what's been decided, what's still open, and what's blocked on what? Don't dump the whole thing into this conversation, I just want the shape of it and the commands to pull the rest if I need them.

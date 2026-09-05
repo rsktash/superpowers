@@ -82,28 +82,29 @@ You MUST create a task for each of these items and complete them in order:
 
 **Storage:**
 
-- Write the spec to a scratch file for review, then create the bead:
+- Write the spec to a scratch file, then create the bead:
   ```bash
-  # Write spec to scratch file (Edit tool shows diff for user review)
+  # Write spec to scratch file (Edit tool shows diff for review)
   # → .bd/.scratch/new-spec.md
   # Create bead from file:
   bd create "Feature: <title>" -t epic -p 1 --body-file .bd/.scratch/new-spec.md --json
   # Clean up:
   rm .bd/.scratch/new-spec.md
   ```
-- Parse the `id` field from the JSON output. Use the actual ID as-is — do not assume a specific format. This ID anchors the entire feature lifecycle.
-- Write a summary file for git searchability:
-  - Glob `docs/beads/YYYY-MM-DD-*.md` (today's date) to find the next daily increment
+- Parse the `id` field from the JSON output — it anchors the feature lifecycle.
+- Lineage: continuing a feature with an existing epic — introduced, upgraded, or edited earlier — names that predecessor, files `bd dep add <new-epic> <old-epic> --type related`, and reuses its `feature:<slug>` label rather than minting a second. No predecessor: mint the label, file no related link. Read the chain back with `bd authority <epic-id> --depth 3` (RELATED; label marks membership). Topics never carry lineage (R-43).
+- Write a summary file for search:
+  - Glob `docs/beads/YYYY-MM-DD-*.md` for the daily increment
   - Write to `docs/beads/{date}-{incr}-{bd-id}-{short-title}.md`
     - `{date}`: today in `YYYY-MM-DD` format
-    - `{incr}`: three-digit zero-padded counter (`001`, `002`, `003`)
+    - `{incr}`: three-digit zero-padded counter
     - `{bd-id}`: the root bead ID
     - `{short-title}`: slugified feature name
   - Contents: one-paragraph summary, key design decisions, acceptance criteria
-  - This file is an **immutable snapshot** — written once, never updated. The bead is the source of truth.
-- Maintain `docs/CONTEXT.md`, the project's domain glossary: one line per term of art this design coined or leaned on ("materialization cascade", not its twenty-word expansion). Specs, bead bodies, and dispatch prompts write in this vocabulary — create the file on first use, append on later brainstorms, commit it with the summary file.
-- If mockups were created during brainstorming, export them as image files and embed references in the spec bead so downstream skills can find and view them. Check the project's CLAUDE.md or documentation for attachment storage conventions (directory structure, URI scheme, naming). If no convention exists, store exported images alongside the summary file and use relative paths in the bead content.
-- Commit the summary file and any exported mockups to git
+  - This file is an **immutable snapshot** — written once, never updated. The bead is authoritative.
+- Maintain `docs/CONTEXT.md`, the project's domain glossary: one line per coined or leaned-on term of art. Specs, bead bodies, and dispatch prompts write in this vocabulary — create on first use, append on later brainstorms, commit with the summary file.
+- If mockups were created, export them as images and embed references in the spec bead so downstream skills find them. Check CLAUDE.md for attachment conventions (directory, URI scheme, naming); absent that, store images beside the summary file with relative paths.
+- Commit the summary file and mockups to git
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 
 **Spec Self-Review:**

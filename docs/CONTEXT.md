@@ -2,10 +2,10 @@
 
 One line per term of art. Specs, bead bodies, and dispatch prompts write in this vocabulary.
 
-- **handoff record** — the fixed-template `[handoff]` comment on the anchor bead that carries a session's pointers to durable state and its five-line discussion thread.
-- **anchor bead** — the one open `Session handoffs` task per project that holds every handoff record as a tagged comment.
-- **night brief** — a handoff record plus an invocation line, sent to a hand-launched session for unattended execution; only on the owner's explicit words.
-- **night receiver** — the session that receives a night brief: wake-only, runs the named execution skill, never rules, parks questions, closes with its own record.
+- **handoff record** — retired: the fixed-template `[handoff]` comment on the anchor bead that once carried a session's pointers to durable state and its five-line discussion thread; superseded by the handoff entry.
+- **anchor bead** — retired: the one open `Session handoffs` task per project that held every handoff record as a tagged comment; the handoff skill's first Close under the lane mechanism closes it for good, and nothing posts to it after.
+- **night brief** — retired: a handoff record plus an invocation line, sent to a hand-launched session for unattended execution; the handoff skill's Night step now sends a plan id, lane and execution skill instead.
+- **night receiver** — retired: the session that received a night brief — wake-only, ran the named execution skill, never ruled, parked questions, closed with its own record; the handoff skill's Night step now covers this role directly.
 - **session boundary** — the orchestration rule's stop condition (closed phase, drained batch, ~250 turns, or 400K peak) at which Close runs; never anticipated.
 - **workfile header** — the output of `bd workfile <id>`: metadata, active rulings, findings, section index, and notes printed to the terminal while the body is written to a scratch file; an executor's one-call contract read.
 - **coverage claim** — a gate item whose check is a test, lint, hook, or guard asserting behavior; a measurement (word count, file exists, grep) is not one.
@@ -32,6 +32,6 @@ One line per term of art. Specs, bead bodies, and dispatch prompts write in this
 - **session id export** — the SessionStart hook's `export BD_SESSION_ID=<session_id>` line in `$CLAUDE_ENV_FILE`; every lane verb and `bd session close` read it.
 - **planner actor** — `BD_ACTOR=planner`, exported by the forked planner for its whole run; bylines its questions and makes bd refuse its rulings.
 - **topic pick** — filing a question or finding without `--topic` first, reading the printed catalogue, and choosing an existing slug; executors never mint.
-- **pending topic** — a statement filed with no fitting slug, resolved by the coordinator at Close; `--topic pending-<task-id>` until bd stores the state itself.
+- **pending topic** — a statement filed with no fitting slug, resolved by the coordinator at Close; `--topic pending-<slugified-task-id>` (the slugify rule in `skills/shared/bd-defaults.md`; `superpowers-bqp.8` becomes `pending-superpowers-bqp-8`) until bd stores the state itself.
 - **mining brief** — the tracker-mining skill's only output: header line, `bd authority`-format lines, a capped "Proposed actions" block of bd commands.
 - **feature lineage** — the chain of epics that introduced, upgraded, and edited one feature: a related link from each new epic to its predecessor plus a shared `feature:<slug>` label, filed by brainstorming at spec creation; read with `bd authority <epic-id> --depth 3`; never a topic.
