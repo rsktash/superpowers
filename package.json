@@ -1,6 +1,6 @@
 {
   "name": "superpowers-beads",
-  "version": "1.4.54",
+  "version": "1.4.55",
   "type": "module",
   "main": ".opencode/plugins/superpowers.js",
   "scripts": {

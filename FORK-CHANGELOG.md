@@ -7,6 +7,23 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.55] - 2026-09-06
+
+Net `skills/` word delta: **+22** (48,573 → 48,595); per-skill split: tracker-mining +13
+(916 → 929) and writing-plans +9 (2,795 → 2,804). Nothing was removed: the growth is the
+argument set on its own line plus the imperative sentence that follows it, and both are the fix.
+
+Two tracker-mining forks in zanjir session 7bd0f7bb (2026-09-05) received correctly substituted
+arguments and both reported having none — the first guessing `audit zanjir-4dly.3`, the exact
+string its own prompt held; the second, given a spelled-out job and scope, answering "No task or
+question was included in this session's input". The cause was the Input line in both `context: fork`
+skills: "`$ARGUMENTS` names one job and its scope" reads, after substitution, as a definition of the
+argument format, and the backticks made the substituted text look like a quoted example. Both skills
+now label the argument as this invocation's own ("**Your job for this invocation:**"), set it on its
+own line without backticks, and follow it with an imperative — "Run that job now.", "Plan it now."
+A fork has no conversation history, so the body is its entire prompt; a body written only as
+procedure reads as documentation.
+
 ## [1.4.54] - 2026-09-05
 
 Net `skills/` word delta: **0** (48,573 → 48,573); punctuation only.

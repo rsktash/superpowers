@@ -15,7 +15,11 @@ A plan is a contract of intent, not a transcript of the code to come. The planne
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Input:** `$ARGUMENTS` has two shapes. A root epic bead id alone selects full mode for the spec held by that epic. A root epic id followed by one or more child ids selects amend mode for those named children. Both modes run forked (see Venue) with no conversation history, so read the epic, the named children when present, and the repo rather than a caller's context. Full mode creates tasks as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" -l "review:trivial-deterministic" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`; `-l` is repeatable, and the second label is added only when the task earns it (Execution Annotation). Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` once per session, skip if already read — a forked skill has a fresh context, so this one always reads it.
+**Your input for this invocation:**
+
+$ARGUMENTS
+
+Plan it now. That input has two shapes. A root epic bead id alone selects full mode for the spec held by that epic. A root epic id followed by one or more child ids selects amend mode for those named children. Both modes run forked (see Venue) with no conversation history, so read the epic, the named children when present, and the repo rather than a caller's context. Full mode creates tasks as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" -l "review:trivial-deterministic" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`; `-l` is repeatable, and the second label is added only when the task earns it (Execution Annotation). Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` once per session, skip if already read — a forked skill has a fresh context, so this one always reads it.
 
 **Mandatory step:** writing-plans is the step between an epic and ANY execution skill. Executing an undecomposed epic is a bypass, not a shortcut.
 

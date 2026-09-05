@@ -10,7 +10,11 @@ disallowed-tools: Edit, Write, NotebookEdit
 
 Mining a live tracker in a coordinator's session cost 321K tokens (2026-09-02). This skill runs those reads forked and returns one **mining brief**, the only thing that crosses back.
 
-**Input:** `$ARGUMENTS` names one job and its scope. Five jobs, no sixth; an unmatched argument is reported unrecognised in the header; no reads run.
+**Your job for this invocation:**
+
+$ARGUMENTS
+
+Run that job now — it names one job and its scope. Five jobs, no sixth; an unmatched or empty argument is reported unrecognised in the header, and no reads run.
 
 ## Jobs
 
