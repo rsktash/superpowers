@@ -9,7 +9,7 @@ that grows the corpus names what it failed to remove.
 
 ## [1.4.52] - 2026-09-05
 
-Net `skills/` word delta: **+2,050** (46,416 → 48,466, measured after merging main at
+Net `skills/` word delta: **+2,123** (46,416 → 48,539, measured after merging main at
 45b1920 and applying the whole-diff review fixes; per-directory, against the pre-merge base 46,372:
 shared +909 — `plan-lane.md` +740 (new file) and `bd-defaults.md` +169; tracker-mining +899
 (new skill, `SKILL.md`); subagent-driven-development +97 — `implementer-prompt.md` +95 and
