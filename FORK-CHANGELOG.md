@@ -9,26 +9,25 @@ that grows the corpus names what it failed to remove.
 
 ## [1.4.52] - 2026-09-05
 
-Net `skills/` word delta: **+2,003** (46,416 → 48,419, measured after merging main at
-45b1920; the per-file breakdown that follows is against the pre-merge base 46,157: shared +909 — `plan-lane.md`
-+740 (new file) and `bd-defaults.md` +169; tracker-mining +899 (new skill, `SKILL.md`);
-subagent-driven-development +202 — `implementer-prompt.md` +151 and `reviewer-prompt.md`
-+51; codex-execution +177 — `dispatch-prompt.md` +154 and `SKILL.md` +23; hybrid-execution
-+23 (`SKILL.md`); brainstorming +4 (`SKILL.md`); handoff +2 (`SKILL.md`); writing-plans +2
-(`SKILL.md`)). The corpus grows: a new shared lane step, a new read-only mining skill, and
+Net `skills/` word delta: **+2,050** (46,416 → 48,466, measured after merging main at
+45b1920 and applying the whole-diff review fixes; per-directory, against the pre-merge base 46,372:
+shared +909 — `plan-lane.md` +740 (new file) and `bd-defaults.md` +169; tracker-mining +899
+(new skill, `SKILL.md`); subagent-driven-development +97 — `implementer-prompt.md` +95 and
+`SKILL.md` +2; codex-execution +94; brainstorming +4; handoff +2; writing-plans +2;
+hybrid-execution -4). The corpus grows: a new shared lane step, a new read-only mining skill, and
 typed handoff, fork, and topic machinery cost more words than the whole-section rewrites
 that paid for part of them displaced — hybrid-execution's duplicate inline/subagent bullet
 map, codex-execution's redundant Common-mistakes row, and handoff's trimmed Night prose
 among them. No dedicated compaction pass ran beyond those rewrites.
 
-**writing-plans files a genuine fork as a bylined `bd question add` from the exported
-`BD_ACTOR=planner` actor, dep-linking every blocked task to the `Decide:` bead its outcome
+**writing-plans files a genuine fork as a bylined `bd create … --question` (`bd question add`
+only on an already-created task) from the exported `BD_ACTOR=planner` actor, dep-linking every blocked task to the `Decide:` bead its outcome
 must settle, and the forked skill now pins its own `model:` line so it never inherits the
 parent session's model.**
 
 **The three execution skills claim their epic's lane through the shared
 `skills/shared/plan-lane.md` step right after the epic gate, and the handoff skill's Close
-and Resume post a typed `bd plan handoff` row — done ids with commits, next id, parked ids
+posts a typed `bd plan handoff` row (Resume reads it and claims the lane) — done ids with commits, next id, parked ids
 each with a question id — in place of the retired anchor-bead comment.**
 
 **A new minimal `hooks/session-id` SessionStart hook appends

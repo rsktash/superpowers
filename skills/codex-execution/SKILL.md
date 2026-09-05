@@ -85,7 +85,7 @@ Codex must stop when a gate can't be satisfied honestly. When it does:
 1. VERIFY the blocker yourself against code/live data — codex may be wrong.
 2. RESOLVE from existing cited authority only — the spec, a convention (file:line), or
    a recorded ruling (`bd rulings <task-id>`); file the resolution as a finding, then close the question with it:
-   `bd finding add <task-id> "<resolution + citation>" -j` (capture the id), then
+   `bd finding add <task-id> "<resolution + citation>" --topic <slug> -j` (slug picked from the printed catalogue; capture the id), then
    `bd question answer <question-id> --finding <finding-id>` (coordinator actor —
    never from an executor shell). A spec-derived resolution is a verified fact, not
    an owner decision: `bd ruling add` stays reserved for transcribing the owner. When no existing authority

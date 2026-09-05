@@ -25,14 +25,14 @@ It appends the entry and releases the lane. Every id is verified in bd. `--done`
 
 `$BD_SESSION_ID` comes from the SessionStart hook; empty is a broken hook to report, never a value to invent.
 
-The anchor bead is retired: the first Close under this skill closes it with one final comment naming the plan id; nothing posts to it after.
+The anchor bead is retired: on the first Close under this skill, `bd search "Session handoffs"` finds it, `bd comment add <anchor-id> "[handoff] retired — handoffs now live in bd plan <prefix>"` posts the one final comment naming the plan id, and `bd close <anchor-id>` closes it; nothing posts to it after.
 
 ## Close
 
 1. Drain in-flight agents: a backgrounded job or child re-invokes you when it exits; wait for that notification, never poll.
 2. `tracker-mining audit <epic-id>` for untyped decisions and stale citations.
 3. `bd session close --session "$BD_SESSION_ID"` lists, writing nothing. Transcribe each owner decision as a ruling on the governing epic, `bd question add` every pending decision on the bead it concerns, and resolve every `pending-` topic slug once bd carries that state.
-4. Holding a lane: run the command above — done and next from `bd plan show <prefix>`, `bd ready` and `git log`; thread from memory. Holding none: post nothing at all.
+4. Holding a lane: run the command above — done and next from `bd plan show <prefix>`, `bd ready` and `git log`; thread from memory. Holding none: post nothing at all. First Close ever for the project: retire the anchor bead as stated above.
 5. Deliver: holding a lane, the final message is the `bd plan show <prefix>` output. Holding none, it says no entry was appended because this session holds no lane, the thread is lost by design, and the next session starts from `bd ready`, `bd question list` and `bd plan show <prefix>`. For a session the owner named, send the plan id, lane and execution skill there.
 
 ## Resume
