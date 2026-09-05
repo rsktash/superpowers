@@ -229,3 +229,18 @@ NOT CHANGED, deliberately: "A plan is never written over an unresolved design fo
   fork negatively, by what it prunes. Also trimmed: "A fork on an already-created task" -> "On
   an already-created task", "The coordinator or owner" -> "Coordinator or owner", "never
   picking a side" -> "never picking sides".
+
+### (2026-09-06) The Input line delivers the argument; it no longer describes it.
+RULE CHANGE: both fork skills open with "**Your input for this invocation:**", the bare
+  $ARGUMENTS on its own line, then an imperative ("Plan it now." / "Run that job now.").
+  The old line — "`$ARGUMENTS` has two shapes." / "`$ARGUMENTS` names one job and its scope."
+  — read, after substitution, as a definition of the argument format rather than as the
+  request itself, and the backticks made the substituted text look like a quoted example.
+
+INCIDENT: two tracker-mining forks in zanjir session 7bd0f7bb (2026-09-05) received correctly
+  substituted arguments and both reported having none. The first answered "No job/scope
+  argument was included in this invocation", then guessed `audit zanjir-4dly.3` as the likely
+  target — the exact string its own prompt held. The second, given a spelled-out job and scope,
+  answered "No task or question was included in this session's input". A fork has no
+  conversation history, so the body is its whole prompt: a body written only as procedure
+  reads as documentation, and the fork finds no request in it.
