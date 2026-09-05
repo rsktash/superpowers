@@ -7,6 +7,15 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.54] - 2026-09-05
+
+Net `skills/` word delta: **0** (48,573 → 48,573); punctuation only.
+
+The 1.4.53 release joined the appended clause straight onto the existing description text
+with no terminating punctuation ("before touching code Runs in its own...", "capped brief
+comes back Runs in its own..."). Both lines now end the existing sentence with a period
+before the clause starts.
+
 ## [1.4.53] - 2026-09-05
 
 Net `skills/` word delta: **+34** (48,539 → 48,573); per-skill split: writing-plans +17
