@@ -7,6 +7,17 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.53] - 2026-09-05
+
+Net `skills/` word delta: **+34** (48,539 → 48,573); per-skill split: writing-plans +17
+(2,778 → 2,795) and tracker-mining +17 (899 → 916).
+
+The writing-plans skill was invoked through a general-purpose wrapper agent in session solo
+(2026-09-05), producing a pass-through planner above the skill's own fork. Both `context: fork`
+skills — writing-plans and tracker-mining — now carry the same clause in their `description:`
+line telling the dispatcher to invoke them directly from the coordinator, never through a
+wrapper subagent. The corpus grows by the clause; nothing is removed.
+
 ## [1.4.52] - 2026-09-05
 
 Net `skills/` word delta: **+2,123** (46,416 → 48,539, measured after merging main at
