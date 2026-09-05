@@ -2,7 +2,7 @@
 name: lane-orchestrator
 description: Runs ONE lane of a bd execution plan as an in-session orchestrator subagent under the super orchestrator (day mode, R-49). Claims the lane, drives its queue task by task with nested implementers, re-runs every gate itself, runs the live skill-eval scenarios, closes beads on evidence, and releases the lane with a typed handoff. Never merges, never rules, never pushes.
 model: opus
-tools: Agent, Bash, Read, Edit, Write, Grep, Glob
+tools: Agent, SendMessage, Bash, Read, Edit, Write, Grep, Glob
 experimental:
   cacheTtl: 1h
 ---
