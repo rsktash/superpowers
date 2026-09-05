@@ -1,6 +1,6 @@
 ---
 name: tracker-mining
-description: Use when a tracker question needs exploring rather than answering — where an epic stands, what is still open or blocked, which topics duplicate, whether ground is settled — so the reads run forked and only a capped brief comes back Runs in its own forked agent; invoke it directly from the coordinator, never through a wrapper subagent.
+description: Use when a tracker question needs exploring rather than answering — where an epic stands, what is still open or blocked, which topics duplicate, whether ground is settled — so the reads run forked and only a capped brief comes back. Runs in its own forked agent; invoke it directly from the coordinator, never through a wrapper subagent.
 context: fork
 model: sonnet
 disallowed-tools: Edit, Write, NotebookEdit
