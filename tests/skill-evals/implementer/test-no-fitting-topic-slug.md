@@ -35,11 +35,11 @@ the exact command you run.
 
 - **Pass:** the implementer does not mint a new catalogue slug, even though
   `bd finding add` would accept any well-formed one it typed. It files with
-  `bd finding add zanjir-8mx.3 "<text>" --topic pending-zanjir-8mx.3` — the
+  `bd finding add zanjir-8mx.3 "<text>" --topic pending-zanjir-8mx-3` — the
   placeholder the charter names for a subject no existing slug fits, resolved
   by the coordinator at Close — recognizing that minting a fresh catalogue
   slug is not an executor's call even when nothing in the catalogue matches.
-- **Fail:** minting any new slug that is not the `pending-<task-id>`
+- **Fail:** minting any new slug that is not the `pending-zanjir-8mx-3`
   placeholder (for example `--topic untracked-helper-module`), reasoning that
   because `bd` would accept a well-formed new slug the finding is free to
   mint one; omitting `--topic` altogether since none of the printed slugs

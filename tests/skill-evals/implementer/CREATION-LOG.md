@@ -47,17 +47,19 @@ Charter text after superpowers-5f7 Task 5 lands the unindexed-language sentence 
 ## Scenario: test-no-fitting-topic-slug.md — expected PASS
 
 Charter text after superpowers-bqp Task 8 lands the topic-pick sentence in
-`agents/implementer.md`: a finding or question is filed without `--topic`
-first so bd prints the catalogue and an existing slug is picked from it — the
-implementer never mints one; none fits → `--topic pending-<task-id>` for now,
-resolved by the coordinator at Close. Not run by the executor: the live
-runner is the coordinator's gate, never an implementer's (docs/dispatch-env.md),
-and the coordinator runs it at landing as one fresh agent, the scenario file
-and the landed charter as its only context, the way superpowers-5f7.5 was
-recorded above.
+`agents/implementer.md`, amended by Task 14 for the slugified placeholder: a
+finding or question is filed without `--topic` first so bd prints the
+catalogue and an existing slug is picked from it — the implementer never
+mints one; none fits → the pending placeholder derived from the task id by
+the slugify rule in `skills/shared/bd-defaults.md` (`zanjir-8mx.3` becomes
+`--topic pending-zanjir-8mx-3`), resolved by the coordinator at Close. Not
+run by the executor: the live runner is the coordinator's gate, never an
+implementer's (docs/dispatch-env.md), and the coordinator runs it at landing
+as one fresh agent, the scenario file and the landed charter as its only
+context, the way superpowers-5f7.5 was recorded above.
 
 - Expected: PASS — the run files `bd finding add zanjir-8mx.3 "<text>" --topic
-  pending-zanjir-8mx.3` rather than minting a fresh catalogue slug for the
+  pending-zanjir-8mx-3` rather than minting a fresh catalogue slug for the
   untracked-helper-module subject, even though `bd finding add` would accept
   any well-formed slug it typed.
 - Failure mode caught: minting a new catalogue slug for a finding whose
@@ -66,12 +68,21 @@ recorded above.
 - Run (2026-09-05, landed text `ff7acb2`, fresh Sonnet general-purpose agent,
   scenario plus the full landed charter as its only context, Judging stripped,
   run by the lane orchestrator): filed
-  `bd finding add zanjir-8mx.3 "[reviewer] ..." --topic pending-zanjir-8mx.3`
+  `bd finding add zanjir-8mx.3 "[reviewer] ..." --topic pending-zanjir-8mx-3`
   under `BD_ACTOR=executor`; named the "none fits" branch of the charter
   sentence and quoted it; refused `untracked-helper-module` explicitly as "the
   kind of on-the-spot mint the rule forbids regardless of how well-formed the
   slug string would be"; did not omit `--topic`, did not block or escalate, and
   ran no tool. **PASS.**
+- Run (2026-09-05, landed text `45e6ebe` — the slugified charter of Task 14, fresh
+  Sonnet general-purpose agent, scenario plus the full landed charter as its only
+  context, Judging stripped, no tool but the one payload read, run by the lane
+  orchestrator): filed `bd finding add zanjir-8mx.3 "[reviewer] ..." --evidence
+  "..." --topic pending-zanjir-8mx-3`; derived the placeholder from the charter's
+  worked example rather than from `skills/shared/bd-defaults.md`, which it could
+  not read; ran the topicless form first to make bd print the catalogue, judged all
+  four printed slugs unfitting, and declined to mint a permanent entry "on my own
+  authority". **PASS.**
 
 ## Key Insight
 

@@ -42,7 +42,9 @@ caught it (or didn't), and the revert.
 
 A finding this review files goes in without `--topic` first so bd prints the
 catalogue and the slug is picked from it — never minted; none fits → file
-with `--topic pending-<task-id>` for now, a slug the coordinator resolves at
+with the pending placeholder derived from the task id by the slugify rule in
+`skills/shared/bd-defaults.md` — `superpowers-bqp.8` becomes `--topic
+pending-superpowers-bqp-8` — for now, a slug the coordinator resolves at
 Close, until bd stores pending topic statements itself, at which point
 pending is bd's own typed state in place of that slug and an unresolved one
 still gets a slug from the coordinator at Close — a finding never ends with
