@@ -7,6 +7,27 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.51] - 2026-09-05
+
+Net `skills/` word delta: **+4** (46,412 → 46,416; `skills/handoff/SKILL.md`
++10, `skills/subagent-driven-development/SKILL.md` -6).
+
+**The poll-to-completion premise is removed from the plugin's skill and agent
+copies.** The rules-overlap audit of 2026-09-05 found the clause "a live
+background child at stop is a silent stall, no completion notification / a
+backgrounded command is polled to completion before your turn ends" resting
+on a false premise: the harness Bash and Agent tool definitions both state
+that a background job re-invokes its parent when it exits, and every agent
+dispatched on 2026-09-05 notified an idle parent. The owner approved removing
+the premise everywhere it is copied; the rules corpus and its
+lane-orchestrator charter were corrected in agent-rules commit 01ddb71, and
+this release brings the plugin copies into line: `agents/lane-orchestrator.md`
+is replaced byte-for-byte from the corrected corpus source, and the poll
+instruction in `skills/subagent-driven-development/SKILL.md` and
+`skills/handoff/SKILL.md` is replaced with the re-invocation fact. The drain
+rule stays — a child that exits after its parent stopped reports to nobody —
+only the stated reason and the "poll to completion" instruction go.
+
 ## [1.4.50] - 2026-09-05
 
 Net `skills/` word delta: **+0** (46,412 → 46,412; no `skills/` file changed).

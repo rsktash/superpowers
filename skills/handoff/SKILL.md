@@ -42,7 +42,7 @@ Every record carries the `Rules:` line. Caps: 20 lines, Thread 5 — over cap, t
 
 ## Close
 
-1. Drain in-flight agents: poll every backgrounded job to completion.
+1. Drain in-flight agents: a backgrounded job or child re-invokes you when it exits; wait for that notification, never poll.
 2. Write in-session rulings onto the governing epic (`bd ruling add`); the record carries none.
 3. Compose from durable state — `bd ready --parent <epic>`, `bd question list`, `git log`; Thread from memory.
 4. Post to the anchor.
