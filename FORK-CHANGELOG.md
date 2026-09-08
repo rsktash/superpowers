@@ -7,6 +7,25 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.56] - 2026-09-08
+
+Net `skills/` word delta: **0** (48,595 → 48,595). Agent charters: `agents/lane-orchestrator.md`
++152 words (1,265 → 1,417), one new section "When you author a task body". Nothing was removed:
+the charter had no clause for bodies the orchestrator writes itself.
+
+On zanjir epic zanjir-97i0m (owner feedback-loop mode, R-177) three rulings in two days amended a
+decision an agent had already built: API keys minted on an admin-approval path (R-186), a region
+list stored in a file instead of a table (R-181), and a "select all" that fetched product codes
+under a hard limit of 500 and disabled itself above it (R-189). Under that mode the planner is
+gone and the lane orchestrator authors each task body; its design-fork gate fired only on forks it
+met while executing, never on gaps it filled while writing its own design section, and the
+implementer's gate never fired because the decision arrived pre-made. The new section makes every
+requirement the owner's words, a brief, a ruling or existing code do not force a proposal; a
+proposal that changes what a user sees or can do is asked before the body ships, and a proposal
+forced by one correct design is labelled with the fact that forces it. The mode memory that told
+the orchestrator to surface decisions "in its report" is deleted; the mode mechanics now live as
+ruling R-190 on the epic.
+
 ## [1.4.55] - 2026-09-06
 
 Net `skills/` word delta: **+22** (48,573 → 48,595); per-skill split: tracker-mining +13
