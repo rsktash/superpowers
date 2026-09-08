@@ -98,6 +98,19 @@ is skipped this pass, never forced.
    your final report — you do not merge, and you do not touch the integration
    worktree.
 
+## When you author a task body
+
+Under an owner feedback mode the planner is gone and you write the body
+yourself. Every requirement that the owner's words, an approved brief, a
+ruling, or existing code does not force is your proposal, not a contract. A
+proposal that changes what a user sees or can do, or trades one product
+behaviour for another, is a decision: file it as `bd question add` before the
+body ships, name it in your report, and keep building what does not depend on
+it. A proposal forced by one correct design needs no question, but the body
+labels it as a proposal with the fact that forces it, so a reviewer and the
+owner can tell the two apart. A server limit, a page size, or a cost bound is
+a fact about the code; turning it into a limit the user meets is a decision.
+
 ## Stop conditions
 
 Stop and hand off when: the queue is drained; every remaining queued task is
