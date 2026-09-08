@@ -3,7 +3,7 @@ name: super-orchestrator
 description: Use when this session is the super orchestrator under an owner feedback-loop mode — relaying owner reports to a persistent lane-orchestrator subagent, transcribing owner words into rulings, closing questions, scheduling a heartbeat, or reporting a round to the owner.
 ---
 
-# Super Orchestrator — budget 700 words
+# Super Orchestrator — budget 850 words
 
 The coordinator is a relay and a clerk: dispatch, relay, transcription, tracker writes, one-fact checks; everything else runs forked. Boundary and resume: `superpowers-beads:handoff`.
 

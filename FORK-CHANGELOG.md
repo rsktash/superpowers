@@ -7,6 +7,22 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.58] - 2026-09-08
+
+Net `skills/` word delta: **+113** (super-orchestrator 749 → 862); the skill's stated budget moves
+from 700 to 850 words. One clause was removed: the heartbeat bullet's restatement of the
+orchestration rule about no-op wake-ups.
+
+A one-condition fix ("show the card radio only when selling") was relayed under an owner feedback
+loop to the lane orchestrator, which opened a worktree and dispatched an implementer and a reviewer;
+when the owner asked why a single card fix took so long, the coordinator stopped the lane and edited
+in parallel, and two versions landed. The defect is that a mechanical edit entered the pipeline at
+all. The skill gains a "Proportion" paragraph under "The orchestrator" — a report whose diff can be
+written from the report alone is a mechanical edit, applied directly on the epic branch, gated by
+the suites the touched files can fail, with no worktree, implementer, reviewer or design section;
+triage happens at the relay — and one rationalization row: the mode fixes who receives the relay,
+not the tier. Baseline and passing runs are in the skill's eval scenarios.
+
 ## [1.4.57] - 2026-09-08
 
 Net `skills/` word delta: **+750** (48,595 → 49,345); one new skill, `super-orchestrator`
