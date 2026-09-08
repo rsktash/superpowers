@@ -29,6 +29,7 @@ The original Superpowers stores specs and plans as markdown files in `docs/super
 | hybrid-execution | New skill: routes each task inline or to a subagent based on the plan's Execution annotation |
 | codex-execution | New skill: runs task beads via the codex CLI with per-landing verification and a terminal whole-diff review |
 | handoff | New skill: session close, resume, and explicit night-session preparation via a tagged record on one anchor bead per project — a fresh session reads pointers to durable state, never a transcript |
+| super-orchestrator | New skill: coordinator conduct under an owner feedback-loop mode — forked reads, owner words transcribed as rulings before the relay, design gaps routed to a design pass, heartbeat and orchestrator replacement, owner-visible reports |
 
 ## Important: Uninstall Original Superpowers First
 
