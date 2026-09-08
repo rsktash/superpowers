@@ -45,11 +45,15 @@ cd "$OUTPUT_DIR"
 
 echo "Plugin dir: $PLUGIN_DIR"
 echo "Running claude -p with naive prompt..."
-timeout 300 claude -p "$PROMPT" \
+# macOS ships no `timeout`; fall back to gtimeout (coreutils) or run unbounded.
+if command -v timeout >/dev/null 2>&1; then TIMEOUT="timeout 300"
+elif command -v gtimeout >/dev/null 2>&1; then TIMEOUT="gtimeout 300"
+else TIMEOUT=""; fi
+$TIMEOUT claude -p "$PROMPT" \
     --plugin-dir "$PLUGIN_DIR" \
     --dangerously-skip-permissions \
     --max-turns "$MAX_TURNS" \
-    --output-format stream-json \
+    --output-format stream-json --verbose \
     > "$LOG_FILE" 2>&1 || true
 
 echo ""

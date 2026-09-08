@@ -7,6 +7,26 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.57] - 2026-09-08
+
+Net `skills/` word delta: **+750** (48,595 → 49,345); one new skill, `super-orchestrator`
+(750 words). Nothing was removed: no skill covered the coordinator's own conduct.
+
+The interactive coordinator that drives an epic under an owner feedback loop had no skill of its
+own, so its conduct was set turn by turn by whichever rule was nearest. In one session that
+produced inline mining in the main context, a UX gap answered by coordinator-drafted options that
+became a bad ruling, a relay that froze an earlier ruling whose premise the owner had just replaced,
+a screenshot origin read as a scope narrowing, a headless emulator offered as evidence, and a
+persistent orchestrator run far past its budget. The skill states the positive behaviour for each:
+forked reads with a line cap, design gaps routed to a forked design pass the owner approves, owner
+words transcribed as rulings before the relay and re-derived when a control changes, visible
+evidence, the 59-minute no-op heartbeat, orchestrator replacement from tracker state, and the
+release path for corpus fixes. Skill-eval scenarios and a triggering prompt ship with it.
+
+Also in this release: `tests/skill-triggering/run-test.sh` falls back when macOS has no `timeout`
+and passes `--verbose`, which the current claude CLI requires with `--output-format stream-json`;
+without both, every triggering test on macOS failed before the prompt ran.
+
 ## [1.4.56] - 2026-09-08
 
 Net `skills/` word delta: **0** (48,595 → 48,595). Agent charters: `agents/lane-orchestrator.md`

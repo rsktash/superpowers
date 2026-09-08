@@ -64,7 +64,7 @@ A repeating workflow defect: forked `superpowers-beads:diagnosing-workflow-defec
 
 ## Red flags
 
-- `bd get … design`, `bd rulings --json`, `git log`, `grep` in your own turn
+- `bd get … design`, a rulings text filter, `git log`, `grep` in your own turn
 - Options for a screen behaviour; the answer inside a design-pass prompt
 - A relay reaffirming a ruling whose premise the owner replaced; "only web" from a screenshot's origin
 - A headless emulator; a turn held for a child; a heartbeat that sends
