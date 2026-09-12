@@ -244,3 +244,14 @@ INCIDENT: two tracker-mining forks in zanjir session 7bd0f7bb (2026-09-05) recei
   answered "No task or question was included in this session's input". A fork has no
   conversation history, so the body is its whole prompt: a body written only as procedure
   reads as documentation, and the fork finds no request in it.
+
+INCIDENT (Grain clause, 2026-09-12, solo session 8a9f872c, superpowers-awg): the owner stopped an
+  18-task phase because each task spent most of its time on tests and gates. Diagnosis: "Writing
+  the Gate" says under-coverage must fail ("every variant has its own assertion") but never says
+  what a variant is, and gate-lint (2026-08-16) leaves only a command or an assertion as legal
+  shapes — so the planner wrote one assertion per datum (sixteen tables, sixteen items; a literal
+  migration roster seven test files had to extend) and a re-cut concatenated thirteen tasks'
+  assertion lists into 17-19 items per task. Lines added that day ran 1.96 test : 1 logic against
+  0.61 in early August; two of the day's suite reruns were test-only failures. writing-good-tests.md
+  (table-driven shape, change-detector ban) was referenced only from the TDD skill the executor
+  reads, never from this planner. Codex, sonnet and GLM showed the same shape under the same text.
