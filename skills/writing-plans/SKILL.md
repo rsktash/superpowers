@@ -5,7 +5,7 @@ context: fork
 model: opus
 ---
 
-# Writing Plans — budget 2776 words
+# Writing Plans — budget 2960 words
 
 ## Overview
 
@@ -129,6 +129,8 @@ symbol: reusedThing @ its/home.ts
 ## Writing the Gate
 
 Every gate item is an outcome you observe, machine-verifiable — "test_validate_jwt_expired passes", never "works correctly" — and falsifiable against under-doing: write it so under-coverage fails ("every variant has its own assertion"), because a fluent executor will satisfy the literal minimum convincingly. Gates collectively exercise the regime the artifact exists to survive — the second page, the full buffer — never only the one-of-everything case; and at least one item names what must stay intact, checked on that same regime. Mechanisms ("flag X is set", "Y is called") belong in steps, not gates. Visual work's gate names what the owner verifies against pixels. The planner names the index queries and expected counts the task's discovery batch runs.
+
+**Grain.** A gate item names one behaviour, not one datum. Where a behaviour holds over N things of a kind, write ONE table-driven item whose table is derived at run time from the same source the code reads (a directory listing, a schema catalogue, an exported registry, a locale file) and whose expectation is the derived set plus its count — never a literal roster the next addition must extend, which is the change detector `writing-good-tests.md` bans. Where a command can observe the outcome, the gate item IS that command with its expected count; an assertion item is written only where no command can. A review finding is fixed on the case that already covers the behaviour, never by adding a round-specific case. Coarsening tasks coarsens their gates: a merged task's gate is the union of behaviours, not the concatenation of its sources' items. Read `writing-good-tests.md` before writing any assertion item.
 
 ## Exploration Map
 

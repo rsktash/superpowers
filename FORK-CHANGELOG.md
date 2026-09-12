@@ -7,6 +7,24 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.59] - 2026-09-12
+
+Net `skills/` word delta: **+151** (writing-plans 2804 → 2955); the skill's stated budget moves
+from 2776 to 2960 words. Nothing was removed; the skill was already 28 words over its budget.
+
+An 18-task phase was stopped by the owner because every task spent most of its time on tests
+and gates: the planner wrote one assertion per datum (sixteen tables, sixteen gate items; a
+literal migration roster that seven test files had to extend), and a re-cut concatenated thirteen
+tasks' assertion lists into 17-19 items per task. Lines added that day ran two test lines per
+logic line against 0.6 in early August, and two suite reruns were test-only failures. "Writing
+the Gate" demanded that under-coverage fail without defining the grain, gate-lint left only a
+command or an assertion as legal shapes, and `writing-good-tests.md` was read by the executor's
+TDD skill, never by the planner. The skill gains a "Grain" paragraph: a gate item names one
+behaviour, not one datum; over N things of a kind, one table-driven item derived at run time with
+its count, never a literal roster; a command with its expected count wherever a command can
+observe the outcome; review findings fixed on the existing case; a merged task's gate is the union
+of behaviours, not the concatenation of its sources; read `writing-good-tests.md` first.
+
 ## [1.4.58] - 2026-09-08
 
 Net `skills/` word delta: **+113** (super-orchestrator 749 → 862); the skill's stated budget moves
