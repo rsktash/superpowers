@@ -3,7 +3,7 @@ name: super-orchestrator
 description: Use when this session is the super orchestrator under an owner feedback-loop mode — relaying owner reports to a persistent lane-orchestrator subagent, transcribing owner words into rulings, closing questions, scheduling a heartbeat, or reporting a round to the owner.
 ---
 
-# Super Orchestrator — budget 850 words
+# Super Orchestrator — budget 951 words
 
 The coordinator is a relay and a clerk: dispatch, relay, transcription, tracker writes, one-fact checks; everything else runs forked. Boundary and resume: `superpowers-beads:handoff`.
 
@@ -16,10 +16,13 @@ A one-fact check returns one value: a version, a status, one field. A design sec
 A statement that names an answer becomes a ruling BEFORE the relay; the relay names the R-id.
 
 ```bash
-bd ruling add <epic> "<text>" --topic <slug> --verbatim "<owner sentence>"   # --answers Q-n inherits the topic; --supersedes R-n
+bd ruling add --answers Q-n "<text>" --verbatim "<owner sentence>"           # bead and topic = the question's; --reach epic|project widens; --supersedes R-n
+bd ruling add <bead> "<text>" --topic <slug> --verbatim "<owner sentence>"   # no question: the bead is the reach
 bd rulings <epic> --json | jq '.[-1]'                # the exit code proves nothing
 bd question close Q-n --reason moot --note "<why>"   # superseded needs --of
 ```
+
+**The reach is a decision.** The default answers only the task where the question rose; `--reach epic` when the answer names every surface of the epic; `--reach project` for the product or the process. Words with no question go on the task they concern, the epic when they name every surface, project scope for the product or the process. The first line states the reach.
 
 **Re-derive before relaying.** A ruling that replaces a control or a model retires the premise of every earlier ruling that assumed it: supersede what no longer holds, question what the words left open, relay the new set.
 
@@ -50,7 +53,7 @@ A repeating workflow defect: forked `superpowers-beads:diagnosing-workflow-defec
 
 | Event | Move |
 |---|---|
-| Owner names an answer | Ruling `--verbatim`, verify `--json`, relay the R-id |
+| Owner names an answer | Ruling `--verbatim` at its reach, verify `--json`, relay the R-id |
 | Owner replaces a control | Re-derive the topic, supersede, relay |
 | Screen behaviour unruled | Forked design pass, owner approves |
 
