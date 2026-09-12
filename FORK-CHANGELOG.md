@@ -7,6 +7,22 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.60] - 2026-09-12
+
+Net `skills/` word delta: **+118** (super-orchestrator 862 → 951, budget restated from 850 to
+951; shared/bd-defaults 1219 → 1248). Nothing was removed; the skill was already 12 words over
+its budget.
+
+On the zanjir epic zanjir-8okxt, 113 of 115 rulings were filed on the epic, eight of them answers
+to questions raised on single tasks (.23, .26, .30, .35, .51, .59, .63, .66), so every task
+printed a 105-ruling block on each read and a lane orchestrator reached its first dispatch at a
+median of 74K context. The licensing text was the Owner words command line, `bd ruling add
+<epic> …`: bd let the caller choose the bead and never used the question's own bead it already
+read for the topic. bd (53700fb) now derives the bead from `--answers` — the question's bead by
+default, its epic with `--reach epic`, project scope with `--reach project` — and refuses a
+positional bead that disagrees. The skill shows the two command forms and keeps the one judgment
+the tool cannot make, which reach; the cheat sheet carries the same contract.
+
 ## [1.4.59] - 2026-09-12
 
 Net `skills/` word delta: **+151** (writing-plans 2804 → 2955); the skill's stated budget moves
