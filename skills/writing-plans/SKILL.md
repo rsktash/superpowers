@@ -5,7 +5,7 @@ context: fork
 model: opus
 ---
 
-# Writing Plans — budget 2950 words
+# Writing Plans — budget 2960 words
 
 ## Overview
 
