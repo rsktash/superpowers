@@ -7,6 +7,24 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.61] - 2026-09-13
+
+Net `skills/` word delta: **0** — no skill changed. The `hooks/citation-lint` hook is deleted
+and its `PreToolUse`/`Bash` registration removed from `hooks/hooks.json`.
+
+On 2026-09-13 the hook denied two `bd update --body-file` calls, on solo-eb4.6.163.22 and
+solo-eb4.6.163.23, because it ran `lint-citations.mjs` with no `--repo` argument: the lint then
+resolved every cited path against the session working directory, while the bead bodies cited
+paths from a nested repository root. Real files read as missing and the hook blocked plan edits
+it was never meant to judge. Denying a planner's own write is the worst failure mode available
+to a fail-open guard, and the hook had no way to learn which root a body speaks from.
+
+The citation convention itself stays: writing-plans still runs
+`node <skill-dir>/scripts/lint-citations.mjs <body-file> --repo <root>` as checklist step 4
+before every `bd create` and in Amend Mode before every child update, with the root named
+explicitly — which is the argument the hook could not supply. The ```citations fenced block
+remains a plan-writing convention described by the skill, not by a hook.
+
 ## [1.4.60] - 2026-09-12
 
 Net `skills/` word delta: **+118** (super-orchestrator 862 → 951, budget restated from 850 to
