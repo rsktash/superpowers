@@ -7,6 +7,25 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.62] - 2026-09-15
+
+Net `skills/` word delta: **+40**. Three skills stop instructing the coordinator to fork.
+
+On 2026-09-15 in hgs-borc the super orchestrator, following "everything else runs forked",
+launched the hgs-8bie.40 planning pass as an Agent-tool fork. A fork copies the session onto
+the session's own model and ignores any model override, so the pass ran on Fable, which the
+orchestration rule names never the execution driver. In the same turn a second skill fork of
+writing-plans ran in the foreground of the coordinator session and flooded it with the
+exploration the owner had ruled out of main. The super-orchestrator skill now says everything
+beyond one-fact checks runs in a dispatched subagent whose model the driving skill's map names,
+never a fork of the session, one such launch per turn; its design-pass, read, and
+workflow-defect lines say "dispatched" in place of "forked". The writing-plans and
+tracker-mining descriptions drop "Runs in its own forked agent"; their `context: fork`
+frontmatter, which honours their own `model:` line (opus, sonnet), is unchanged.
+
+Failed to remove: the super-orchestrator skill was already over its 850-word budget at 951
+words and now stands at 979; the displacement is owed.
+
 ## [1.4.61] - 2026-09-13
 
 Net `skills/` word delta: **0** — no skill changed. The `hooks/citation-lint` hook is deleted
