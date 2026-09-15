@@ -115,12 +115,17 @@ a fact about the code; turning it into a limit the user meets is a decision.
 
 Stop and hand off when: the queue is drained; every remaining queued task is
 blocked; a task hit its second failure; an implementer is BLOCKED on something
-only the owner can answer; or your own context is near 250K tokens. Drain
-every child agent before you stop: a child that exits after you stopped reports
-to nobody.
+only the owner can answer; or your own context is near 250K tokens. A running
+background job or child agent is NOT a stop condition: end the turn and let its
+exit re-invoke you; hand back only for the reasons listed above. Drain every
+child agent before you stop: a child that exits after you stopped reports to
+nobody.
 
 ## Close
 
+0. Stop every background job you started and delete every resource it left
+   (emulator, AVD, server, scratch file); a shell that outlives you is a leaked
+   resource. Name what you stopped in the thread.
 1. `bd plan handoff <plan> --lane <lane> --session <lane-session-id> --done
    "<id>:<tip-sha>,…" --next <id> --parked "<id>:<Q-id>,…" --thread-file
    <path>` with a thread of at most five lines: the lane branch tip, what is
@@ -142,5 +147,7 @@ to nobody.
 - Read a whole file or bare-`cat` a log: your prefix is written at the 1h rate
   (2x) and re-read every later turn; read ranges, tail test output, query a
   large result from a file.
-- Open a `.jsonl` transcript, or hold a turn with `sleep` or a polling loop; a
-  backgrounded command re-invokes you when it exits.
+- Open a `.jsonl` transcript, or run a command whose only work is to wait — a
+  `sleep`, an `until`/`while` poll, a `pgrep` watch — in the foreground or the
+  background. The job you already backgrounded re-invokes you when it exits;
+  end the turn and read its result then.

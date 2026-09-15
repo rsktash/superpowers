@@ -7,6 +7,23 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.63] - 2026-09-15
+
+Net `skills/` word delta: **0**. `agents/lane-orchestrator.md` grows by 89 words; three sentences that let a lane park on background waits.
+
+On 2026-09-15 in session 99929eb6 (epic zanjir-8okxt) lane 8okxt-rail-88 left eleven
+background zsh jobs running after its handoff, each an `until ! pgrep -f 'verify-88.sh'`
+loop whose own command line matched the pattern, so none could end; lane 8okxt-gutter-89
+handed back twice mid-flight "because three background jobs run". The charter's Never
+bullet forbade holding a turn with a sleep or poll and named backgrounding as the
+compliant path, so an obedient lane moved the poll into `run_in_background`; its Close
+steps named no background job; its Stop conditions did not say a running job is not one.
+Three edits, owner go the same day (superpowers-4yj): the Never bullet forbids a
+wait-only command in the foreground or the background and says the backgrounded job's
+exit re-invokes the lane; Close gains step 0, stop every background job and its
+resources and name them in the thread; Stop conditions state that a running background
+job or child is not a stop condition.
+
 ## [1.4.62] - 2026-09-15
 
 Net `skills/` word delta: **+40**. Three skills stop instructing the coordinator to fork.
