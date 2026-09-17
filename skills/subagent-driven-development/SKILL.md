@@ -13,7 +13,7 @@ Execute a plan by dispatching a fresh subagent per task, reviewing each task's o
 
 **Set up first:** REQUIRED SUB-SKILL — superpowers-beads:using-git-worktrees (isolated workspace before any task).
 
-**Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and route to superpowers-beads:writing-plans. Two exemptions: an open child whose title starts with `Decide:` is a decision bead, exempt from the `exec:` check, and must be the dependency of at least one open task (`bd get <id> rdeps` non-empty) — otherwise it is an orphan fork and the gate stops on it; an open child carrying an open owner question (`bd question list` names it) is parked on the owner, hidden by `bd ready`, and exempt the same way. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
+**Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead that fails any one of these — no children; no `plan-ready:` label on the root; no `## Attention Map` section in the root body (`bd show <root-id>` outline); any open child without an `exec:` label — is a spec, a half-written plan, or a hand-filed plan, not a plan: STOP and dispatch `superpowers-beads:planner`. Two exemptions: an open child whose title starts with `Decide:` is a decision bead, exempt from the `exec:` check, and must be the dependency of at least one open task (`bd get <id> rdeps` non-empty) — otherwise it is an orphan fork and the gate stops on it; an open child carrying an open owner question (`bd question list` names it) is parked on the owner, hidden by `bd ready`, and exempt the same way. Never improvise tasks from the epic body, and never mint the missing label or section by hand — every one of them is writing-plans' product, and the gate exists to tell its output from a copy.
 
 **Lane step:** with the gate passed, take this epic's lane per `skills/shared/plan-lane.md`, mode `subagent`, before the first claim.
 
@@ -44,7 +44,7 @@ A finding may not itself rest on a prediction of rendered behavior: its reading-
 
 Batch ALL findings into ONE question to your human partner before the session's first claim — never drip them out mid-run as you happen to notice each one: one batched question costs one interruption instead of five. If the review turns up nothing, say so in one line and start.
 
-A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; route the root epic id plus the bead id to writing-plans amend mode before it can be claimed.
+A ready bead labeled `needs-plan` is not dispatchable — it is a filed finding, not a planned task; dispatch `superpowers-beads:planner` with the root epic and bead ids, amend mode, before it can be claimed.
 
 ## The Loop
 
@@ -87,10 +87,10 @@ A reviewer's finding is a claim, not a verdict. Reviewer citations — file:line
 - **Findings that conflict with the plan's recorded decisions escalate to your human partner** — don't silently apply a suggestion that contradicts a decision already made for this plan.
 - **Filing threshold — a defect (per Authority triage) is fixed in the round (Fix Routing) or triaged by severity, never filed by default.** Propose a standalone bead only for: wrong behavior a user can hit, security, data loss, or something that blocks current work. Everything else is one comment line on the project's backlog bead (`bd comment add <backlog-id> "<one line>"`).
 - **Where a filing lands:** under the executing epic ONLY if it blocks that epic's own acceptance — a defect in what the epic built, or a gap that makes its gates unmeetable — dep-linked as a blocker. Everything else goes to the backlog line or, past the severity bar, a standalone bead outside the epic. The epic's close-set is its plan batch plus its own blockers, nothing else — that is what lets a five-task epic close at five.
-- **A finding deferred as a bead is labeled `needs-plan` at creation** (`-l needs-plan`). It carries a gate but no steps — the label keeps `bd ready` from surfacing it as dispatchable; route the root epic id plus the bead id to writing-plans amend mode.
+- **A finding deferred as a bead is labeled `needs-plan` at creation** (`-l needs-plan`). It carries a gate but no steps — the label keeps `bd ready` from surfacing it as dispatchable; dispatch `superpowers-beads:planner` with the root epic and bead ids, amend mode.
 - **The session's completion report lists every bead it created**, each with its one-line severity justification — filing visibility without mid-run stops.
 - **Fix Routing — who applies a defect.** Every defect goes back to the implementer's live session — it holds the context a fresh agent lacks — and that round carries ALL outstanding defects for the task, and no proposals; a round per finding is pure ceremony. A fresh implementer is dispatched only when that session is gone. The controller applies inline only a mechanical edit with no design content — a comment's wording, a changelog line — and then re-runs the one check; anything that decides behavior is the implementer's round however small the diff, and "small", "obvious" and "the reviewer already wrote the test" are not the test. A controller-applied fix carries the implementer's full obligations — including the sibling-site sweep for the defect class; a sweep spanning surfaces the finding didn't enumerate is design content, not a mechanical edit — dispatch it. Fixes land as commits on top of the reviewed ones either way.
-- **A second FAIL routes the split through writing-plans amend mode — after an authority audit.** Before routing or dispatching anything further, re-walk every open finding's authority chain end to end: a finding whose asserted authority exists solely in an agent-authored comment — not independently traceable to a gate item, normative clause, convention, or verbatim owner message — is struck, not fixed, and the round count usually collapses with it. Send what survives to amend mode with the root epic id plus the task id; amend mode is the only actor that performs the split, creating replacement sibling tasks under the root epic along the task's file map (per writing-plans' Task Size) and closing the original as superseded. No third same-shape round; the redo unit must shrink before any further round.
+- **A second FAIL routes the split through the planner's amend mode — after an authority audit.** Before routing or dispatching anything further, re-walk every open finding's authority chain end to end: a finding whose asserted authority exists solely in an agent-authored comment — not independently traceable to a gate item, normative clause, convention, or verbatim owner message — is struck, not fixed, and the round count usually collapses with it. Send what survives to amend mode with the root epic id plus the task id; amend mode is the only actor that performs the split, creating replacement sibling tasks under the root epic along the task's file map (per writing-plans' Task Size) and closing the original as superseded. No third same-shape round; the redo unit must shrink before any further round.
 
 ## Coordination Gate
 
@@ -135,7 +135,7 @@ Implementers report one of four:
 
 ## Model Selection
 
-Each task's tier is declared by the plan (superpowers-beads:writing-plans, Execution Annotation); this section only resolves it to a model. Your human partner's standing model policy (project memory, CLAUDE.md) overrides the map — check it before resolving any tier. Absent a policy, on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model.
+Each task's tier is declared by the plan (superpowers-beads:planner, Execution Annotation); this section only resolves it to a model. Your human partner's standing model policy (project memory, CLAUDE.md) overrides the map — check it before resolving any tier. Absent a policy, on Claude harnesses: `cheap` → Sonnet, `standard` → Sonnet, `capable` → the session's model.
 
 The doctrine behind the map — what a tier measures, when `capable` is earned, the pinned contract down-routing presumes, and the model the task's reviewer runs on — lives in `skills/shared/model-tiers.md`. Read it before resolving a contested tier.
 
@@ -154,5 +154,5 @@ The doctrine behind the map — what a tier measures, when `capable` is earned, 
 ## Integration
 
 - **superpowers-beads:using-git-worktrees** — REQUIRED before starting (also owns Finishing: merge back + cleanup).
-- **superpowers-beads:writing-plans** — creates the plan this skill executes.
+- **superpowers-beads:planner** — creates the plan this skill executes.
 - Implementers follow **superpowers-beads:test-driven-development** per task.

@@ -1,8 +1,9 @@
 ---
 name: writing-plans
-description: Use when you have a spec or requirements for a multi-step task, before touching code. Invoke it directly from the coordinator, never through a wrapper subagent.
+description: Use when you have a spec or requirements for a multi-step task, before touching code. The coordinator reaches it by dispatching `superpowers-beads:planner`, never through a hand-written wrapper subagent.
 context: fork
 model: opus
+disable-model-invocation: true
 ---
 
 # Writing Plans — budget 2960 words
@@ -19,11 +20,11 @@ A plan is a contract of intent, not a transcript of the code to come. The planne
 
 $ARGUMENTS
 
-Plan it now. That input has two shapes. A root epic bead id alone selects full mode for the spec held by that epic. A root epic id followed by one or more child ids selects amend mode for those named children. Both modes run forked (see Venue) with no conversation history, so read the epic, the named children when present, and the repo rather than a caller's context. Full mode creates tasks as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" -l "review:trivial-deterministic" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`; `-l` is repeatable, and the second label is added only when the task earns it (Execution Annotation). Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` once per session, skip if already read — a forked skill has a fresh context, so this one always reads it.
+Plan it now. That input has two shapes. A root epic bead id alone selects full mode for the spec held by that epic. A root epic id followed by one or more child ids selects amend mode for those named children. Both modes run in the planning venue (see Venue) with no conversation history, so read the epic, the named children when present, and the repo rather than a caller's context. Full mode creates tasks as child beads: `bd create "Task N: <name>" -p 1 --parent <root-id> --body-file .bd/.scratch/task-N.md -l "exec:<mode>" -l "review:trivial-deterministic" --json` — hierarchical IDs, sequential deps via `bd dep add <task-2> <task-1>`; `-l` is repeatable, and the second label is added only when the task earns it (Execution Annotation). Use `--parent`, never `--type related` (that breaks `bd children` and epic views). Read `skills/shared/bd-defaults.md` once per session, skip if already read — a planner has a fresh context, so this one always reads it.
 
 **Mandatory step:** writing-plans is the step between an epic and ANY execution skill. Executing an undecomposed epic is a bypass, not a shortcut.
 
-**Venue: you are the forked planning agent (`context: fork`).** This skill runs in an isolated subagent, so invoking it never loads this procedure into the coordinator's session, and you do not dispatch a further planner — you ARE it. Verify citations freely: opening every cited file here costs the coordinator nothing, because none of that reading lands in its session. Return a **receipt** and nothing else: bead ids, per-task Files lists, `exec:` labels, `plan-ready` marker.
+**Venue: you are the planning agent** — the dispatched `superpowers-beads:planner`, or the owner's slash command. It never loads into the coordinator's session, and you do not dispatch a further planner — you ARE it. Two planners run only on different epics. Verify citations freely: opening every cited file here costs the coordinator nothing, because none of that reading lands in its session. Return a **receipt** and nothing else: bead ids, per-task Files lists, `exec:` labels, `plan-ready` marker.
 
 **`NEEDS_RULING` is a successful, partial return:** task beads for the unforked region, decision beads over the rest. Never resolve an owner-level fork to avoid returning empty. Persist the draft to the beads and `.bd/.scratch` before returning, so any resumer starts from the draft, never zero.
 
@@ -169,7 +170,7 @@ When later phases depend on what earlier phases actually land, the last task of 
 ## Amend Mode
 
 Amend mode's input is the root epic id plus one or more child ids: an unlabeled child, a `needs-plan` bead, or a task a second review FAIL must split.
-Amend mode runs forked exactly like full mode.
+Amend mode runs in the same venue as full mode.
 Rewrite each named child's body to the Task Structure template.
 Lint each named child's rewritten body with the citation lint before updating the child.
 Label each named child `exec:<mode>` and also `review:trivial-deterministic` when it earns that label.
