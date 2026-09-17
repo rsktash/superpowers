@@ -60,6 +60,23 @@ Charter text as landed by the release that created it.
   also named the one uncovered case — an unreadable file — as NEEDS_CONTEXT.
 - Action: none.
 
+## Live route check — PASS
+
+Run against the installed plugin after the release, not against a payload: one
+fresh Sonnet agent, real tools, told that `agents/planner.md` is its system
+prompt and to follow only the charter's "Load your procedure" section. It ran
+`ls -d ~/.claude/plugins/cache/rsktash/superpowers-beads/*/ | sort -V | tail
+-1`, got the installed directory, read
+`skills/writing-plans/SKILL.md` under it, quoted the frontmatter back including
+`disable-model-invocation: true`, and listed all seven Checklist titles. The
+procedure loads with the key set; the charter's path resolution is not
+hypothetical.
+
+The agent type itself is only dispatchable after the session reloads its
+plugins: an `Agent` call naming `superpowers-beads:planner` in the session that
+published the release is refused with "agent type not found", because the
+registry is read at session start.
+
 ## Scenario: test-worktree-and-parallel-creates.md — PASS, baseline contaminated
 
 - GREEN observed: both shortcuts declined, each against the charter's own
