@@ -7,6 +7,41 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.64] - 2026-09-17
+
+Net `skills/` word delta: **+40** (49,746 → 49,786); per-skill split: super-orchestrator
++38 (979 → 1,017), writing-plans +10 (2,949 → 2,959), subagent-driven-development −4,
+brainstorming −2, codex-execution −2, hybrid-execution 0. `agents/planner.md` adds 634
+words outside `skills/`. What it failed to remove: the super-orchestrator paragraph states
+a harness behaviour no existing sentence carried, so nothing was displaced for it, and that
+file now sits 66 words over its stated 951-word budget.
+
+Claude Code forces a forked skill into the foreground when the same skill is invoked while
+an earlier invocation of it is still running (code.claude.com/docs/en/skills.md).
+writing-plans is `context: fork`, so a coordinator could plan only one epic at a time and
+the second invocation blocked its own session. The Agent tool has no such limit. 1.4.53 had
+answered a pass-through planner — a hand-written general-purpose wrapper above the skill's
+own fork — by telling the dispatcher to invoke the skill directly and never through a
+wrapper subagent; that protection stands, and this release names the sanctioned parallel
+route in place of a hand-written one: the declared `superpowers-beads:planner` agent, Opus,
+one per epic, several at once across different epics.
+
+The procedure keeps one home. `agents/planner.md` carries no copy of it: the charter
+resolves the installed plugin directory and reads `skills/writing-plans/SKILL.md` from it.
+The skill now sets `disable-model-invocation: true`, which blocks both a Skill-tool
+invocation and a subagent `skills:` preload (same doc page), so the file read is the only
+route left to an agent and the slash command is the owner's. A baseline run without the
+charter, given the refusal, filed a question and reported BLOCKED rather than read the file;
+the charter's sentence naming the read as the sanctioned route is what turns that into a
+plan (`tests/skill-evals/planner/`). The charter also states what a dispatched planner must
+never do: enter a worktree (it pins the coordinator's whole session and every later lane
+claim is refused) and create children in parallel (parallel creates collide in bd).
+
+Sibling sites that told the coordinator how to reach planning now name the dispatch:
+brainstorming's terminal step and implementation handoff, the epic gates and `needs-plan`
+routes in hybrid-execution, subagent-driven-development and codex-execution, and
+super-orchestrator, which gains the foreground-forcing behaviour itself.
+
 ## [1.4.63] - 2026-09-15
 
 Net `skills/` word delta: **0**. `agents/lane-orchestrator.md` grows by 89 words; three sentences that let a lane park on background waits.

@@ -31,9 +31,9 @@ You MUST create a task for each of these items and complete them in order:
 6. **Create spec bead** — store spec in beads via `bd create` and write summary file to `docs/beads/`
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews spec bead** — ask user to review the spec via `bd show` before proceeding
-9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+9. **Transition to implementation** — dispatch `superpowers-beads:planner`
 
-**Terminal step:** The ONLY skill you invoke after brainstorming is writing-plans. Do NOT invoke frontend-design, mcp-builder, or any other implementation skill.
+**Terminal step:** The ONLY step after brainstorming is the `superpowers-beads:planner` dispatch. Do NOT invoke frontend-design, mcp-builder, or any other implementation skill.
 
 ## The Process
 
@@ -127,9 +127,9 @@ Wait for the user's response. If they request changes, update the bead and re-ru
 
 **Implementation:**
 
-- Invoke the writing-plans skill to create a detailed implementation plan
-- Pass the root bead ID to writing-plans (not a file path)
-- Do NOT invoke any other skill. writing-plans is the next step.
+- Dispatch the `superpowers-beads:planner` agent to create a detailed implementation plan
+- Pass the root bead ID to it (not a file path)
+- Do NOT invoke any other skill; the owner may type the writing-plans slash command.
 
 ## Key Principles
 

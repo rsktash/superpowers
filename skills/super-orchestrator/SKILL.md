@@ -11,6 +11,8 @@ The coordinator is a relay and a clerk: dispatch, relay, transcription, tracker 
 
 A one-fact check returns one value: a version, a status, one field. A design section, a rulings filter, a `git log`, a screenshot is mining: dispatch `superpowers-beads:miner` or invoke `superpowers-beads:tracker-mining` with a line cap, one such launch per turn, end the turn, answer from the brief. Residency is the test, not size.
 
+Planning is a dispatch — `superpowers-beads:planner`, one per epic, parallel across epics. A forked skill is invoked one at a time: a second invocation while the first one runs is forced to the foreground and holds this session.
+
 ## Owner words
 
 A statement that names an answer becomes a ruling BEFORE the relay; the relay names the R-id.
