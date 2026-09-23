@@ -7,6 +7,19 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.65] - 2026-09-24
+
+Net `skills/` word delta: **+1** (49,786 → 49,787); per-skill split: super-orchestrator
++1 (1,017 → 1,018). What it failed to remove: the sentence only reorders its list and needs
+"then" to keep the sequence readable, so nothing was displaced; the file stays over its
+951-word budget as before.
+
+The super orchestrator's final message now opens with the owner's decision, before the
+localhost and device currency. The owner reads the pending decision first, and a decision
+at the end of the message sits behind everything else. Tested with the same round's facts
+run twice: under the old wording the blocking question came last, under the new one first,
+and the rest of the order held.
+
 ## [1.4.64] - 2026-09-17
 
 Net `skills/` word delta: **+40** (49,746 → 49,786); per-skill split: super-orchestrator
