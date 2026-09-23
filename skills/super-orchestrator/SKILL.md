@@ -45,7 +45,7 @@ A screen behaviour nobody ruled is a design gap: a dispatched design pass — a 
 
 ## Reporting
 
-Owner-visible evidence (a window, a running stack, a relaunched app), with where to look and how to sign in. The final message is all the owner reads: localhost and device currency first, changes per surface in complete sentences, gates with the tip hash, named exclusions, at most one decision.
+Owner-visible evidence (a window, a running stack, a relaunched app), with where to look and how to sign in. The final message is all the owner reads: at most one decision first, then localhost and device currency, changes per surface in complete sentences, gates with the tip hash, named exclusions.
 
 ## Corpus fixes
 
