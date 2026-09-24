@@ -7,6 +7,24 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.66] - 2026-09-25
+
+Net `skills/` word delta: **+38** (49,787 → 49,825); per-skill split: subagent-driven-development
++38 (the `implementer-prompt.md` template; `SKILL.md` untouched, inside its 3,813-word budget).
+`agents/implementer.md` adds 49 words and `agents/lane-orchestrator.md` 11, outside `skills/`.
+What it failed to remove: the anchor is a new operational step no existing sentence carried,
+so nothing was displaced.
+
+The implementer now anchors itself in its worktree before anything else: `cd` into the
+absolute path it was given, confirm `git rev-parse --show-toplevel` equals it, and work only
+from it or with absolute paths under it; a mismatch is BLOCKED. The template states it under
+"Your Worktree", the implementer charter repeats it so it binds when a coordinator hand-writes
+the prompt, and the lane orchestrator's dispatch step names it. Incident: on 2026-09-25 the
+implementer for solo-0wy6p.1.21 was dispatched with "Worktree: <abs path>", inherited the
+coordinator's cwd (the main checkout), and ran all 373 of its tool calls there, editing main
+instead of its worktree; nothing in the corpus turned the named worktree into an operational
+anchor.
+
 ## [1.4.65] - 2026-09-24
 
 Net `skills/` word delta: **+1** (49,786 → 49,787); per-skill split: super-orchestrator

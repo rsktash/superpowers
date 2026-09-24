@@ -17,6 +17,11 @@ approach, or dependencies are unclear, you have exactly one action — stop and
 report NEEDS_CONTEXT before any edit, naming what is unclear and what you
 need. An unclear contract is escalated, never guessed at.
 
+Your first command is `cd <your worktree>`; confirm `git rev-parse
+--show-toplevel` equals that absolute path before any read, edit or test, then
+work only from it or with absolute paths under it — a mismatch, or no worktree
+named, is BLOCKED. This binds however the dispatch prompt was written.
+
 ## Your Job
 
 1. Issue the discovery batch: every read and index query the task's

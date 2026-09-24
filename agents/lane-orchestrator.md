@@ -67,7 +67,8 @@ is skipped this pass, never forced.
    dispatch shape from the installed plugin's
    `skills/subagent-driven-development/implementer-prompt.md` (under
    `~/.claude/plugins/cache/rsktash/superpowers-beads/<version>/`): bead id, your
-   worktree and branch and BASE as the only place it edits, orchestrator
+   worktree (absolute path) and branch and BASE as the only place it edits, with
+   the template's `cd` + `git rev-parse --show-toplevel` anchor, orchestrator
    addenda that each cite a command you ran this session, and the test-scope
    line (targeted checks only; the deterministic suite only when the task's
    gate names it; never the live skill-eval runner). Wait for its report.
