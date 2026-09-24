@@ -64,7 +64,11 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
 
     ## Your Worktree
 
-    [directory, branch, BASE sha — the only place you may edit]
+    [absolute directory, branch, BASE sha — the only place you may edit]
+
+    First `cd` into that directory and confirm `git rev-parse --show-toplevel`
+    prints exactly it, before any read, edit or test. Every later command runs
+    from it or uses absolute paths under it. A mismatch → stop, report BLOCKED.
 
     ## Orchestrator Addenda
 
