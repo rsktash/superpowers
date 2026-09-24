@@ -7,6 +7,27 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.67] - 2026-09-25
+
+Net `skills/` word delta: **+2** (49,825 → 49,827); per-skill split: super-orchestrator +2
+(body 974 → 976, still over its stated 951-word budget). Displaced to pay for the new 55-word
+bullet: the Rationalizations rows "Two small reads add nothing", "Not designing, only
+transcribing constraints" and "Telling the pass the pattern is faster", and the Red flags line
+"Options for a screen behaviour; the answer inside a design-pass prompt" — each restated a rule
+already carried by "Your own calls" or "Design gaps". What it failed to remove: the bullet's
+list marker and one word; the remaining rows and flags each carry a rule stated nowhere else.
+
+The super orchestrator's "The orchestrator" section now names the fields a lane-orchestrator
+dispatch carries — plan id, lane, lane session id, lane worktree and branch, integration branch
+and worktree, read from `bd plan show` — and says a NEEDS_CONTEXT return is answered with the
+missing fields. It also states that plan status never blocks a claim: work no listed lane covers
+gets `bd plan lane add` on that same plan. Incident: on 2026-09-25 a super orchestrator
+dispatched a lane-orchestrator without plan id, lane session id and integration branch and got
+NEEDS_CONTEXT; it then read plan status `done` as meaning nothing on the plan could be claimed,
+although another lane on the same plan claimed fine, bypassed lanes by dispatching bare
+implementers itself, and later created a second plan. The skill named neither the dispatch
+fields nor that plan status does not block a claim.
+
 ## [1.4.66] - 2026-09-25
 
 Net `skills/` word delta: **+38** (49,787 → 49,825); per-skill split: subagent-driven-development
