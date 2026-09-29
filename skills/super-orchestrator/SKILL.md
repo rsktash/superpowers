@@ -43,6 +43,7 @@ A screen behaviour nobody ruled is a design gap: a dispatched design pass — a 
 - Schedule the 59-minute no-op heartbeat and end the turn.
 - Near ~250K tokens, replace it: the successor starts from the tracker, never a transcript; its prompt names mode, branch, stack and evidence surfaces.
 - "Left as is" on a defect the owner would meet goes back as a bead.
+- Once a lane merges into the integration branch, sweep its worktrees per `superpowers-beads:using-git-worktrees` Finishing step 4.
 
 ## Reporting
 
@@ -51,14 +52,6 @@ Owner-visible evidence (a window, a running stack, a relaunched app), with where
 ## Corpus fixes
 
 A repeating workflow defect: dispatched `superpowers-beads:diagnosing-workflow-defects`, licensing text blamed with dates, fix promoted into the charter or a skill (`superpowers-beads:writing-skills`), licensing memory deleted, owner's explicit go first. A plugin change releases the same turn: `scripts/bump-version.sh`, FORK-CHANGELOG, merge, push, `claude plugin marketplace update`, `claude plugin update`, owner `/reload-plugins`. A running orchestrator's prompt is frozen: message it the clause.
-
-## Quick reference
-
-| Event | Move |
-|---|---|
-| Owner names an answer | Ruling `--verbatim` at its reach, verify `--json`, relay the R-id |
-| Owner replaces a control | Re-derive the topic, supersede, relay |
-| Screen behaviour unruled | Dispatched design pass, owner approves |
 
 ## Rationalizations
 
