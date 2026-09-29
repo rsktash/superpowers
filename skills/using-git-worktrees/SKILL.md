@@ -152,44 +152,6 @@ Ready to implement <feature-name>
 | Tests fail during baseline | Report failures + ask |
 | No package.json/Cargo.toml | Skip dependency install |
 
-## Common Mistakes
-
-### Skipping ignore verification
-
-- **Problem:** Worktree contents get tracked, pollute git status
-- **Fix:** Always use `git check-ignore` before creating project-local worktree
-
-### Assuming directory location
-
-- **Problem:** Creates inconsistency, violates project conventions
-- **Fix:** Follow priority: existing > CLAUDE.md > ask
-
-### Proceeding with failing tests
-
-- **Problem:** Can't distinguish new bugs from pre-existing issues
-- **Fix:** Report failures, get explicit permission to proceed
-
-### Hardcoding setup commands
-
-- **Problem:** Breaks on projects using different tools
-- **Fix:** Auto-detect from project files (package.json, etc.)
-
-## Example Workflow
-
-```
-You: I'm using the using-git-worktrees skill to set up an isolated workspace.
-
-[Check .worktrees/ - exists]
-[Verify ignored - git check-ignore confirms .worktrees/ is ignored]
-[Create worktree: git worktree add .worktrees/auth -b feature/auth]
-[Run npm install]
-[Run npm test - 47 passing]
-
-Worktree ready at /Users/jesse/myproject/.worktrees/auth
-Tests passing (47 tests, 0 failures)
-Ready to implement auth feature
-```
-
 ## Red Flags
 
 **Never:**
@@ -243,12 +205,14 @@ git merge <feature-branch>
 <the suite command from the project runbook — see Finishing step 1>
 ```
 
-### 4. Remove the Worktree
+### 4. Remove the Worktrees
 
 ```bash
 git worktree remove <path>
 git branch -d <feature-branch>
 ```
+
+Then sweep every worktree the merged branch spawned: its task worktrees (branch `task/<lane>-*`) and review worktrees (`.worktrees/review-*`, detached). Each whose branch or HEAD is merged into `<base>` goes: `git worktree remove`, then `git branch -d` for a branch. `--force` only when the sole untracked content is OS junk (`.DS_Store`); `-d` refuses unmerged work. Report each worktree kept and why: branch unmerged, or tracked or untracked changes beyond OS junk.
 
 ### 5. Never Open a PR
 

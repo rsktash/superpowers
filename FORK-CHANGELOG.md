@@ -7,6 +7,26 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.68] - 2026-09-29
+
+Net `skills/` word delta: **-114** (49,827 → 49,713); per-skill split: using-git-worktrees -82
+(body 1,117 → 1,035, back under its 1,100-word budget), super-orchestrator -32 (body 976 → 944,
+back under its 951-word budget). Displaced: using-git-worktrees' "Common Mistakes" and "Example
+Workflow" sections, which restated the Red Flags list and Quick Reference table; the
+super-orchestrator "Quick reference" table, which restated "Owner words" and "Design gaps".
+Outside `skills/`, the lane-orchestrator agent grows by 80 words (no stated budget).
+
+Worktree cleanup now has an owner at both merge points. The lane-orchestrator merges a task
+worktree's branch into its lane branch and in the same step runs `git worktree remove` and
+`git branch -d`; it removes each review worktree once its verdict is processed, and its handoff
+and final report name any worktree it could not remove, with the reason. using-git-worktrees'
+Finishing step 4 now sweeps, after the merged branch's own worktree, every task (`task/<lane>-*`)
+and review worktree it spawned that is merged into the base (`--force` only for OS-junk-only
+untracked content), reporting each kept worktree and why; the super orchestrator points at that
+step after merging a lane. Incident: on 2026-09-29 msklad-biklod held 112 worktrees, 76 of them
+on branches already merged into main — lanes left task worktrees behind, the super orchestrator
+removed only the lane worktree, and no skill owned the sweep.
+
 ## [1.4.67] - 2026-09-25
 
 Net `skills/` word delta: **+2** (49,825 → 49,827); per-skill split: super-orchestrator +2
