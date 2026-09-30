@@ -7,6 +7,19 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.69] - 2026-09-30
+
+Net `skills/` word delta: **-1**; per-skill split: super-orchestrator -1 (body 944 → 943, under its
+951-word budget). Displaced: "Owner words"' restatement of the reach ladder for words with no
+question, now "take the same reach".
+
+Owner words become a ruling only when they decide something future work must obey — behavior,
+design, vendor, cost, convention. An operational instruction (sequence, go-ahead, push timing,
+close/stop) is executed and never filed. Incident: on 2026-09-30 the Biklod super orchestrator filed
+push-timing instructions as rulings (R-1198, R-1205), following "a statement that names an answer
+becomes a ruling BEFORE the relay"; the owner objected to a ruling for every message. The same
+carve-out landed in the global CLAUDE.md Evidence rule.
+
 ## [1.4.68] - 2026-09-29
 
 Net `skills/` word delta: **-114** (49,827 → 49,713); per-skill split: using-git-worktrees -82

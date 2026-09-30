@@ -15,7 +15,7 @@ Planning is a dispatch — `superpowers-beads:planner`, one per epic, parallel a
 
 ## Owner words
 
-A statement that names an answer becomes a ruling BEFORE the relay; the relay names the R-id.
+A decision binding future work (behavior, design, vendor, cost, convention) becomes a ruling BEFORE the relay; the relay names the R-id. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed.
 
 ```bash
 bd ruling add --answers Q-n "<text>" --verbatim "<owner sentence>"           # bead and topic = the question's; --reach epic|project widens; --supersedes R-n
@@ -24,7 +24,7 @@ bd rulings <epic> --json | jq '.[-1]'                # the exit code proves noth
 bd question close Q-n --reason moot --note "<why>"   # superseded needs --of
 ```
 
-**The reach is a decision.** The default answers only the task where the question rose; `--reach epic` when the answer names every surface of the epic; `--reach project` for the product or the process. Words with no question go on the task they concern, the epic when they name every surface, project scope for the product or the process. The first line states the reach.
+**The reach is a decision.** The default answers only the task where the question rose; `--reach epic` when the answer names every surface of the epic; `--reach project` for the product or the process. Words with no question take the same reach. The first line states the reach.
 
 **Re-derive before relaying.** A ruling that replaces a control or a model retires the premise of every earlier ruling that assumed it: supersede what no longer holds, question what the words left open, relay the new set.
 
