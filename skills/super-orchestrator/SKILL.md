@@ -36,9 +36,10 @@ A screen behaviour nobody ruled is a design gap: a dispatched design pass — a 
 
 ## The orchestrator
 
-**Proportion.** The pipeline exists for uncertainty. A report whose diff can be written from the report alone, touching the file it names and nothing else, is a mechanical edit: applied directly on the epic branch by the orchestrator, or by you when none is running, gated by the suites the touched files can fail, redeployed, closed with one line. No worktree, no implementer, no reviewer, no design section. Triage happens at the relay: mechanical goes straight to the edit, everything else goes to the loop. A forty-minute path for a one-condition fix is the defect, whoever walks it.
+**Proportion.** The pipeline exists for uncertainty. A report whose diff can be written from the report alone, touching the file it names and nothing else, is a mechanical edit: applied directly on the epic branch by the orchestrator, or by you when none is running, gated by the suites the touched files can fail, redeployed, closed with one line. No worktree, no implementer, no reviewer, no design section. Triage happens at the relay: mechanical goes straight to the edit, everything else goes to the loop.
 
 - A lane-orchestrator dispatch names plan id, lane, lane session id, lane worktree and branch, and integration branch and worktree, read from `bd plan show`; a NEEDS_CONTEXT return is answered with the missing fields. Plan status never blocks a claim — work no listed lane covers gets `bd plan lane add` on that same plan (`skills/shared/plan-lane.md`).
+- An implementer dispatched outside a lane follows your claim — `bd update <id> --status in_progress --assignee "<user> / <model>"` — and its prompt names it; otherwise the task goes through a lane.
 - Its charter ("When you author a task body") makes gap-fills proposals. Before reporting a round, dispatch a read of each authored child's design section; a server fact turned into a user limit is a decision to surface.
 - Schedule the 59-minute no-op heartbeat and end the turn.
 - Near ~250K tokens, replace it: the successor starts from the tracker, never a transcript; its prompt names mode, branch, stack and evidence surfaces.
@@ -59,7 +60,6 @@ A repeating workflow defect: dispatched `superpowers-beads:diagnosing-workflow-d
 |---|---|
 | "R-n excludes it; no decision exists" | The complaint targets what R-n fixed. Re-derive. |
 | "A comment instead of closing Q-n" | Nothing binding in a comment. Close moot. |
-| "The mode routes every item through the orchestrator" | The mode fixes who receives the relay, not the tier. Mechanical edits skip the pipeline. |
 
 ## Red flags
 

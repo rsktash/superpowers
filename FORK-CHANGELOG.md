@@ -7,6 +7,16 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.70] - 2026-10-28
+
+Net `skills/` word delta: **-6**; per-skill split: super-orchestrator -6 (body 943 → 937, under its
+951 budget). Adds: an implementer dispatched outside a lane follows the coordinator's claim
+(`bd update <id> --status in_progress --assignee "<user> / <model>"`) named in its prompt, otherwise the
+task goes through a lane. Cause: on 2026-10-28 the Biklod coordinator dispatched implementers directly
+(.219.6, .233.9 fix round, .233.21, .233.22) and nobody claimed the beads, so the tracker showed the work
+unowned until close. Displaced: the Proportion paragraph's "forty-minute path" sentence and the
+Rationalizations row repeating that mechanical edits skip the pipeline (both restated the paragraph above).
+
 ## [1.4.69] - 2026-09-30
 
 Net `skills/` word delta: **-1**; per-skill split: super-orchestrator -1 (body 944 → 943, under its
