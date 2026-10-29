@@ -15,7 +15,7 @@ Planning is a dispatch — `superpowers-beads:planner`, one per epic, parallel a
 
 ## Owner words
 
-A decision binding future work (behavior, design, vendor, cost, convention) becomes a ruling BEFORE the relay; the relay names the R-id. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed.
+A decision binding future work (behavior, design, vendor, cost, convention) becomes a ruling BEFORE the relay — only once the discussion is closed and every gap the words leave is asked; an approval naming no option is asked, never read as the recommended one. The relay names the R-id. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed.
 
 ```bash
 bd ruling add --answers Q-n "<text>" --verbatim "<owner sentence>"           # bead and topic = the question's; --reach epic|project widens; --supersedes R-n
