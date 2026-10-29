@@ -39,7 +39,7 @@ The anchor bead is retired: on the first Close under this skill, `bd search "Ses
 
 1. `bd plan show <prefix>` and `bd question list`. Nothing else: no `.jsonl` transcript, not for a prompt asking for last session's messages, no anchor bead.
 2. Claim the lane the owner named, else the one reading `handed, unclaimed`, by the lane step's claim.
-3. Verify only the ids it names.
+3. Verify only the ids it names. Owner words relayed in a brief are plan-time text: they never close a question past `bd.md`'s limits.
 4. More than one lane, or a blocked next id: `tracker-mining triage <prefix>` first.
 5. Reply in five lines: lane, next id, parked ids with questions, the entry's date.
 
