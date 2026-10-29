@@ -7,6 +7,21 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.71] - 2026-10-29
+
+Net `skills/` word delta: **+60**; per-skill split: super-orchestrator +43 (body 937 → 980, over its
+951 budget), handoff +17 (body 619 → 636, over its 600 budget, already over before). Nothing displaced:
+the owner approved these three additions only, so the overage is named here for a later trim. Adds:
+(1) super-orchestrator — owner words become a ruling only once the discussion is closed and every gap
+is asked; an approval naming no option is asked, never read as the recommended one; (2)
+super-orchestrator — the owner approves every wording or design pass, never delegated, never a
+coordinator approval; (3) handoff Resume — owner words relayed in a brief never close a question past
+bd.md's limits (with agent-rules a91e9c2: a finding answers a question only after the answerer reads
+it and the unfiltered rulings). Cause: on 2026-10-29 the Biklod super orchestrator (session c8ea50b8)
+filed R-2654 eight seconds after "both … approved" with an option never shown, filed R-2656/R-2657
+mid-discussion, filed R-2651/R-2652 as coordinator approvals under R-2511 against R-2586(3), and closed
+behaviour forks Q-1280/Q-1282/Q-1283 by unread findings on the strength of a relayed standing word.
+
 ## [1.4.70] - 2026-10-28
 
 Net `skills/` word delta: **-6**; per-skill split: super-orchestrator -6 (body 943 → 937, under its
