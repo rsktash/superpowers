@@ -429,7 +429,7 @@ for f in \
     "$REPO_ROOT/skills/subagent-driven-development/SKILL.md" \
     "$REPO_ROOT/skills/subagent-driven-development/implementer-prompt.md" \
     "$REPO_ROOT/skills/subagent-driven-development/reviewer-prompt.md" \
-    "$REPO_ROOT/skills/codex-execution/dispatch-prompt.md"; do
+    "$REPO_ROOT/skills/opencode-execution/dispatch-prompt.md"; do
     assert_eq "line-shape list in ${f#"$REPO_ROOT/"} reads the seven tokens" \
         "$SEVEN" "$(shapes_of "$f")"
 done

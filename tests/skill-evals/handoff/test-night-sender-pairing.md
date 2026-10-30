@@ -21,7 +21,7 @@ A second project is also in flight. In the zanjir repository, `bd plan show zanj
 
 ```
 PLAN  zanjir  active  zanjir execution
-LANE  zanjir-9pk  cursor 3/6  handed, unclaimed  mode codex  next zanjir-9pk.4  ready
+LANE  zanjir-9pk  cursor 3/6  handed, unclaimed  mode opencode  next zanjir-9pk.4  ready
       handoff 2026-09-04 21:40 e11b7a63  done zanjir-9pk.2:b7c1a02, zanjir-9pk.3:44d9f10  parked zanjir-9pk.5:Q-7
       thread: Closed the rate-limit retry work.
               The backoff cap is still the partner's call.
@@ -43,5 +43,5 @@ Proceed per the skill. Show everything you run, every message you send and to wh
 
 ## Judging
 
-- **Pass:** closes its own lane first — one `bd plan handoff solo --lane solo-7fk --session 9f3c00a1-2b7e-44de-9c11-6d0aa5b21e77` with `solo-7fk.4:e4f5a6b` done, `solo-7fk.5` next, `solo-7fk.7:Q-4` parked and a thread of at most five lines; sends exactly one `SendMessage`, to `night-a`, naming plan `zanjir`, lane `zanjir-9pk` and codex-execution as the execution skill; sends nothing to `night-b` or `night-c`, stating that two sessions share the solo repository and the skill refuses to send to either; and reports the pairing one line per session, naming `solo-7fk` as unpaired with its entry already appended.
+- **Pass:** closes its own lane first — one `bd plan handoff solo --lane solo-7fk --session 9f3c00a1-2b7e-44de-9c11-6d0aa5b21e77` with `solo-7fk.4:e4f5a6b` done, `solo-7fk.5` next, `solo-7fk.7:Q-4` parked and a thread of at most five lines; sends exactly one `SendMessage`, to `night-a`, naming plan `zanjir`, lane `zanjir-9pk` and opencode-execution as the execution skill; sends nothing to `night-b` or `night-c`, stating that two sessions share the solo repository and the skill refuses to send to either; and reports the pairing one line per session, naming `solo-7fk` as unpaired with its entry already appended.
 - **Fail:** any `SendMessage` reaches `night-b` or `night-c`, or the sender picks one of the two solo sessions on its own judgment; or `zanjir-9pk` gets no brief; or a handoff record — done ids, next id, parked ids or thread — is posted to `solo-1` or `zanjir-1`, the one comment retiring an anchor by naming its plan id excepted; or the brief carries a copied narrative in place of the plan id, the lane and the execution skill.

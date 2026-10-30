@@ -1,6 +1,6 @@
 # The Lane Step — the plan, the epic's lane, the claim
 
-The one home for lane creation. hybrid-execution, codex-execution and
+The one home for lane creation. hybrid-execution, opencode-execution and
 subagent-driven-development each cite this file once, immediately after their
 epic gate; every rule below is stated once, here, for the three alike. Lane
 creation is the coordinator's job and it happens at execution start: the
@@ -54,7 +54,7 @@ prints `lane <epic-id> added to <plan-id> with <n> queued`. The four values:
   comma-separated, minus every child whose title starts with `Decide:`: a
   decision bead is the owner's to rule, never a queue entry to execute.
 - `--mode` — the skill you are running: hybrid-execution passes `subagent`,
-  codex-execution passes `codex`, subagent-driven-development passes
+  opencode-execution passes `opencode`, subagent-driven-development passes
   `subagent`. bd's third value, `inline`, is passed by no execution skill.
 - `--rulings` — every id `bd rulings <epic-id>` prints, comma-separated. That
   list is inheritance-resolved, so the rulings the epic's parents carry are

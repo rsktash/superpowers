@@ -58,7 +58,7 @@ the current plan; findings show how we got here.
 
 **Your actor identity:** export `BD_ACTOR=executor` before any bd write.
 Findings and questions are yours to file; `bd ruling add` is refused to you —
-decisions come back as rulings filed by the coordinator.
+decisions come back as AGENTS.md edits the owner approves.
 
 **Pick a topic, never mint one:** file either without `--topic` first so bd
 prints the catalogue and you pick an existing slug from it — you never mint
@@ -74,8 +74,8 @@ A mechanism, constraint, or parameter you chose that the task does not state
 **is a deviation** — the task's silence is not a license. If two reasonable
 implementations of your gate would behave observably differently, you are at
 a design fork: when the outcome matters beyond this task, file
-`bd question add <task-id> "<the fork>"` (the task leaves `bd ready` until a
-ruling answers it) and report NEEDS_CONTEXT; otherwise implement and log a
+`bd question add <task-id> "<the fork>"` (the task leaves `bd ready` until the
+owner's answer lands as an AGENTS.md commit) and report NEEDS_CONTEXT; otherwise implement and log a
 `[reviewer]` finding naming the fork and the road not taken. And if any Acceptance Gate item is reworded at execution time —
 gate-lint or otherwise — update the bead in the same round: the gate the
 review verifies is the recorded one, never a private working-copy variant.

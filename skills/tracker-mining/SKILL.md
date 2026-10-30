@@ -20,13 +20,13 @@ Run that job now — it names one job and its scope. Five jobs, no sixth; an unm
 
 **`triage <plan-id>`** — what each lane is on and what blocks it. `bd plan show <plan-id>`, bare `bd question list`, `bd authority <cursor-id> --json` per lane. Brief: a line per lane (name, cursor, holder, next, blocker), then the blocking questions.
 
-**`audit <project|epic-id>`** — four checks, never a listing.
+**`audit <project|epic-id>`** — four checks, never a listing. Rulings are legacy: they bind only where no AGENTS.md covers the code; elsewhere the audit reports them as extraction material.
 
 Scope first; neither verb scopes as its name suggests. Project rulings are bare `bd rulings` — never `bd rulings --scope project`, which lists only issue-id-null rulings, none here. Epic rulings are `bd rulings <epic-id>`, inheritance resolved. Questions never inherit: both scopes run bare `bd question list` and select rows by the `[issue-id]` cell each carries — the epic's id plus every `<epic-id>.` child, which `bd question list <epic-id>` misses. Then `bd topics --all` once.
 
 - **Contradicting rulings** — two active rulings on one scope that disagree; bd never refuses the second. Pair by the slug each settled (`bd topics --all`), compare full texts (`bd rulings --json`), since headlines truncate.
 - **Stale citations** — an answered question still called open, a superseded ruling still quoted as law. `bd settled "<cited-id>"` finds the statements repeating it; `bd question list --status answered`, then `--status superseded`, gives the truth.
-- **Unpromoted candidates** — an owner decision that never became a ruling: findings from `bd authority <scope> --json`, its owner sentence from `bd source <id>`, then the scope's rulings to confirm none carries it.
+- **Unpromoted candidates** — an owner decision that never landed in an AGENTS.md: findings from `bd authority <scope> --json`, its owner sentence from `bd source <id>`, then the folder AGENTS.md files and the scope's rulings to confirm none carries it.
 - **Duplicate and label-shaped topics** — two slugs for one subject (`execution-lane` beside `execution-lanes`), or a slug naming a process step, not a subject in dispute. `bd topics --all` is the whole input.
 
 Brief: a line per hit, grouped by check; a check with no hit says so, so silence never reads as clean.

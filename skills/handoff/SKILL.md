@@ -31,7 +31,7 @@ The anchor bead is retired: on the first Close under this skill, `bd search "Ses
 
 1. Drain in-flight agents: a backgrounded job or child re-invokes you when it exits; wait for that notification, never poll.
 2. `tracker-mining audit <epic-id>` for untyped decisions and stale citations.
-3. `bd session close --session "$BD_SESSION_ID"` lists, writing nothing. Transcribe each owner decision as a ruling on the governing epic, `bd question add` every pending decision on the bead it concerns, and resolve every `pending-` topic slug once bd carries that state.
+3. `bd session close --session "$BD_SESSION_ID"` lists, writing nothing. Propose each owner decision binding future work as an AGENTS.md edit for the owner to approve, `bd question add` every pending decision on the bead it concerns, and resolve every `pending-` topic slug once bd carries that state.
 4. Holding a lane: run the command above — done and next from `bd plan show <prefix>`, `bd ready` and `git log`; thread from memory. Holding none: post nothing at all. First Close ever for the project: retire the anchor bead as stated above.
 5. Deliver: holding a lane, the final message is the `bd plan show <prefix>` output. Holding none, it says no entry was appended because this session holds no lane, the thread is lost by design, and the next session starts from `bd ready`, `bd question list` and `bd plan show <prefix>`. For a session the owner named, send the plan id, lane and execution skill there.
 

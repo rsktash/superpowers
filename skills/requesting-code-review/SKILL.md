@@ -42,7 +42,7 @@ Use Task tool with superpowers-beads:code-reviewer type, fill template at `code-
 - `{DESCRIPTION}` - Brief summary
 
 **3. Act on feedback — triage by authority first:**
-- A finding is a **defect** only if it cites the authority it violates: a gate item, a normative task clause, an explicit convention, or a recorded owner ruling. Severity ranks defects; it never converts a proposal into round content.
+- A finding is a **defect** only if it cites the authority it violates: a gate item, a normative task clause, an explicit convention, an AGENTS.md rule, or a recorded owner ruling where no AGENTS.md covers the code. Severity ranks defects; it never converts a proposal into round content.
 - Defects: one fix round carrying all of them. Proposals: one line on the backlog bead.
 - Push back if reviewer is wrong (with reasoning)
 
@@ -81,7 +81,7 @@ You: [Fix progress indicators]
 - Catch issues before they compound
 - Fix before moving to next task
 
-**Plan execution (subagent-driven-development / hybrid-execution / codex-execution):**
+**Plan execution (subagent-driven-development / hybrid-execution / opencode-execution):**
 - Review per task at its own tier; the whole-diff review runs once at the end
 
 **Ad-Hoc Development:**

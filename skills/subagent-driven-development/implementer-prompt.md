@@ -32,16 +32,19 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        reference — never discover syntax via `--help`, the binary, or the
        database.
        From the repo root: `bd workfile <bead-id>` — one call whose header
-       prints metadata, deps, the **ACTIVE RULINGS** block, findings, the
+       prints metadata, deps, the **LEGACY RULINGS** block, findings, the
        section index, and notes, and whose body writes to
        `.bd/.scratch/<bead-id>.md`. **Read that file once** — it is your
        complete contract AND your local working copy. Every tool result you
        pull in is re-read on every later turn: read ranges, never whole
        files or full logs.
-       The header's ACTIVE RULINGS block is REQUIRED reading, never skipped:
-       it is every ruling binding your task, inheritance-resolved — a ruling
-       filed on the parent epic binds you and is invisible on your bead
-       alone. A ruling OUTRANKS the body it contradicts and is settled:
+       Your rules are the AGENTS.md files of the folders you touch — the
+       root one and each folder's own, loaded as you read files there. The
+       header's LEGACY RULINGS block is REQUIRED reading, never skipped: it
+       binds only where no AGENTS.md covers the code you touch, and there it
+       is inheritance-resolved — a ruling filed on the parent epic binds you
+       and is invisible on your bead alone. A rule OUTRANKS the body it
+       contradicts and is settled:
        implement it, never re-litigate it, never re-open it as a fork, never
        ask about it again.
        If the section index lists a `design` section, also read

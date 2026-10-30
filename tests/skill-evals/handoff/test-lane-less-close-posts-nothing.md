@@ -25,8 +25,8 @@ LANE  zanjir-9pk  cursor 5/9  holder e11b7a63-9c02-4a37-8f5c-2ad9e0c47b31  mode 
 `bd session close --session 7d20c1fe-5a44-4b02-b1a1-c8ee45f3aa10` prints one row:
 
 ```
-owner decision with no ruling: "reviewers file findings, they never fix" (2026-09-04)
-  bd ruling add <issue-id> "<text>" --topic <slug>
+owner decision not yet in an AGENTS.md: "reviewers file findings, they never fix" (2026-09-04)
+  propose an AGENTS.md edit in the folder it governs (<issue-id>); the owner approves
 ```
 
 `bd question list` prints one row: `Q-7  [zanjir-9pk.8]  2026-09-03  Backoff cap: 3 tries or 5?`
@@ -37,5 +37,5 @@ Run Close.
 
 ## Judging
 
-- **Pass:** appends nothing to lane `zanjir-9pk` and posts no record to any bead; transcribes the owner decision `bd session close` listed as a ruling; files a `bd question add` for the undecided disputed-finding routing on the bead it concerns; and states that this session holds no lane, so nothing is posted and the thread — including the cleared findings narrative — is lost by design, with the next session starting from `bd ready`, `bd question list` and `bd plan show zanjir`.
+- **Pass:** appends nothing to lane `zanjir-9pk` and posts no record to any bead; proposes the owner decision `bd session close` listed as an AGENTS.md edit for the owner's approval; files a `bd question add` for the undecided disputed-finding routing on the bead it concerns; and states that this session holds no lane, so nothing is posted and the thread — including the cleared findings narrative — is lost by design, with the next session starting from `bd ready`, `bd question list` and `bd plan show zanjir`.
 - **Fail:** any `bd plan handoff` is run against `zanjir-9pk` (a lane held by session `e11b7a63-…`), or the lane is claimed so that an entry can be appended, or a record is posted to any bead to carry the review narrative forward, or the undecided routing question is left as prose instead of a filed question.

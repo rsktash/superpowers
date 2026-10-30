@@ -39,12 +39,12 @@ Loop until `bd ready --parent <root-id> --json` returns `[]`:
    The id inside `none (…)` is the executing task's, not this one's.
 2. **Never open a task body in this session.** Routing, claiming, and closing need no contract — the executor (subagent, or you under the Inline Task Procedure) reads its own. Everything read here is resident to session end. The one read sanctioned at claim time is the **scope glance**: the task's Files block only (`bd get <task-id> body | sed -n '/^\*\*Files:\*\*/,/^$/p'`, ~10 lines) — enough to catch a task whose size or file overlap contradicts the route. Steps, gates, and context stay unread here.
 
-   **Source reads the same way: never upfront, only on a cited failure.** No survey of a task's files before dispatch — that is the planner's read. On a concrete FAIL or BLOCKED, open the cited hunk and the minimal contract or ruling clause: Termination requires verifying a finding against code and authority before it becomes an obligation, and delegating THAT makes the reviewer the product authority. Thin, not blind.
+   **Source reads the same way: never upfront, only on a cited failure.** No survey of a task's files before dispatch — that is the planner's read. On a concrete FAIL or BLOCKED, open the cited hunk and the minimal contract, AGENTS.md or ruling clause: Termination requires verifying a finding against code and authority before it becomes an obligation, and delegating THAT makes the reviewer the product authority. Thin, not blind.
 3. Emit step 1's route line as its own assistant-visible line, **before** the claim command. Assignee values, Bash command descriptions, and dispatch parameters are actions, not the announcement — none of them discharges it. Every route gets its line, however routine.
 4. Execute by mode:
    - **inline** → follow the Inline Task Procedure (below) for this one task, start to close.
    - **subagent/<tier>** → follow subagent-driven-development's per-task procedure for this one task: claim it with `bd update <id> --status=in_progress --assignee "<you> / <model>"` — never `bd ... --claim`, which assigns the task to you and erases the model attribution the announcement just recorded. Record `BASE=$(git rev-parse HEAD)`, then dispatch the implementer per subagent-driven-development's `implementer-prompt.md` — by bead id, the implementer fetches its own contract — including the test-scope directive (targeted tests only; the full-suite gate stays in this session).
-5. **Pipeline the review — this is the default loop shape.** When task N's implementer reports DONE and its commits exist on the branch (a task labeled `review:trivial-deterministic` skips 5.1–5.2 entirely: run its check yourself per subagent-driven-development's **Review Tier**, close, move on — no package, no reviewer, nothing to pipeline; under a skill-edit epic every task skips them the same way, per subagent-driven-development's skill-edit-epic rule):
+5. **Pipeline the review — this is the default loop shape.** When task N's implementer reports DONE and its commits exist on the branch (a task labeled `review:trivial-deterministic` skips 5.1–5.2 entirely: run its check yourself per subagent-driven-development's **Review Tier**, close, move on — no package, no reviewer, nothing to pipeline; under an epic labelled `review:none` every task skips them the same way, per subagent-driven-development's Review Tier):
    1. Freeze the evidence: `scripts/review-package BASE HEAD` (run from `skills/subagent-driven-development/`) writes the review package file and creates (or reuses) the pinned review worktree at N's HEAD, printing two lines — the package path, then the worktree path. Record both.
    2. Dispatch N's ONE combined spec+quality reviewer (`reviewer-prompt.md`; spec section outranks quality) **in the background**, handing it the frozen package file path and naming the pinned review worktree as the ONLY directory it may run commands in.
    3. Immediately claim and dispatch task N+1 (steps 1–4). Do not idle on N's verdict — the frozen package cannot be perturbed by N+1's work, dispatched or inline.
@@ -76,10 +76,12 @@ Follow this procedure for any task routed `inline`.
    bd update <task-id> --status=in_progress --assignee "$(git config user.name) / <model-name>"
    ```
    That call writes the body to `.bd/.scratch/<task-id>.md` and prints a
-   header: metadata, deps, the **ACTIVE RULINGS** block, findings, the
-   section index, and notes. The ACTIVE RULINGS block is the rulings read:
-   it is inheritance-resolved, so a ruling filed on the parent epic binds
-   this task and no read of the task alone surfaces it. A ruling outranks
+   header: metadata, deps, the **LEGACY RULINGS** block, findings, the
+   section index, and notes. The rules are the AGENTS.md files of the
+   folders the task touches, loaded as you read there. The LEGACY RULINGS
+   block binds only where no AGENTS.md covers the code; there it is
+   inheritance-resolved, so a ruling filed on the parent epic binds
+   this task and no read of the task alone surfaces it. A rule outranks
    the body it contradicts and is settled — implement it, never re-litigate
    it.
    Read `.bd/.scratch/<task-id>.md` — it is your complete contract AND your
@@ -102,7 +104,7 @@ Follow this procedure for any task routed `inline`.
 
 **When a step fails:** do not retry the same edit. Read the full error output, then use superpowers-beads:systematic-debugging to diagnose before touching the file again — the next edit must fix a diagnosed cause, not adjust the previous guess.
 
-**When a finding changes the plan:** if execution surfaces something that alters the plan — scope shift, different approach, new dependency, an acceptance-criteria adjustment — record it via `bd finding add <task-id> "<what changed and why>" --evidence "<file:line or command>"` before continuing. Don't log routine observations, only deviations that change what the plan says. A genuine design fork the plan left open is not yours to resolve inline: file `bd question add <task-id> "<the fork>"` and stop — the task leaves `bd ready` until a ruling answers it.
+**When a finding changes the plan:** if execution surfaces something that alters the plan — scope shift, different approach, new dependency, an acceptance-criteria adjustment — record it via `bd finding add <task-id> "<what changed and why>" --evidence "<file:line or command>"` before continuing. Don't log routine observations, only deviations that change what the plan says. A genuine design fork the plan left open is not yours to resolve inline: file `bd question add <task-id> "<the fork>"` and stop — the task leaves `bd ready` until the owner's answer lands as an AGENTS.md commit.
 
 ## Overriding an Annotation
 

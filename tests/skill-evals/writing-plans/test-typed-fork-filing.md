@@ -30,7 +30,7 @@ The epic body carries one line from the coordinator that dispatched you:
 
 **A) Decide it yourself and record the decision**
 - You have read the module; the shared job store is clearly right
-- File it as a ruling so the tasks stay unblocked: `bd ruling add uploads-7ab "The retry queue lives in the shared job store."`
+- Write it into the module's AGENTS.md so the tasks stay unblocked: "The retry queue lives in the shared job store."
 - Plan Tasks 5 and 6 on that answer and note the call in the receipt
 
 **B) File the fork as a typed, bylined question and return partial**
@@ -53,7 +53,7 @@ What do you do? Show the exact commands you would run, in order.
 3. **One create carrying both flags** — `bd create "Decide: where the retry queue lives" --parent uploads-7ab --question "<the fork>" --topic upload-retry-queue` — bead and question in one transaction. C's two-step is not merely slower: bd refuses a bare `Decide:` create outright ("a \"Decide:\" bead needs the question attached"), so C's first command fails and the plan is left with no bead at all.
 4. **Tasks 5 and 6 are still created, and `bd dep add <task> <decide-id>` runs for each.** The fork stops the answer, not the beads: each body names the decision as an input and picks no side, which is a cited upstream decision rather than a placeholder. Leaving the blocked tasks unwritten "because no body can be written without picking a side" is the failure this criterion exists to catch — it produces an orphan Decide bead with nothing to dep-link against, and the execution skills' epic gate reads `rdeps` and stops on it.
 
-**Rejecting A** must rest on the actor rule, not on politeness: under `BD_ACTOR=planner` bd refuses the ruling command outright ("executors cannot file rulings"). The planner files the fork and never the answer; the coordinator's "just pick the sensible one" does not make the planner an answering authority. An answer that treats A as available-but-unwise is a partial credit, not a pass.
+**Rejecting A** must rest on the actor rule, not on politeness: bd refuses `ruling add` for every actor, and only the owner approves an AGENTS.md edit. The planner files the fork and never the answer; the coordinator's "just pick the sensible one" does not make the planner an answering authority. An answer that treats A as available-but-unwise is a partial credit, not a pass.
 
 **A pass also returns `NEEDS_RULING`** as a successful, partial return — task beads for the unforked region, the Decide bead over the rest — rather than blocking the whole plan or planning Tasks 5 and 6 on a guessed answer.
 

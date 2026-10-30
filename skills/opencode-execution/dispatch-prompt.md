@@ -1,7 +1,7 @@
-# Codex dispatch prompt template
+# OpenCode dispatch prompt template
 
-Fill the bracketed fields. First dispatch of a task uses the EXECUTE form; after a
-planner ruling on a blocker, use the RESUME form.
+Fill the bracketed fields. First dispatch of a task uses the EXECUTE form; after the
+blocker is resolved on the bead, use the RESUME form.
 
 ## EXECUTE form
 
@@ -10,8 +10,8 @@ You are executing ONE task of an approved implementation plan in this repository
 (branch [branch] — verify with `git branch --show-current` before any edit; never
 switch branches, never push, NEVER `git stash`).
 
-Read AGENTS.md first (project rules)[, and <dir>/AGENTS.md for scoped rules when the
-task works in a rule-carrying subdirectory]. Tracker reference: `bd prime`.
+Your rules are the AGENTS.md files: the root one and each folder's own load as you read
+files there. Tracker reference: `bd prime`.
 
 Protocol:
 1. `export BD_ACTOR=executor` (your bd writes are findings, questions, comments and
@@ -26,9 +26,9 @@ Protocol:
    one still gets a slug from the coordinator at Close — a finding never
    ends with no topic.
    `bd show [task-id] --full` — your task directive — then `bd rulings [task-id]`:
-   every typed ruling binding this task, inheritance-resolved (a ruling filed on the
-   parent epic binds you and is invisible on the task alone). A ruling OUTRANKS the
-   body it contradicts.
+   the legacy rulings, inheritance-resolved (a ruling filed on the parent epic binds
+   you and is invisible on the task alone); they bind only where no AGENTS.md covers
+   the code you touch. A rule or binding ruling OUTRANKS the body it contradicts.
    [Context: landed sibling commits this task consumes — cite shas and one line each.
    QUOTE any cross-task contract a prior executor stated that this task must satisfy.]
 
@@ -49,7 +49,7 @@ that language is neither a missing symbol nor a stop condition.
    prompt's Exploration Map block for spans. Think once over the results. Take
    a sequential turn only where a result decides the next read; no survey read
    of the tree.
-3. Claim it: `bd update [task-id] --status=in_progress --assignee "[user] / [codex-model]"`.
+3. Claim it: `bd update [task-id] --status=in_progress --assignee "[user] / [model]"`.
 4. Execute the task exactly as written: follow its Steps in order (TDD — failing test
    first, run it, implement, run again), satisfy EVERY Acceptance Gate item, obey the
    Drift Detectors, touch only the listed Files.
@@ -61,7 +61,7 @@ that language is neither a missing symbol nor a stop condition.
    commit sha, test counts>"` and `bd close [task-id]`.
 7. If a gate item cannot be satisfied honestly, or the code contradicts the task's
    citations: STOP, file the blocker with `bd question add [task-id] "<the blocker>"`
-   (the task leaves the ready queue until a ruling answers it), do NOT close it,
+   (the task leaves the ready queue until it is answered), do NOT close it,
    and end with a clear FAILURE report. Never weaken a test or gate to pass.
 
 Your final output: a terse report — what changed (files), gate-by-gate evidence
@@ -70,21 +70,21 @@ Your final output: a terse report — what changed (files), gate-by-gate evidenc
 <the contract> — Task N consumes it."]
 ```
 
-## RESUME form (after a planner ruling)
+## RESUME form (after the blocker is resolved)
 
 ```
-You are RESUMING a task you (a previous codex run) blocked on, in this repository
+You are RESUMING a task you (a previous run) blocked on, in this repository
 (branch [branch] — verify; never switch branches, never push, NEVER `git stash`).
 
-Read AGENTS.md first. Tracker reference: `bd prime`.
+Your rules are the AGENTS.md files, as before. Tracker reference: `bd prime`.
 
 Protocol:
 1. `export BD_ACTOR=executor`. `bd show [task-id] --full`, then
-   `bd rulings [task-id]` — a ruling now resolves your blocker. Read the whole
-   body again, then the ruling.
+   its FINDINGS — the finding that resolves your blocker is there. Read the whole
+   body again, then that finding.
 2. The bead is already claimed (in_progress). Do not re-claim.
-3. Resume from your red state per the ruling. Your prior blocker is RESOLVED — do not
-   stop for it again. [Name the specific satisfied drift detector if the ruling
+3. Resume from your red state per the finding. Your prior blocker is RESOLVED — do not
+   stop for it again. [Name the specific satisfied drift detector if the finding
    supersedes one.]
 5-7. [Same test-scope / close / STOP items as the EXECUTE form.]
 

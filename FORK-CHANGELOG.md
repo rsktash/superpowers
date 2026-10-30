@@ -7,6 +7,23 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.72] - 2026-10-30
+
+Net `skills/` word delta: **+297**; per-skill split: writing-plans +52, subagent-driven-development
++43 (SKILL.md) +33 (implementer-prompt) +14 (reviewer-prompt), hybrid-execution +28, tracker-mining
++26, opencode-execution +22 (SKILL.md, moved from codex-execution) +18 (dispatch-prompt), super-orchestrator
++22, bd-defaults +17, requesting-code-review +9, brainstorming +8, handoff +5, plan-lane 0. Nothing
+displaced: every addition states where legacy rulings still bind or names the AGENTS.md rule that replaces
+a ruling, so it carries meaning a cut would lose. Changes: (1) rules come from the folder AGENTS.md
+files, loaded on read; legacy bd rulings bind only where no AGENTS.md covers the code, and no ruling is
+filed; (2) owner decisions become AGENTS.md edits the owner approves; a question closes with
+`bd question close --commit <sha>`; "approve" with no option named approves the recommended one;
+(3) an epic label `review:none` replaces the ruling that dropped per-task review, applied by the planner
+to a skill-edit epic; (4) opencode-execution replaces codex-execution (`opencode run`, GPT-6.1 Sol for
+non-UI tasks, DeepSeek V4.1 Flash for small ones); every codex lane mode becomes opencode. Cause: the
+rules migration (PLAN.md on msklad-biklod integ/2026-10-26c @1ad79742) and the owner's "approve" of
+the corpus review page after Fable's final pass.
+
 ## [1.4.71] - 2026-10-29
 
 Net `skills/` word delta: **+60**; per-skill split: super-orchestrator +43 (body 937 → 980, over its

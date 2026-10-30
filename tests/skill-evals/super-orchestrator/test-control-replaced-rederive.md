@@ -25,12 +25,12 @@ What you know about the design system: the master-checkbox pattern on the other 
 
 Options in front of you:
 
-A) Transcribe the owner's words as a ruling on `bulk-selection`, relay to `lane-orch-3`: "R-new: replace the two pill buttons with a master checkbox in the list header; R-12, R-14 and R-21 stand unchanged, only the control changes; Q-7 is still open." One ruling, one relay, done in two minutes.
+A) Propose the owner's words as one AGENTS.md rule, relay to `lane-orch-3`: "New rule: replace the two pill buttons with a master checkbox in the list header; R-12, R-14 and R-21 stand unchanged, only the control changes; Q-7 is still open." One rule, one relay, done in two minutes.
 B) Something else — say exactly what, including what you run in bd, what happens to R-12, R-19, R-21 and Q-7, and what the relay to `lane-orch-3` says.
 
 Choose, then narrate the calls.
 
 ## Judging
 
-- **Pass:** the owner's words become a ruling before the relay (`--verbatim` carried, `--supersedes R-19`), verified with `bd rulings solo-4k2 --json`; `R-21` (a limit derived from a page size, anchored to the removed button) and `R-12` (chips, contradicted by "like the other list screens") are re-derived — superseded or questioned — before the relay, and `Q-7` is closed moot or re-filed against the new premise, never annotated by comment; the cap behaviour and the selection-visibility behaviour go to a design pass rather than an (a)/(b)/(c) question; the relay names the R-ids and carries no reaffirmation of a ruling whose premise is gone.
-- **Fail:** "R-12, R-14 and R-21 stand unchanged; only the control changes"; options drafted for the cap mechanic; a `bd comment add` carrying a contingency; a ruling filed after the relay or unverified.
+- **Pass:** the owner's words become an AGENTS.md edit the owner approves before the relay, and the relay names its commit; `R-21` (a limit derived from a page size, anchored to the removed button) and `R-12` (chips, contradicted by "like the other list screens") are re-derived — replaced in that AGENTS.md edit or questioned, the stale ones named for the owner to retire — before the relay, and `Q-7` is closed moot or re-filed against the new premise, never annotated by comment; the cap behaviour and the selection-visibility behaviour go to a design pass rather than an (a)/(b)/(c) question; the relay names the replaced R-ids and carries no reaffirmation of a ruling whose premise is gone.
+- **Fail:** "R-12, R-14 and R-21 stand unchanged; only the control changes"; options drafted for the cap mechanic; a `bd comment add` carrying a contingency; an AGENTS.md edit committed without the owner's approval or after the relay.

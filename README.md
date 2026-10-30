@@ -10,7 +10,7 @@ The original Superpowers stores specs and plans as markdown files in `docs/super
 
 - **Specs are beads.** The brainstorming skill creates a root epic bead (`bd create -t epic`) instead of writing a markdown file. The full spec lives in the bead body.
 - **Plans are bead trees.** The writing-plans skill creates child beads for each task, linked with dependency graphs (`bd dep add`). No plan markdown file.
-- **Execution is bead-driven.** The subagent-driven-development, hybrid-execution, and codex-execution skills use `bd ready --parent` / `bd update --assignee` / `bd close --reason` instead of parsing checkboxes in a file.
+- **Execution is bead-driven.** The subagent-driven-development, hybrid-execution, and opencode-execution skills use `bd ready --parent` / `bd update --assignee` / `bd close --reason` instead of parsing checkboxes in a file.
 - **Progress is live.** Track everything in [beads-ui](https://github.com/mantoni/beads-ui) in real time.
 - **Git stays searchable.** A lightweight summary file is committed to `docs/beads/` for each feature, and all commit messages include bead IDs.
 
@@ -27,9 +27,9 @@ The original Superpowers stores specs and plans as markdown files in `docs/super
 | subagent-driven-development | Same dispatch model, beads for persistent tracking |
 | using-superpowers | Bootstrap mentions beads storage model |
 | hybrid-execution | New skill: routes each task inline or to a subagent based on the plan's Execution annotation |
-| codex-execution | New skill: runs task beads via the codex CLI with per-landing verification and a terminal whole-diff review |
+| opencode-execution | New skill: runs task beads via `opencode run` with per-landing verification and a terminal whole-diff review |
 | handoff | New skill: session close, resume, and explicit night-session preparation via a tagged record on one anchor bead per project — a fresh session reads pointers to durable state, never a transcript |
-| super-orchestrator | New skill: coordinator conduct under an owner feedback-loop mode — forked reads, owner words transcribed as rulings before the relay, design gaps routed to a design pass, heartbeat and orchestrator replacement, owner-visible reports |
+| super-orchestrator | New skill: coordinator conduct under an owner feedback-loop mode — forked reads, owner decisions proposed as AGENTS.md edits before the relay, design gaps routed to a design pass, heartbeat and orchestrator replacement, owner-visible reports |
 
 ## Important: Uninstall Original Superpowers First
 
@@ -67,7 +67,7 @@ cd superpowers
 
 1. **brainstorming** — Refines ideas, creates spec as an epic bead, commits summary to `docs/beads/`
 2. **writing-plans** — Decomposes spec into task beads with dependency ordering
-3. **subagent-driven-development**, **hybrid-execution**, or **codex-execution** — Executes tasks via `bd ready` loop; hybrid routes each task inline or to a subagent per its Execution annotation
+3. **subagent-driven-development**, **hybrid-execution**, or **opencode-execution** — Executes tasks via `bd ready` loop; hybrid routes each task inline or to a subagent per its Execution annotation
 4. **using-git-worktrees** (Finishing: Merge Back and Clean Up) — Verifies all tasks closed, closes epic, merges/PRs with bead ID
 
 ### Summary file naming

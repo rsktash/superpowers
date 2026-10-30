@@ -30,7 +30,7 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
 
     Task bead: <bead-id>. Fetch the contract yourself from the repo root:
     `bd workfile <bead-id> --out .bd/.scratch/review-<bead-id>.md` — the
-    printed header carries the rulings block your Authority anchors cite;
+    touched folders' AGENTS.md files, and the header's legacy rulings block where no AGENTS.md covers the code, carry what your Authority anchors cite;
     Read the written file for the body — its requirements and its
     **Acceptance Gate** are what you review against. The `--out` name keeps
     a re-review from overwriting the implementer's copy of the same bead's
@@ -153,7 +153,7 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
       findings" and "conditional PASS" are FAIL misspelled — the verdict
       flips only after the fix lands and its check re-runs.
     - **Authority, per finding:** the violated gate item, normative task-body
-      clause, convention file:line, or verbatim owner ruling. A reproducible
+      clause, convention file:line, AGENTS.md rule, or verbatim owner ruling. A reproducible
       failure introduced by BASE..HEAD — including a regression in
       pre-existing behavior the diff changed — anchors to the task's stated
       purpose; never label it proposal because the gate omitted the input. A

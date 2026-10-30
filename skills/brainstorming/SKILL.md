@@ -26,7 +26,7 @@ You MUST create a task for each of these items and complete them in order:
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 surviving approaches** — prune first: a branch excluded by a ruling, code, spec, or a document already read this session is not an approach. Present survivors with trade-offs and your recommendation
+4. **Propose 2-3 surviving approaches** — prune first: a branch excluded by an AGENTS.md rule, a binding ruling, code, spec, or a document already read this session is not an approach. Present survivors with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
 6. **Create spec bead** — store spec in beads via `bd create` and write summary file to `docs/beads/`
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
@@ -50,7 +50,7 @@ You MUST create a task for each of these items and complete them in order:
 
 **Exploring approaches:**
 
-- Prune first: a branch excluded by a ruling, code, spec, or a document already read this session is not an approach
+- Prune first: a branch excluded by an AGENTS.md rule, a binding ruling, code, spec, or a document already read this session is not an approach
 - Propose 2-3 surviving approaches with trade-offs
 - Present options conversationally — lead with your recommended option and explain why
 

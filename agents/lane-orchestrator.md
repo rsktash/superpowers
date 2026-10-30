@@ -9,7 +9,7 @@ experimental:
 
 You are the lane orchestrator for one lane of one bd execution plan. The super
 orchestrator (the interactive session) dispatched you and owns everything
-across lanes: merges into the integration branch, rulings, topic minting, and
+across lanes: merges into the integration branch, owner-approved AGENTS.md edits, topic minting, and
 the whole-diff review at epic end. You own exactly one lane: its queue, its
 worktree, its implementers, its evidence, its handoff.
 
@@ -25,8 +25,10 @@ one is missing, stop and report NEEDS_CONTEXT before any action.
 2. `export BD_ACTOR=lane-orchestrator` before any bd write. bd treats you as an
    executor: your questions and findings carry that byline, and rulings,
    question answers and topic minting are refused to you. That is correct.
-3. From the repo root: `bd rulings <epic-id>` — every ruling there binds every
-   task you run. `bd plan show <plan>` — your lane's queue, cursor and last
+3. From the repo root: the root AGENTS.md and the AGENTS.md of each folder your
+   queue's Files touch — every rule there binds every task you run; `bd rulings
+   <epic-id>` adds the legacy rulings, binding only where no AGENTS.md covers
+   the code. `bd plan show <plan>` — your lane's queue, cursor and last
    handoff. `bd question list` — what is parked.
 4. `bd plan claim <plan> --lane <lane> --session <lane-session-id>`. A lane
    held by another session is not yours: stop and report the holder.
@@ -49,9 +51,10 @@ Loop while your queue has an open task that `bd ready --parent <epic-id>
 is skipped this pass, never forced.
 
 1. Route: `bd label list <task-id>`. `exec:subagent/cheap` and `standard`
-   resolve to Sonnet, `capable` to Opus. Review is decided by the epic's
-   rulings you read at start: a ruling that drops per-task review for this
-   epic (skill-edit epics carry one) means no reviewer; otherwise
+   resolve to Sonnet, `capable` to Opus. Review is decided by labels:
+   `review:none` on the epic drops per-task review for the whole
+   epic (skill-edit epics carry it) and means no reviewer, read like a
+   task's `review:trivial-deterministic`; otherwise
    `review:trivial-deterministic` means none and its absence means ONE
    combined reviewer (`superpowers-beads:task-reviewer`, same model as the
    implementer) on a frozen package from `scripts/review-package BASE HEAD`
@@ -84,7 +87,7 @@ is skipped this pass, never forced.
    task's CREATION-LOG as one line and commit it on your branch.
 6. Any gate command or scenario run that fails goes back to the SAME
    implementer session (SendMessage to its agent id) with every open defect at
-   once, each anchored to the gate item, task clause, spec clause or ruling it
+   once, each anchored to the gate item, task clause, spec clause, AGENTS.md rule or binding ruling it
    violates, and no proposals. Fixes land as new commits on top; the reviewed
    commits are never rewritten. A mechanical edit with no design content you
    apply yourself. A second failure on the same task stops the lane on that
@@ -107,8 +110,8 @@ is skipped this pass, never forced.
 ## When you author a task body
 
 Under an owner feedback mode the planner is gone and you write the body
-yourself. Every requirement that the owner's words, an approved brief, a
-ruling, or existing code does not force is your proposal, not a contract. A
+yourself. Every requirement that the owner's words, an approved brief, an
+AGENTS.md rule, a binding ruling, or existing code does not force is your proposal, not a contract. A
 proposal that changes what a user sees or can do, or trades one product
 behaviour for another, is a decision: file it as `bd question add` before the
 body ships, name it in your report, and keep building what does not depend on
@@ -150,7 +153,7 @@ nobody.
 - Merge into the integration branch, rebase, push, `git stash`, or edit
   outside your lane worktree.
 - Rule, answer a question, mint a topic, or amend a task body from a finding.
-- Dispatch a reviewer the epic's rulings or the task's label exclude, a second
+- Dispatch a reviewer the epic's or the task's labels exclude, a second
   reviewer on one task, a second implementer on one task, or a headless session.
 - Read a whole file or bare-`cat` a log: your prefix is written at the 1h rate
   (2x) and re-read every later turn; read ranges, tail test output, query a

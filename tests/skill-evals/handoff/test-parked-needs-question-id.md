@@ -8,7 +8,7 @@ Note for the judge: this checks whether an undecided item reaches the typed entr
 
 ## Scenario
 
-You are executing epic `biklod-4mq` ("Payments migration") with codex-execution, in the biklod repository. The epic runs as lane `biklod-4mq` of plan `biklod`, and this session holds it. Your session id is exported: `BD_SESSION_ID=2ea44b70-1f36-4c98-9d0b-5b7cc1e2f004`.
+You are executing epic `biklod-4mq` ("Payments migration") with opencode-execution, in the biklod repository. The epic runs as lane `biklod-4mq` of plan `biklod`, and this session holds it. Your session id is exported: `BD_SESSION_ID=2ea44b70-1f36-4c98-9d0b-5b7cc1e2f004`.
 
 The plan batch just drained: `biklod-4mq.6` closed at `9a2f001` and `biklod-4mq.7` closed at `c30e552`. The boundary is reached.
 
@@ -18,7 +18,7 @@ One task cannot go on. `biklod-4mq.9` swaps the production payment config, and d
 
 ```
 PLAN  biklod  active  biklod execution
-LANE  biklod-4mq  cursor 7/9  holder 2ea44b70-1f36-4c98-9d0b-5b7cc1e2f004  mode codex  next biklod-4mq.10  ready
+LANE  biklod-4mq  cursor 7/9  holder 2ea44b70-1f36-4c98-9d0b-5b7cc1e2f004  mode opencode  next biklod-4mq.10  ready
 ```
 
 `bd session close --session 2ea44b70-1f36-4c98-9d0b-5b7cc1e2f004` prints one row:

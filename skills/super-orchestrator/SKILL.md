@@ -1,6 +1,6 @@
 ---
 name: super-orchestrator
-description: Use when this session is the super orchestrator under an owner feedback-loop mode — relaying owner reports to a persistent lane-orchestrator subagent, transcribing owner words into rulings, closing questions, scheduling a heartbeat, or reporting a round to the owner.
+description: Use when this session is the super orchestrator under an owner feedback-loop mode — relaying owner reports to a persistent lane-orchestrator subagent, turning owner decisions into AGENTS.md edits, closing questions, scheduling a heartbeat, or reporting a round to the owner.
 ---
 
 # Super Orchestrator — budget 951 words
@@ -15,24 +15,23 @@ Planning is a dispatch — `superpowers-beads:planner`, one per epic, parallel a
 
 ## Owner words
 
-A decision binding future work (behavior, design, vendor, cost, convention) becomes a ruling BEFORE the relay — only once the discussion is closed and every gap the words leave is asked; an approval naming no option is asked, never read as the recommended one. The relay names the R-id. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed.
+A decision binding future work (behavior, design, vendor, cost, convention) becomes an AGENTS.md edit the owner approves BEFORE the relay — only once the discussion is closed and every gap the words leave is asked; "approve" with no option named approves the recommended one. The approved edit is its own commit; the relay names its hash. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed. No ruling is filed (bd refuses it); legacy rulings bind only where no AGENTS.md covers the code.
 
 ```bash
-bd ruling add --answers Q-n "<text>" --verbatim "<owner sentence>"           # bead and topic = the question's; --reach epic|project widens; --supersedes R-n
-bd ruling add <bead> "<text>" --topic <slug> --verbatim "<owner sentence>"   # no question: the bead is the reach
-bd rulings <epic> --json | jq '.[-1]'                # the exit code proves nothing
+git commit -m "<rule>" -- <folder>/AGENTS.md          # after the owner approves the wording; the message quotes the owner sentence
+bd question close Q-n --commit <sha>                 # closes the question with a pointer to that commit
 bd question close Q-n --reason moot --note "<why>"   # superseded needs --of
 ```
 
-**The reach is a decision.** The default answers only the task where the question rose; `--reach epic` when the answer names every surface of the epic; `--reach project` for the product or the process. Words with no question take the same reach. The first line states the reach.
+**The folder is the reach.** A rule goes in the AGENTS.md of the deepest folder whose code it governs; a rule shared by sibling folders goes in their parent, never copied into each; the product or the process goes in the root AGENTS.md. The relay's first line names the file.
 
-**Re-derive before relaying.** A ruling that replaces a control or a model retires the premise of every earlier ruling that assumed it: supersede what no longer holds, question what the words left open, relay the new set.
+**Re-derive before relaying.** A rule that replaces a control or a model retires the premise of every earlier rule that assumed it: propose the edit of what no longer holds in the same commit, question what the words left open, relay the new text.
 
 **A feedback item is a class across every surface.** A screenshot's origin narrows nothing; exclusions carry reasons, same round.
 
 ## Design gaps
 
-A screen behaviour nobody ruled is a design gap: a dispatched design pass — a proposal grounded in the design system's established patterns — that the owner approves. Words name the outcome, not the control: when an established pattern does the outcome better, the pass proposes it. The dispatch carries the gap, the screenshot and the rulings; the pass chooses the answer. Your own questions carry only decisions that are the owner's by nature: vendor, cost, business rule, priority. Options with one recommended, a fix named in a relay, a proposal dictated to the pass: all you designing. The owner approves every wording or design pass — never delegated, never a coordinator approval.
+A screen behaviour nobody decided is a design gap: a dispatched design pass — a proposal grounded in the design system's established patterns — that the owner approves. Words name the outcome, not the control: when an established pattern does the outcome better, the pass proposes it. The dispatch carries the gap, the screenshot and the folder's AGENTS.md path; the pass chooses the answer. Your own questions carry only decisions that are the owner's by nature: vendor, cost, business rule, priority. Options with one recommended, a fix named in a relay, a proposal dictated to the pass: all you designing. The owner approves every wording or design pass — never delegated, never a coordinator approval.
 
 ## The orchestrator
 
@@ -58,11 +57,11 @@ A repeating workflow defect: dispatched `superpowers-beads:diagnosing-workflow-d
 
 | Excuse | Reality |
 |---|---|
-| "R-n excludes it; no decision exists" | The complaint targets what R-n fixed. Re-derive. |
+| "The AGENTS.md rule excludes it; no decision exists" | The complaint targets what that rule fixed. Re-derive. |
 | "A comment instead of closing Q-n" | Nothing binding in a comment. Close moot. |
 
 ## Red flags
 
 - `bd get … design`, a rulings text filter, `git log`, `grep` in your own turn
-- A relay reaffirming a ruling whose premise the owner replaced; "only web" from a screenshot's origin
+- A relay reaffirming a rule whose premise the owner replaced; "only web" from a screenshot's origin
 - A headless emulator; a turn held for a child; a heartbeat that sends
