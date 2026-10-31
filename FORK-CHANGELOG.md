@@ -7,6 +7,19 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.74] - 2026-11-01
+
+Net `skills/` word delta: **−9** (brainstorming 2105 → 2096). Added: checklist step 9 "Propose lasting rules" and a
+Lasting Rules Gate between spec approval and the planner dispatch — the model proposes the spec's decisions that must
+outlive the feature (four-question test), each as a proposed AGENTS.md line with its folder and verified facts; the
+owner approves, edits or drops each, and nothing is written into an AGENTS.md before that. The project-rules line now
+names each touched folder's AGENTS.md before CLAUDE.md (it named CLAUDE.md and .claude/rules/ only). Displaced (186
+words): the intro sentence, a duplicated context bullet, the question bullets merged, the prune list pointing to step 4,
+the Key Principles section (YAGNI kept under Presenting the design), and four shortened or duplicated lines. Cause: the
+msklad-biklod rules migration pilot drafted 33 rule lines of which 16 were one-time approvals or history; the owner
+placed the rule-vs-detail test in brainstorming, not writing-plans, because planning runs autonomously; owner approved
+2026-11-01.
+
 ## [1.4.73] - 2026-10-31
 
 Net `skills/` word delta: **+76** (handoff +76). Nothing displaced; the handoff skill now measures 747
