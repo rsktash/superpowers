@@ -7,8 +7,6 @@ description: "You MUST use this before any creative work - creating features, bu
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
-
 <HARD-GATE>
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
@@ -31,7 +29,8 @@ You MUST create a task for each of these items and complete them in order:
 6. **Create spec bead** — store spec in beads via `bd create` and write summary file to `docs/beads/`
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews spec bead** — ask user to review the spec via `bd show` before proceeding
-9. **Transition to implementation** — dispatch `superpowers-beads:planner`
+9. **Propose lasting rules** — candidates from the approved spec; the user approves each before any is written (see Lasting Rules Gate)
+10. **Transition to implementation** — dispatch `superpowers-beads:planner`
 
 **Terminal step:** The ONLY step after brainstorming is the `superpowers-beads:planner` dispatch. Do NOT invoke frontend-design, mcp-builder, or any other implementation skill.
 
@@ -39,19 +38,15 @@ You MUST create a task for each of these items and complete them in order:
 
 **Understanding the idea:**
 
-- Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
 - **Evidence before design (suspected problems only):** when the brainstorm's premise is a suspected defect, limitation, or incompatibility — not a requested feature — first show the problem exists: a repro, an error, a concrete failing case. If the premise dissolves under evidence, say so and stop; a brainstorm built on an unverified premise designs a solution to nothing. Feature/new-capability brainstorms are exempt.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
-- For appropriately-scoped projects, ask questions one at a time to refine the idea
-- Prefer multiple choice questions when possible, but open-ended is fine too
-- Only one question per message - if a topic needs more exploration, break it into multiple questions
+- For appropriately-scoped projects, ask one question per message — break a topic that needs more exploration into several; prefer multiple choice, open-ended is fine too
 - Focus on understanding: purpose, constraints, success criteria
 
 **Exploring approaches:**
 
-- Prune first: a branch excluded by an AGENTS.md rule, a binding ruling, code, spec, or a document already read this session is not an approach
-- Propose 2-3 surviving approaches with trade-offs
+- Prune first (checklist step 4), then propose 2-3 surviving approaches with trade-offs
 - Present options conversationally — lead with your recommended option and explain why
 
 **Presenting the design:**
@@ -60,6 +55,7 @@ You MUST create a task for each of these items and complete them in order:
 - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
 - Ask after each section whether it looks right so far
 - Cover: architecture, components, data flow, error handling, testing
+- YAGNI ruthlessly — remove unnecessary features from all designs
 - Identify scope boundaries: which components will become separate implementation tasks? Where are the interfaces between them? What should each task NOT touch? This information feeds into writing-plans' Drift Detectors.
 - Be ready to go back and clarify if something doesn't make sense
 - A fork the dialogue can't settle — one needing research, a prototype, or an external fact — doesn't stall the spec: record it in the spec as an explicitly open decision. writing-plans turns each open decision into a blocking decision bead, resolved before the tasks it gates are written.
@@ -69,12 +65,12 @@ You MUST create a task for each of these items and complete them in order:
 - Break the system into smaller units that each have one clear purpose, communicate through well-defined interfaces, and can be understood and tested independently
 - For each unit, you should be able to answer: what does it do, how do you use it, and what does it depend on?
 - Can someone understand what a unit does without reading its internals? Can you change the internals without breaking consumers? If not, the boundaries need work.
-- Smaller, well-bounded units are also easier for you to work with - you reason better about code you can hold in context at once, and your edits are more reliable when files are focused. When a file grows large, that's often a signal that it's doing too much.
+- Smaller units are also easier for you: you reason better about code you can hold in context, and edits to focused files are more reliable. A large file is often doing too much.
 
 **Working in existing codebases:**
 
 - Explore the current structure before proposing changes. Follow existing patterns.
-- Check for project coding rules (CLAUDE.md, .claude/rules/) — designs must respect existing project constraints. Reference relevant rules in the spec so downstream skills inherit them.
+- Check for project rules (the AGENTS.md of each folder the work touches, then CLAUDE.md) — designs must respect existing project constraints. Reference relevant rules in the spec so downstream skills inherit them.
 - Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
 - Don't propose unrelated refactoring. Stay focused on what serves the current goal.
 
@@ -116,7 +112,7 @@ After creating the spec bead, read it back via `bd show <bead-id> --full` (specs
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit — or, where only research or a prototype can settle it, mark it as an explicitly open decision for writing-plans' decision bead.
 5. **Scope boundary check:** Does the spec identify which areas will become separate implementation tasks? Are the interfaces between areas explicit? Could writing-plans generate specific Drift Detectors ("DO NOT touch X — that's another task's job") from this spec? If scope boundaries are vague, add them.
 
-Fix any issues inline. No need to re-review — just fix and move on.
+Fix issues inline; no re-review.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the spec before proceeding:
@@ -125,23 +121,18 @@ After the spec review loop passes, ask the user to review the spec before procee
 
 Wait for the user's response. If they request changes, update the bead and re-run the spec review loop. Only proceed once the user approves.
 
+**Lasting Rules Gate:**
+After the user approves the spec, propose the candidates: the decisions in it you judge must outlive this feature. A decision is a candidate only when all four hold: it holds after this feature ships, for work nobody has planned; an agent working elsewhere would break it, because without its reason it looks wrong; no AGENTS.md rule covers it already; it reaches beyond one place, or is a "must never" for security, cost or data. Show each as one proposed line in its folder's AGENTS.md format, with the folder and the facts you verified: the folders whose code it reaches, the test that pins it. "No candidates" is an answer. The user approves, edits or drops each; nothing is written into an AGENTS.md before that. Each approved line is its own AGENTS.md commit, landed before the planner dispatch, with `Check: none` until its test exists.
+
 **Implementation:**
 
 - Dispatch the `superpowers-beads:planner` agent to create a detailed implementation plan
 - Pass the root bead ID to it (not a file path)
 - Do NOT invoke any other skill; the owner may type the writing-plans slash command.
 
-## Key Principles
-
-- **One question at a time** - Don't overwhelm with multiple questions
-- **YAGNI ruthlessly** - Remove unnecessary features from all designs
-- **Explore alternatives** - Always propose 2-3 approaches before settling
-- **Incremental validation** - Present design, get approval before moving on
-- **Be flexible** - Go back and clarify when something doesn't make sense
-
 ## Visual Companion
 
-A visual companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question gets visuals.
+A visual companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode.
 
 **Companion selection:** On Claude Code (the built-in Artifact tool is available), use Artifacts as the visual companion. On other harnesses, fall back to the browser-based companion.
 
@@ -150,7 +141,7 @@ A visual companion for showing mockups, diagrams, and visual options during brai
 - **Artifacts (Claude Code):** > "Some of what we're working on might be easier to show visually. I can put together mockups, diagrams, and side-by-side comparisons as Artifacts you can view right here as we go. Want to try it?"
 - **Browser fallback:** > "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
 
-**This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
+**This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
 
 **Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use visuals or the terminal. The test: **would the user understand this better by seeing it than reading it?**
 
