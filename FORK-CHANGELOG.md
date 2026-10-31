@@ -7,6 +7,17 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.73] - 2026-10-31
+
+Net `skills/` word delta: **+76** (handoff +76). Nothing displaced; the handoff skill now measures 747
+words against its stated 600, a gap that predates this release (671 before it). Changes: a handoff
+summary from memory stays, but every line names the id or path it rests on; a session holding no lane
+sends a successor the owner named a summary of what it was working on, items marked "no record" where
+none holds them; at Resume the successor re-checks each item against its record before acting on it or
+telling the owner, and the record wins (replaces "verify only the ids it names"). Cause: solo session
+529cde4d handed off a review without a lane as prose from memory listing approved rule 30 as open, and
+session 5310393b, verifying ids only, reopened it; owner approved 2026-10-31.
+
 ## [1.4.72] - 2026-10-30
 
 Net `skills/` word delta: **+297**; per-skill split: writing-plans +52, subagent-driven-development
