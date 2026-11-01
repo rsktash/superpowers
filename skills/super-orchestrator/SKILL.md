@@ -15,7 +15,7 @@ Planning is a dispatch — `superpowers-beads:planner`, one per epic, parallel a
 
 ## Owner words
 
-A decision binding future work (behavior, design, vendor, cost, convention) becomes an AGENTS.md edit the owner approves BEFORE the relay — only once the discussion is closed and every gap the words leave is asked; "approve" with no option named approves the recommended one. The approved edit is its own commit; the relay names its hash. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed. No ruling is filed (bd refuses it); legacy rulings bind only where no AGENTS.md covers the code.
+A decision binding future work (behavior, design, vendor, cost, convention) may become an AGENTS.md edit only if the owner says record it — an owner ask, or approval of the exact text shown; approving the decision is not that, and one-feature choices stay in the epic. A recorded edit lands BEFORE the relay — only once the discussion is closed and every gap the words leave is asked; "approve" with no option named approves the recommended one. The approved edit is its own commit; the relay names its hash. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed. No ruling is filed (bd refuses it); legacy rulings bind only where no AGENTS.md covers the code.
 
 ```bash
 git commit -m "<rule>" -- <folder>/AGENTS.md          # after the owner approves the wording; the message quotes the owner sentence
