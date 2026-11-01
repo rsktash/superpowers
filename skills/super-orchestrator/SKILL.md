@@ -20,7 +20,7 @@ A decision binding future work (behavior, design, vendor, cost, convention) may 
 ```bash
 git commit -m "<rule>" -- <folder>/AGENTS.md          # after the owner approves the wording; the message quotes the owner sentence
 bd question close Q-n --commit <sha>                 # closes the question with a pointer to that commit
-bd question close Q-n --reason moot --note "<why>"   # superseded needs --of
+bd question close Q-n --reason moot --note "<why>"   # owner answer without a rule: the answer is the note; superseded needs --of
 ```
 
 **The folder is the reach.** A rule lives in the deepest folder that contains every file able to break it; a folder holds a rule about its children only when it is true of all of them; a rule two modules share belongs to the one whose code decides it, never a parent and never both. The relay's first line names the file.
