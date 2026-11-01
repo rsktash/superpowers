@@ -23,7 +23,7 @@ bd question close Q-n --commit <sha>                 # closes the question with 
 bd question close Q-n --reason moot --note "<why>"   # superseded needs --of
 ```
 
-**The folder is the reach.** A rule goes in the AGENTS.md of the deepest folder whose code it governs; a rule shared by sibling folders goes in their parent, never copied into each; the product or the process goes in the root AGENTS.md. The relay's first line names the file.
+**The folder is the reach.** A rule lives in the deepest folder that contains every file able to break it; a folder holds a rule about its children only when it is true of all of them; a rule two modules share belongs to the one whose code decides it, never a parent and never both. The relay's first line names the file.
 
 **Re-derive before relaying.** A rule that replaces a control or a model retires the premise of every earlier rule that assumed it: propose the edit of what no longer holds in the same commit, question what the words left open, relay the new text.
 

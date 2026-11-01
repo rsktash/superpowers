@@ -7,6 +7,14 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.75] - 2026-11-01
+
+Net `skills/` word delta: **+13** (super-orchestrator 997 → 1010). The folder-is-the-reach paragraph no longer sends a
+rule shared by sibling folders to their parent: a rule lives in the deepest folder that contains every file able to
+break it, a folder holds a rule about its children only when it is true of all of them, and a rule two modules share
+belongs to the one whose code decides it. The old sentence contradicted the msklad-biklod placement ruling and produced
+a parent-folder proposal in the files pilot review. Nothing displaced; the 13 words are owed.
+
 ## [1.4.74] - 2026-11-01
 
 Net `skills/` word delta: **−9** (brainstorming 2105 → 2096). Added: checklist step 9 "Propose lasting rules" and a
