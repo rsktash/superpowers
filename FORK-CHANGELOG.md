@@ -7,6 +7,43 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.77] - 2026-11-07
+
+Net `skills/` word delta: **+206** by `wc -w` (super-orchestrator 1102 → 1211, writing-plans 3039 → 3083,
+subagent-driven-development 3904 → 3943, requesting-code-review 513 → 527); `agents/lane-orchestrator.md`
+1636 → 1646. Nothing displaced. Known overage: super-orchestrator stands at 1211 words against its stated 951
+(1102 before this release, so 151 of the gap predates it); requesting-code-review, subagent-driven-development
+and writing-plans were already over their stated budgets by the same count and grow further. A displacement
+for super-orchestrator that leaves this release's lines untouched is proposed, not applied.
+
+Effect: the owner's "a new pattern needs explicit approval" now holds in every seat, not only in the
+coordinator's own rules. The planner can no longer prune a login, role, store, vendor, process or mechanism the
+tree does not have as "forced by one correct design": it files a decision bead, never a pin or a labelled
+proposal, and its receipt lists every *Proposal:* its bodies carry. A lane authoring a body files a question for
+a forced proposal that adds a new pattern. In review (requesting-code-review, subagent-driven-development), an
+unapproved new pattern is one owner question that never flips the verdict and holds the branch's merge until the
+owner answers. The super orchestrator carries an owner answer onward as the owner's words or the exact approved
+text, labels a consequence it derives as its own and asks it before it binds, counts a new pattern among the
+owner's decisions, reads a planner receipt's Proposals before relaying it (owning any "no owner question needed"),
+and holds a lane whose review names an unapproved new pattern while other lanes move. Cause: solo, 2026-11-06/07 —
+a planner pruned a new database login as forced, a lane built it, review passed it, and the coordinator relayed
+"the main login reads no company schema" as the owner's words; wording approved by the owner line by line
+(solo-97ybl, Q-1579). Evals: five scenarios under `tests/skill-evals/`, GREEN 5/5 PASS; baseline FAIL for the lane
+charter and requesting-code-review. Version fields re-synced: 1.4.76 had bumped three of the five files.
+
+## [1.4.76] - 2026-11-02
+
+Net `skills/` word delta: **+71** by `wc -w` (super-orchestrator 1059 → 1102, writing-plans 3011 → 3039), derived
+from `git diff 572209b a74672d`. Displaced: no record. Changes (07a2984, 6cd7b74, 504dbb2): a decision binding
+future work becomes an AGENTS.md rule only when the owner says record it — an owner ask, or approval of the exact
+text shown; approving the decision is not that. A Decide bead closes by commit only when the owner recorded a
+rule; otherwise it closes moot with the answer as the note, and the answer is written into every dependent task's
+body because a dependent never sees the note. The super orchestrator's moot close carries an owner answer that
+is not recorded as a rule. Cause: msklad-bot session 4c2f75f2 (2026-11-01) committed six AGENTS.md rules after
+the owner approved only the design choices behind them; owner approved each change. The release commit
+(a74672d) bumped `.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json` and `.claude-plugin/marketplace.json`
+but left `package.json` and `gemini-extension.json` at 1.4.75 (fixed in 1.4.77). Eval runs: no record.
+
 ## [1.4.75] - 2026-11-01
 
 Net `skills/` word delta: **+13** (super-orchestrator 997 → 1010). The folder-is-the-reach paragraph no longer sends a

@@ -15,7 +15,7 @@ Planning is a dispatch — `superpowers-beads:planner`, one per epic, parallel a
 
 ## Owner words
 
-A decision binding future work (behavior, design, vendor, cost, convention) may become an AGENTS.md edit only if the owner says record it — an owner ask, or approval of the exact text shown; approving the decision is not that, and one-feature choices stay in the epic. A recorded edit lands BEFORE the relay — only once the discussion is closed and every gap the words leave is asked; "approve" with no option named approves the recommended one. The approved edit is its own commit; the relay names its hash. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed. No ruling is filed (bd refuses it); legacy rulings bind only where no AGENTS.md covers the code.
+A decision binding future work (behavior, design, vendor, cost, convention) may become an AGENTS.md edit only if the owner says record it — an owner ask, or approval of the exact text shown; approving the decision is not that, and one-feature choices stay in the epic. A recorded edit lands BEFORE the relay — only once the discussion is closed and every gap the words leave is asked; "approve" with no option named approves the recommended one. The approved edit is its own commit; the relay names its hash. An operational instruction (sequence, go-ahead, push timing, close/stop) is executed, never filed. No ruling is filed (bd refuses it); legacy rulings bind only where no AGENTS.md covers the code. Whatever carries an owner answer onward — an AGENTS.md line, a moot note, a task body, a dispatch prompt — carries the owner's words or the exact text they approved, nothing added; a consequence you derive is labelled yours and is a question before it binds.
 
 ```bash
 git commit -m "<rule>" -- <folder>/AGENTS.md          # after the owner approves the wording; the message quotes the owner sentence
@@ -31,7 +31,7 @@ bd question close Q-n --reason moot --note "<why>"   # owner answer without a ru
 
 ## Design gaps
 
-A screen behaviour nobody decided is a design gap: a dispatched design pass — a proposal grounded in the design system's established patterns — that the owner approves. Words name the outcome, not the control: when an established pattern does the outcome better, the pass proposes it. The dispatch carries the gap, the screenshot and the folder's AGENTS.md path; the pass chooses the answer. Your own questions carry only decisions that are the owner's by nature: vendor, cost, business rule, priority. Options with one recommended, a fix named in a relay, a proposal dictated to the pass: all you designing. The owner approves every wording or design pass — never delegated, never a coordinator approval.
+A screen behaviour nobody decided is a design gap: a dispatched design pass — a proposal grounded in the design system's established patterns — that the owner approves. Words name the outcome, not the control: when an established pattern does the outcome better, the pass proposes it. The dispatch carries the gap, the screenshot and the folder's AGENTS.md path; the pass chooses the answer. Your own questions carry only decisions that are the owner's by nature: vendor, cost, business rule, priority, and a new pattern. Options with one recommended, a fix named in a relay, a proposal dictated to the pass: all you designing. The owner approves every wording or design pass — never delegated, never a coordinator approval.
 
 ## The orchestrator
 
@@ -39,11 +39,12 @@ A screen behaviour nobody decided is a design gap: a dispatched design pass — 
 
 - A lane-orchestrator dispatch names plan id, lane, lane session id, lane worktree and branch, and integration branch and worktree, read from `bd plan show`; a NEEDS_CONTEXT return is answered with the missing fields. Plan status never blocks a claim — work no listed lane covers gets `bd plan lane add` on that same plan (`skills/shared/plan-lane.md`).
 - An implementer dispatched outside a lane follows your claim — `bd update <id> --status in_progress --assignee "<user> / <model>"` — and its prompt names it; otherwise the task goes through a lane.
-- Its charter ("When you author a task body") makes gap-fills proposals. Before reporting a round, dispatch a read of each authored child's design section; a server fact turned into a user limit is a decision to surface.
+- A lane's charter makes its gap-fills proposals. Before reporting a round, dispatch a read of each authored child's design section; a server fact turned into a user limit is a decision to surface. A planner receipt lists every *Proposal:* its bodies carry; you read them before relaying the receipt, and "no owner question needed" is never relayed as the planner's word — it is yours after that read.
 - Schedule the 59-minute no-op heartbeat and end the turn.
 - Near ~250K tokens, replace it: the successor starts from the tracker, never a transcript; its prompt names mode, branch, stack and evidence surfaces.
 - "Left as is" on a defect the owner would meet goes back as a bead.
 - Once a lane merges into the integration branch, sweep its worktrees per `superpowers-beads:using-git-worktrees` Finishing step 4.
+- A lane whose review or findings name a new pattern the owner has not approved does not merge until that question is answered; other lanes keep moving.
 
 ## Reporting
 

@@ -96,6 +96,16 @@ Each run: one fresh Sonnet general-purpose agent, payload = the scenario file wi
 - `test-comment-wording-inline.md` — **PASS**: the controller applied the rewording inline as a mechanical edit with no design content, committed on top of the reviewed commit without amending, re-ran the named `grep` check to clear the verdict, and named the single-hit sibling sweep as what discharged the obligation that licenses the inline edit.
 - Action: none. No fix round.
 
+## Edit round: an unapproved new pattern in review (bead superpowers-mgm) — 2026-11-07
+
+Observed (solo, 2026-11-06/07): a lane built a new database login the owner never approved and the reviewer passed it. Edit under test: the Authority triage sentence "A new pattern the change under review introduces, with no owner approval and no AGENTS.md rule naming it, is that owner question: it never flips the verdict, and the branch carrying it does not merge until the owner answers." Scenario: `test-unapproved-pattern-finding.md`.
+
+Method: one fresh Sonnet `general-purpose` agent per run, payload = the scenario with `## Judging` stripped plus the full governing file, read from one payload file and nothing else; the agent was told to apply no CLAUDE.md, rules file or memory it had loaded, because the seat replayed did not have the coordinator's "a new pattern needs explicit approval" rule. Baseline = the file at `main` `a74672d`; GREEN = the file at `fix/owner-authority-gates` `a8b812a` (owner-approved wording, Q-1579). Judged by the executor against the Judging section.
+
+- Baseline — **PASS (non-discriminating).** "Finding 1 (new `schema_owner` login): a proposal, not a defect. I do not fix it, I do not rule on it, and I park `shop-41.7` on one owner question." The gate defect went to the live implementer alone ("Do not touch the `schema_owner` login"); `.7` not closed, `.8`/`.9` untouched, `.10`–`.12` continued. Reached through the pre-edit "genuine fork → one owner question, never self-ruled" clause.
+- GREEN — **PASS.** "It does not flip the verdict or board a fix round." / "The diff introduces a new pattern with no owner approval and no AGENTS.md rule naming it. The skill treats that as one owner question."; `bd question add shop-41.7 "…"`; one-defect round ("Do not remove, rename or reroute the schema_owner login"); `.10`–`.12` continued; "The branch carrying the unapproved login does not merge until the owner answers. The full-suite gate, whole-diff review and merge wait for the owner's morning answer." The merge hold is stated only in the GREEN run.
+- Action: none.
+
 ---
 
-*Created: 2026-09-05*
+*Created: 2026-09-05; updated 2026-11-07*

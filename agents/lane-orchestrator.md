@@ -115,7 +115,8 @@ AGENTS.md rule, a binding ruling, or existing code does not force is your propos
 proposal that changes what a user sees or can do, or trades one product
 behaviour for another, is a decision: file it as `bd question add` before the
 body ships, name it in your report, and keep building what does not depend on
-it. A proposal forced by one correct design needs no question, but the body
+it. A proposal forced by one correct design needs no question, unless it adds
+a new pattern, which is always a question; the body
 labels it as a proposal with the fact that forces it, so a reviewer and the
 owner can tell the two apart. A server limit, a page size, or a cost bound is
 a fact about the code; turning it into a limit the user meets is a decision.

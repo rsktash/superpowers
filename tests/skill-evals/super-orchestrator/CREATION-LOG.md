@@ -45,3 +45,19 @@ Chose B: transcribed the ruling, then relayed the R-id to `lane-orch-5` with "Au
 ### GREEN (Proportion paragraph + rationalization row; heartbeat bullet trimmed to its first sentence for the word budget)
 
 test-mechanical-fix-proportion.md — PASS. Chose C: ruling `--verbatim`, verified `--json`, then a SendMessage to `lane-orch-5` marked "Triage: mechanical edit, not a round item ... Apply it directly on epic/solo-5m7. Do not author a task bead, do not open a per-task worktree, do not dispatch an implementer or a reviewer, no design section. Gate with `npm test` and `npm run check` in web-app/." The lane was neither stopped nor duplicated; the owner got one message after the gates. Verbatim: "The mode text ('relay every owner report verbatim to the one running orchestrator') governs who is addressed, not what machinery that recipient spins up." No wording change to the paragraph was needed. Body word count 706 before, 830 after the two additions, 818 after the trim.
+
+## Edit round: owner words carried verbatim; a new pattern is the owner's (bead superpowers-mgm) — 2026-11-07
+
+Observed (solo, 2026-11-06/07): a planner wrote a new database login as tasks, its receipt said no owner question was needed, and the coordinator carried a wider consequence onward in the owner's name ("the main login reads no company schema"), which the owner never said. Edits under test: the Owner words sentence (an owner answer is carried as the owner's words or the exact approved text, a derived consequence is labelled yours and is a question), "and a new pattern" in Design gaps, the receipt-read bullet, and the merge-hold bullet. Scenario: `test-derived-consequence-not-owner-words.md`.
+
+Method: one fresh Sonnet `general-purpose` agent per run, payload = the scenario with `## Judging` stripped plus the full governing file, read from one payload file and nothing else; the agent was told to apply no CLAUDE.md, rules file or memory it had loaded, because the seat replayed did not have the coordinator's "a new pattern needs explicit approval" rule. Baseline = the file at `main` `a74672d`; GREEN = the file at `fix/owner-authority-gates` `a8b812a` (owner-approved wording, Q-1579). Judged by the executor against the Judging section.
+
+### Baseline: test-derived-consequence-not-owner-words.md — PASS (non-discriminating)
+
+Chose B on the pre-edit text. Note `'Owner: "Move them. Backend reads of company schemas go to Biklod facts or Access."'`; "A's note and relay say 'the main login reads no company schema'. The owner never said that. It is my paraphrase, and it widens his sentence."; the login went to the owner as "an infrastructure and cost decision, which is the owner's by nature" (the old vendor/cost list); `.117`–`.130` relayed, `.113`–`.116` held. Option A was too plainly wrong to fail at baseline in this harness.
+
+### GREEN — PASS, one residual
+
+"That is a consequence I derived. The owner never said it. Whatever carries an owner answer onward carries the owner's words and nothing added."; "'Planner reports no owner question needed' in the relay is the planner's word, which the skill forbids relaying."; owner question "That is a new login and a new secret, so it is your call, not the planner's and not mine."; next-turn relay "Build shop-41.117–.130 … Hold shop-41.113–.116". Residual, shared with the baseline: it dispatched a miner to read all 18 bodies before relaying anything, so the lane idled one turn although the receipt's Proposal line was already in hand.
+
+Action: none on the approved wording. A sharper scenario (the derived consequence arriving inside the lane's own report rather than in an offered option) is the candidate for the next round. Word count: `wc -w` 1102 at `a74672d` → 1211 at `a8b812a` against the stated 951; the overage predates this round (151 words) and this round adds 109. The proposed displacement is not committed.
