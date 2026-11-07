@@ -193,4 +193,4 @@ Write the marker on the root bead and stop:
 bd label add <root-id> plan-ready:$(git rev-parse --short HEAD)
 ```
 
-Return the receipt, the exploration map path `docs/beads/<epic-id>.map.md` among its items, plus any open decision beads and `NEEDS_RULING` if so. A receipt carrying prose reintroduces the residency the venue split removed. The marker's consumer is the execution skills' epic gate — a run finding none routes back to planning.
+Return the receipt, one line per *Proposal:* the bodies carry, the exploration map path `docs/beads/<epic-id>.map.md` among its items, plus any open decision beads and `NEEDS_RULING` if so. A receipt carrying prose reintroduces the residency the venue split removed. The marker's consumer is the execution skills' epic gate — a run finding none routes back to planning.

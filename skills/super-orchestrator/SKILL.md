@@ -39,7 +39,7 @@ A screen behaviour nobody decided is a design gap: a dispatched design pass — 
 
 - A lane-orchestrator dispatch names plan id, lane, lane session id, lane worktree and branch, and integration branch and worktree, read from `bd plan show`; a NEEDS_CONTEXT return is answered with the missing fields. Plan status never blocks a claim — work no listed lane covers gets `bd plan lane add` on that same plan (`skills/shared/plan-lane.md`).
 - An implementer dispatched outside a lane follows your claim — `bd update <id> --status in_progress --assignee "<user> / <model>"` — and its prompt names it; otherwise the task goes through a lane.
-- Its charter ("When you author a task body") makes gap-fills proposals. Before reporting a round, dispatch a read of each authored child's design section; a server fact turned into a user limit is a decision to surface.
+- A lane's charter makes its gap-fills proposals. Before reporting a round, dispatch a read of each authored child's design section; a server fact turned into a user limit is a decision to surface. A planner receipt lists every *Proposal:* its bodies carry; you read them before relaying the receipt, and "no owner question needed" is never relayed as the planner's word — it is yours after that read.
 - Schedule the 59-minute no-op heartbeat and end the turn.
 - Near ~250K tokens, replace it: the successor starts from the tracker, never a transcript; its prompt names mode, branch, stack and evidence surfaces.
 - "Left as is" on a defect the owner would meet goes back as a bead.
