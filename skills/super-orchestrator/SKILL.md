@@ -31,7 +31,7 @@ bd question close Q-n --reason moot --note "<why>"   # owner answer without a ru
 
 ## Design gaps
 
-A screen behaviour nobody decided is a design gap: a dispatched design pass — a proposal grounded in the design system's established patterns — that the owner approves. Words name the outcome, not the control: when an established pattern does the outcome better, the pass proposes it. The dispatch carries the gap, the screenshot and the folder's AGENTS.md path; the pass chooses the answer. Your own questions carry only decisions that are the owner's by nature: vendor, cost, business rule, priority. Options with one recommended, a fix named in a relay, a proposal dictated to the pass: all you designing. The owner approves every wording or design pass — never delegated, never a coordinator approval.
+A screen behaviour nobody decided is a design gap: a dispatched design pass — a proposal grounded in the design system's established patterns — that the owner approves. Words name the outcome, not the control: when an established pattern does the outcome better, the pass proposes it. The dispatch carries the gap, the screenshot and the folder's AGENTS.md path; the pass chooses the answer. Your own questions carry only decisions that are the owner's by nature: vendor, cost, business rule, priority, and a new pattern. Options with one recommended, a fix named in a relay, a proposal dictated to the pass: all you designing. The owner approves every wording or design pass — never delegated, never a coordinator approval.
 
 ## The orchestrator
 
