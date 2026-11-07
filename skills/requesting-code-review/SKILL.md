@@ -43,7 +43,7 @@ Use Task tool with superpowers-beads:code-reviewer type, fill template at `code-
 
 **3. Act on feedback — triage by authority first:**
 - A finding is a **defect** only if it cites the authority it violates: a gate item, a normative task clause, an explicit convention, an AGENTS.md rule, or a recorded owner ruling where no AGENTS.md covers the code. Severity ranks defects; it never converts a proposal into round content.
-- Defects: one fix round carrying all of them. Proposals: one line on the backlog bead.
+- Defects: one fix round carrying all of them. Proposals: one line on the backlog bead. An unapproved new pattern: one owner question, and no merge until it is answered.
 - Push back if reviewer is wrong (with reasoning)
 
 ## Example

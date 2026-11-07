@@ -44,6 +44,7 @@ A screen behaviour nobody decided is a design gap: a dispatched design pass — 
 - Near ~250K tokens, replace it: the successor starts from the tracker, never a transcript; its prompt names mode, branch, stack and evidence surfaces.
 - "Left as is" on a defect the owner would meet goes back as a bead.
 - Once a lane merges into the integration branch, sweep its worktrees per `superpowers-beads:using-git-worktrees` Finishing step 4.
+- A lane whose review or findings name a new pattern the owner has not approved does not merge until that question is answered; other lanes keep moving.
 
 ## Reporting
 
