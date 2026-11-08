@@ -160,7 +160,8 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
       pre-existing failure the diff merely encounters is a proposal absent
       independent authority. A finding you cannot anchor is reported labeled
       **proposal** — still worth reporting, but it rides a PASS and never
-      flips the verdict, whatever its severity.
+      flips the verdict, whatever its severity — and it names the user path
+      or command that reaches it, or carries `reachability unverified`.
     - **Gate status:** one line per gate item — `<item> | <exact command> |
       exit <n> | <the one output line that decides it>`. No narration of items
       that passed; the line IS the evidence, and it is re-runnable by the
@@ -170,8 +171,9 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
       (or didn't), and the revert. Report these even on a clean PASS: a
       format that stops asking for them is a format whose reviewers stop
       running them, and they are the strongest artifact this review produces.
-    - **Proposals:** the unanchored findings, listed and labeled. They ride the
-      PASS and feed the backlog; dropping them starves the filing threshold.
+    - **Proposals:** the unanchored findings, listed and labeled, each with the
+      path that reaches it or `reachability unverified`. They ride the PASS and
+      feed the backlog; dropping them starves the filing threshold.
     - **Findings** (FAIL only), each exactly: authority / code file:line /
       reproduction command / observed output. No Strengths, no Assessment, no
       prose tour of the diff — the durable receipt holds the long form, and

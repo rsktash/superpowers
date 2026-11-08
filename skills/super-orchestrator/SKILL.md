@@ -9,7 +9,7 @@ The coordinator is a relay and a clerk: dispatch, relay, transcription, tracker 
 
 ## Your own calls
 
-A one-fact check returns one value: a version, a status, one field. A design section, a rulings filter, a `git log`, a screenshot is mining: dispatch `superpowers-beads:miner` or invoke `superpowers-beads:tracker-mining` with a line cap, one such launch per turn, end the turn, answer from the brief. Residency is the test, not size.
+A one-fact check returns one value: a version, a status, one field. A design section, a rulings filter, a `git log`, a screenshot is mining: dispatch `superpowers-beads:miner` or invoke `superpowers-beads:tracker-mining` with a line cap, one such launch per turn, end the turn, answer from the brief. Residency is the test, not size. A bounded read (ranges) that grounds an owner question or tests an agent's proposal before relay is your own call, never mining.
 
 Planning is a dispatch — `superpowers-beads:planner`, one per epic, parallel across epics. A forked skill is invoked one at a time: a second invocation while the first one runs is forced to the foreground and holds this session.
 
@@ -27,11 +27,9 @@ bd question close Q-n --reason moot --note "<why>"   # owner answer without a ru
 
 **Re-derive before relaying.** A rule that replaces a control or a model retires the premise of every earlier rule that assumed it: propose the edit of what no longer holds in the same commit, question what the words left open, relay the new text.
 
-**A feedback item is a class across every surface.** A screenshot's origin narrows nothing; exclusions carry reasons, same round.
-
 ## Design gaps
 
-A screen behaviour nobody decided is a design gap: a dispatched design pass — a proposal grounded in the design system's established patterns — that the owner approves. Words name the outcome, not the control: when an established pattern does the outcome better, the pass proposes it. The dispatch carries the gap, the screenshot and the folder's AGENTS.md path; the pass chooses the answer. Your own questions carry only decisions that are the owner's by nature: vendor, cost, business rule, priority, and a new pattern. Options with one recommended, a fix named in a relay, a proposal dictated to the pass: all you designing. The owner approves every wording or design pass — never delegated, never a coordinator approval.
+A screen behaviour nobody decided is a design gap: a dispatched design pass — a proposal grounded in the design system's established patterns — that the owner approves. Words name the outcome, not the control: when an established pattern does the outcome better, the pass proposes it. The dispatch carries the gap, the screenshot and the folder's AGENTS.md path; the pass chooses the answer. Your own questions carry only decisions that are the owner's by nature — vendor, cost, business rule, priority, a new pattern — and each carries the read that grounds it (`Evidence: <path>:<line>`; question-evidence-guard refuses one without). A reviewer's proposal is a guess until your read reaches the code it names: then a finding or a question; `reachability unverified` is at most a finding. Options with one recommended, a fix named in a relay, a proposal dictated to the pass: all you designing. The owner approves every wording or design pass — never delegated, never a coordinator approval.
 
 ## The orchestrator
 
@@ -41,14 +39,13 @@ A screen behaviour nobody decided is a design gap: a dispatched design pass — 
 - An implementer dispatched outside a lane follows your claim — `bd update <id> --status in_progress --assignee "<user> / <model>"` — and its prompt names it; otherwise the task goes through a lane.
 - A lane's charter makes its gap-fills proposals. Before reporting a round, dispatch a read of each authored child's design section; a server fact turned into a user limit is a decision to surface. A planner receipt lists every *Proposal:* its bodies carry; you read them before relaying the receipt, and "no owner question needed" is never relayed as the planner's word — it is yours after that read.
 - Schedule the 59-minute no-op heartbeat and end the turn.
-- Near ~250K tokens, replace it: the successor starts from the tracker, never a transcript; its prompt names mode, branch, stack and evidence surfaces.
 - "Left as is" on a defect the owner would meet goes back as a bead.
 - Once a lane merges into the integration branch, sweep its worktrees per `superpowers-beads:using-git-worktrees` Finishing step 4.
 - A lane whose review or findings name a new pattern the owner has not approved does not merge until that question is answered; other lanes keep moving.
 
 ## Reporting
 
-Owner-visible evidence (a window, a running stack, a relaunched app), with where to look and how to sign in. The final message is all the owner reads: at most one decision first, then localhost and device currency, changes per surface in complete sentences, gates with the tip hash, named exclusions.
+Owner-visible evidence (a window, a running stack, a relaunched app), with where to look and how to sign in. The final message is all the owner reads: at most one decision first — one that carries its evidence line, else none — then localhost and device currency, changes per surface in complete sentences, gates with the tip hash, named exclusions.
 
 ## Corpus fixes
 
@@ -60,9 +57,10 @@ A repeating workflow defect: dispatched `superpowers-beads:diagnosing-workflow-d
 |---|---|
 | "The AGENTS.md rule excludes it; no decision exists" | The complaint targets what that rule fixed. Re-derive. |
 | "A comment instead of closing Q-n" | Nothing binding in a comment. Close moot. |
+| "The reviewer proposed it, so it is a decision" | A proposal is a guess until a read reaches the code it names. Read, then finding or question. |
 
 ## Red flags
 
-- `bd get … design`, a rulings text filter, `git log`, `grep` in your own turn
+- `bd get … design`, a rulings text filter, `git log`, a `grep` in your own turn that grounds no owner question
 - A relay reaffirming a rule whose premise the owner replaced; "only web" from a screenshot's origin
 - A headless emulator; a turn held for a child; a heartbeat that sends

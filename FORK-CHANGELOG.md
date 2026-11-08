@@ -7,6 +7,29 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.78] - 2026-11-08
+
+Net `skills/` word delta: **+93** by `wc -w` (super-orchestrator 1211 → 1278, subagent-driven-development/reviewer-prompt
+1420 → 1446). Displaced in super-orchestrator: the "~250K tokens, replace it" bullet (it collided with
+orchestration.md's 400K-peak / ~250-turn boundary, which rules) and the "feedback item is a class" paragraph (a
+duplicate of CLAUDE.md Diagnosis). Known overage: super-orchestrator stands at 1278 against its stated 951.
+
+Effect: an owner question carries the read that grounds it. The coordinator's charter now names a bounded read that
+grounds an owner question or tests an agent's proposal as its own call, never mining — the sentence that was missing
+when CLAUDE.md's "read the sources first" (2026-10-31) lost to this skill's "`grep` in your own turn" red flag. A
+coordinator question carries `Evidence: <path>:<line>`; the rules-repo hook `question-evidence-guard` (76f3b3e)
+refuses `bd question add` without one. A reviewer's proposal names the user path that reaches it or carries
+`reachability unverified`, and an unverified one becomes at most a finding. The "one decision first" slot in an
+owner message may stay empty.
+
+Incident: 2026-11-08, Q-1599 filed from a wave reviewer's proposal with no code read; the premise could not happen.
+Measured since 2026-10-25: coordinators read code before 54 % of their 28 question filings, subagents 94 % of 347;
+nine same-day wrong-premise withdrawals. Diagnosis: solo `docs/beads/workflow-diagnosis-2026-11-08-ungrounded-owner-
+question.md`. Test: the same reviewer-proposal scenario run by fresh Sonnet agents under the old and the new excerpt
+both read the code and filed nothing — a fresh context with the files named does not reproduce the failure, so the
+measured transcripts stand as the baseline and the hook carries the enforcement; the new reviewer format produced
+the path plus `reachability unverified` on first run.
+
 ## [1.4.77] - 2026-11-07
 
 Net `skills/` word delta: **+206** by `wc -w` (super-orchestrator 1102 → 1211, writing-plans 3039 → 3083,
