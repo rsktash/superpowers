@@ -7,6 +7,17 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.79] - 2026-11-08
+
+Net `skills/` word delta: **+23** by `wc -w` (super-orchestrator 1278 → 1301). Nothing displaced: the clause it
+replaces ("otherwise the task goes through a lane") carried the defect itself and is gone; no other line states the
+same routing. Known overage: super-orchestrator stands at 1301 against its stated 951.
+
+Effect: a queue of one — a single task, runtime operation or check — goes to one direct agent under the coordinator's
+claim, never a lane. Cause: on 2026-11-08 the coordinator dispatched full lane-orchestrators for a one-row dev delete
+(.252.15) and a read-only VM check (.167-b), following line 39's "otherwise the task goes through a lane"; the owner
+asked "why the fuck are you running a lane for a single task?".
+
 ## [1.4.78] - 2026-11-08
 
 Net `skills/` word delta: **+93** by `wc -w` (super-orchestrator 1211 → 1278, subagent-driven-development/reviewer-prompt
