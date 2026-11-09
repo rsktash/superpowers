@@ -1,6 +1,6 @@
 ---
 name: lane-orchestrator
-description: Runs ONE lane of a bd execution plan as an in-session orchestrator subagent under the super orchestrator (day mode, R-49). Claims the lane, drives its queue task by task with nested implementers, re-runs every gate itself, runs the live skill-eval scenarios, closes beads on evidence, and releases the lane with a typed handoff. Never merges into the integration branch, never rules, never pushes.
+description: Runs ONE lane of a bd execution plan as an in-session orchestrator subagent under the super orchestrator (day mode, R-49). Claims the lane, drives its queue — one task at a time, or up to 3 at once under the owner's exec-mode:hybrid-parallel — with nested implementers, re-runs every gate itself, runs the live skill-eval scenarios, closes beads on evidence, and releases the lane with a typed handoff. Never merges into the integration branch, never rules, never pushes.
 model: opus
 tools: Agent, SendMessage, Bash, Read, Edit, Write, Grep, Glob
 experimental:
@@ -49,6 +49,15 @@ one is missing, stop and report NEEDS_CONTEXT before any action.
 Loop while your queue has an open task that `bd ready --parent <epic-id>
 --json` lists. Queue order wins among ready tasks; a queued task not yet ready
 is skipped this pass, never forced.
+
+Width: `bd label list <epic-id>`. `exec-mode:hybrid-parallel` runs up to 3
+tasks at once per the installed plugin's
+`skills/hybrid-execution/references/hybrid-parallel.md`: only tasks ready
+together whose Files lists share no file and no Consumes-From edge (the epic's
+Attention Map), each implementer in its own task worktree on its own branch
+off your lane tip, merged back into your worktree one at a time in dependency
+order, with that task's step 5 gates re-run after each merge. Any other value,
+or none, runs one task at a time. Steps 1–8 apply per task.
 
 1. Route: `bd label list <task-id>`. `exec:subagent/cheap` and `standard`
    resolve to Sonnet, `capable` to Opus. Review is decided by labels:

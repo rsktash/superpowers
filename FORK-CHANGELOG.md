@@ -7,6 +7,17 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.80] - 2026-11-09
+
+Net `skills/` word delta: **+74** by `wc -w` (super-orchestrator 1301 → 1347, shared/plan-lane 740 → 768); the
+lane-orchestrator agent charter grows too (outside `skills/`). Nothing displaced: the owner asked for the content
+review that may shrink these files as the next step.
+
+- A lane runs the owner's execution mode. The owner's serial-or-parallel choice is recorded on the epic as
+  `exec-mode:serial` or `exec-mode:hybrid-parallel`; the super orchestrator asks once when it is missing and names
+  it in every lane dispatch; the lane orchestrator runs up to 3 eligible tasks at once under hybrid-parallel, per
+  hybrid-execution's existing procedure, and one at a time otherwise.
+
 ## [1.4.79] - 2026-11-08
 
 Net `skills/` word delta: **+23** by `wc -w` (super-orchestrator 1278 → 1301). Nothing displaced: the clause it

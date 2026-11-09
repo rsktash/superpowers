@@ -56,6 +56,9 @@ prints `lane <epic-id> added to <plan-id> with <n> queued`. The four values:
 - `--mode` — the skill you are running: hybrid-execution passes `subagent`,
   opencode-execution passes `opencode`, subagent-driven-development passes
   `subagent`. bd's third value, `inline`, is passed by no execution skill.
+- The owner's serial-or-parallel choice is not a `--mode` value: it lives on
+  the epic as the label `exec-mode:serial` or `exec-mode:hybrid-parallel`, and
+  a resumed lane reads it again.
 - `--rulings` — every id `bd rulings <epic-id>` prints, comma-separated. That
   list is inheritance-resolved, so the rulings the epic's parents carry are
   already in it.
