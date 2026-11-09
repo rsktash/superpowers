@@ -2,28 +2,6 @@
 
 Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
 
-## When to Use
-
-Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
-
-**Use the browser** when the content itself is visual:
-
-- **UI mockups** — wireframes, layouts, navigation structures, component designs
-- **Architecture diagrams** — system components, data flow, relationship maps
-- **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
-- **Design polish** — when the question is about look and feel, spacing, visual hierarchy
-- **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
-
-**Use the terminal** when the content is text or tabular:
-
-- **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
-- **Conceptual A/B/C choices** — picking between approaches described in words
-- **Tradeoff lists** — pros/cons, comparison tables
-- **Technical decisions** — API design, data modeling, architectural approach selection
-- **Clarifying questions** — anything where the answer is words, not a visual preference
-
-A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
-
 ## How It Works
 
 The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
@@ -57,9 +35,6 @@ scripts/start-server.sh --project-dir /path/to/project
 
 **Claude Code (Windows):**
 ```bash
-# Windows auto-detects and uses foreground mode, which blocks the tool call.
-# Use run_in_background: true on the Bash tool call so the server survives
-# across conversation turns.
 scripts/start-server.sh --project-dir /path/to/project
 ```
 When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
@@ -97,7 +72,7 @@ Use `--url-host` to control what hostname is printed in the returned URL JSON.
    - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
    - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
    - **Never reuse filenames** — each screen gets a fresh file
-   - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
+   - Use Write tool — **never use cat/heredoc**
    - Server automatically serves the newest file
 
 2. **Tell user what to expect and end your turn:**
@@ -121,13 +96,13 @@ Use `--url-host` to control what hostname is printed in the returned URL JSON.
    </div>
    ```
 
-   This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
+   When the next visual question comes up, push a new content file as usual.
 
 6. Repeat until done.
 
 ## Writing Content Fragments
 
-Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
+Write just the content that goes inside the page.
 
 **Minimal example:**
 
@@ -152,8 +127,6 @@ Write just the content that goes inside the page. The server wraps it in the fra
   </div>
 </div>
 ```
-
-That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
 
 ## CSS Classes Available
 
@@ -261,17 +234,9 @@ If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser 
 
 - **Scale fidelity to the question** — wireframes for layout, polish for polish questions
 - **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
-- **Iterate before advancing** — if feedback changes current screen, write a new version
 - **2-4 options max** per screen
 - **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
 - **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
-
-## File Naming
-
-- Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
-- Never reuse filenames — each screen must be a new file
-- For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
-- Server serves newest file by modification time
 
 ## Cleaning Up
 
