@@ -134,24 +134,7 @@ Start here: `skills/using-skills`
 
 ## Testing Protocol
 
-For each variant:
-
-1. **Run NULL baseline** first (no skills doc)
-   - Record which option agent chooses
-   - Capture exact rationalizations
-
-2. **Run variant** with same scenario
-   - Does agent check for skills?
-   - Does agent use skills if found?
-   - Capture rationalizations if violated
-
-3. **Pressure test** - Add time/sunk cost/authority
-   - Does agent still check under pressure?
-   - Document when compliance breaks down
-
-4. **Meta-test** - Ask agent how to improve doc
-   - "You had the doc but didn't check. Why?"
-   - "How could doc be clearer?"
+Run each variant through testing-skills-with-subagents.md (baseline, variant, pressure, meta-test).
 
 ## Success Criteria
 
@@ -167,23 +150,3 @@ For each variant:
 - Agent rationalizes away under pressure
 - Agent treats skill as reference not requirement
 
-## Expected Results
-
-**NULL:** Agent chooses fastest path, no skill awareness
-
-**Variant A:** Agent might check if not under pressure, skips under pressure
-
-**Variant B:** Agent checks sometimes, easy to rationalize away
-
-**Variant C:** Strong compliance but might feel too rigid
-
-**Variant D:** Balanced, but longer - will agents internalize it?
-
-## Next Steps
-
-1. Create subagent test harness
-2. Run NULL baseline on all 4 scenarios
-3. Test each variant on same scenarios
-4. Compare compliance rates
-5. Identify which rationalizations break through
-6. Iterate on winning variant to close holes
