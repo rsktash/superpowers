@@ -104,3 +104,7 @@ refusal names a verb bd does not yet carry. When `bd plan close` ships, a
 finished plan is closed before the next is created, and that close is the one
 thing that makes a second `bd plan create` in a project safe; until it ships,
 a second create is a defect.
+
+## Epic gate
+
+**Epic gate:** run `bd children <root-id>` first, then `bd label list <root-id>` and `bd label list <task-id>` for every open child. An epic-type bead with no children, no `plan-ready:` label on the root, no `## Attention Map` section in the root body (`bd show <root-id>` outline), or an open child without an `exec:` label is not a plan: STOP and dispatch `superpowers-beads:planner`. Exempt from the `exec:` check: an open child titled `Decide:` that an open task depends on (`bd get <id> rdeps` non-empty; none → orphan fork, the gate stops on it), and an open child carrying an open owner question (`bd question list`). Never improvise tasks from the epic body; never mint the missing label or section by hand. A ready bead labeled `needs-plan` is not dispatchable: dispatch `superpowers-beads:planner` with the root epic and bead ids, amend mode.
