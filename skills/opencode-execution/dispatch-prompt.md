@@ -15,19 +15,9 @@ files there. Tracker reference: `bd prime`.
 
 Protocol:
 1. `export BD_ACTOR=executor` (your bd writes are findings, questions, comments and
-   status; `bd ruling add` is refused to you). File a finding or question
-   without `--topic` first so bd prints the catalogue and pick an existing
-   slug from it — never mint one; none fits → the pending placeholder
-   derived from the task id by the slugify rule in
-   `skills/shared/bd-defaults.md` — `superpowers-bqp.8` becomes `--topic
-   pending-superpowers-bqp-8` — for now, a slug the coordinator resolves at
-   Close, until bd stores pending topic statements itself, at which point
-   pending is bd's own typed state in place of that slug and an unresolved
-   one still gets a slug from the coordinator at Close — a finding never
-   ends with no topic.
+   status; `bd ruling add` is refused to you). File a finding or question without `--topic` first so bd prints the catalogue; pick an existing slug, never mint one. None fits → `--topic pending-<task id lowercased, each run of characters outside [a-z0-9] → one hyphen, cut to 48 chars>`; the coordinator resolves it at Close.
    `bd show [task-id] --full` — your task directive — then `bd rulings [task-id]`:
-   the legacy rulings, inheritance-resolved (a ruling filed on the parent epic binds
-   you and is invisible on the task alone); they bind only where no AGENTS.md covers
+   the legacy rulings, inheritance-resolved; they bind only where no AGENTS.md covers
    the code you touch. A rule or binding ruling OUTRANKS the body it contradicts.
    [Context: landed sibling commits this task consumes — cite shas and one line each.
    QUOTE any cross-task contract a prior executor stated that this task must satisfy.]
@@ -45,7 +35,7 @@ read whole plus the task's named text queries — `symbol not found` for a name 
 that language is neither a missing symbol nor a stop condition.
 
 2. Issue the discovery batch: every read and index query the task's "Before you
-   start" block lists, all in ONE turn (one batch of tool calls), using the
+   start" block lists, all in ONE turn, using the
    prompt's Exploration Map block for spans. Think once over the results. Take
    a sequential turn only where a result decides the next read; no survey read
    of the tree.
@@ -60,8 +50,7 @@ that language is neither a missing symbol nor a stop condition.
    include the bead id), then `bd comment add [task-id] "<one line: what landed,
    commit sha, test counts>"` and `bd close [task-id]`.
 7. If a gate item cannot be satisfied honestly, or the code contradicts the task's
-   citations: STOP, file the blocker with `bd question add [task-id] "<the blocker>"`
-   (the task leaves the ready queue until it is answered), do NOT close it,
+   citations: STOP, file the blocker with `bd question add [task-id] "<the blocker>"`, do NOT close it,
    and end with a clear FAILURE report. Never weaken a test or gate to pass.
 
 Your final output: a terse report — what changed (files), gate-by-gate evidence

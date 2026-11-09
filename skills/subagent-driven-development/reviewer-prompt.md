@@ -2,17 +2,13 @@
 
 Use this template when dispatching the task's single reviewer subagent. It covers
 spec compliance FIRST, then code quality — one dispatch, one report, two sections.
-(Ruled 2026-07-12: separate spec and quality reviewers doubled cost for no
-catch-rate gain.)
 
 ```
-Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edits confined to the disposable review worktree; general-purpose only if the review needs browser/device/MCP tools):
+Task tool (subagent_type: superpowers-beads:task-reviewer; general-purpose only if the review needs browser/device/MCP tools):
   description: "Review Task N: [task name]"
   model: [REQUIRED — resolve the task's tier through the shared tier map
     (skills/shared/model-tiers.md): `standard` → Sonnet, `capable` → the
-    capable model. This is the same model the coordinator's route line states
-    for this task; it is never the coordinator's free choice. An omitted
-    model silently inherits the session's most expensive one.]
+    capable model.]
   prompt: |
     You are reviewing whether an implementation matches its specification AND
     whether it is well-built. Spec compliance comes first; spec findings outrank
@@ -32,10 +28,7 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     `bd workfile <bead-id> --out .bd/.scratch/review-<bead-id>.md` — the
     touched folders' AGENTS.md files, and the header's legacy rulings block where no AGENTS.md covers the code, carry what your Authority anchors cite;
     Read the written file for the body — its requirements and its
-    **Acceptance Gate** are what you review against. The `--out` name keeps
-    a re-review from overwriting the implementer's copy of the same bead's
-    scratch file. [Never paste the task body into this prompt — the reviewer
-    fetches it; the controller's context never carries it.] Need a bd command
+    **Acceptance Gate** are what you review against. [Never paste the task body into this prompt.] Need a bd command
     this prompt does not name? `bd prime` prints the full reference — never
     discover syntax via `--help`, the binary, or the database.
 
@@ -57,15 +50,7 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
 
     The implementer claims the gate items pass. Verify each one independently.
 
-    ## CRITICAL: Do Not Trust the Report
-
-    The implementer's report may be incomplete, inaccurate, or optimistic.
-    You MUST verify everything independently.
-
-    **DO NOT:**
-    - Take their word for what they implemented
-    - Trust their claims about completeness
-    - Accept their interpretation of requirements
+    ## Verify independently — the report may be incomplete or optimistic
 
     **DO:**
     - Make the one-turn read — ONE turn, no survey: open REVIEW_PACKAGE (commit
@@ -79,12 +64,8 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     - Check for missing pieces they claimed to implement
     - Look for extra features they didn't mention
     - Where a gate item claims coverage, run falsification per your charter —
-      required, not optional. "Passes" alone cannot distinguish a working
-      guard from a decorative one.
-    - Read the bead's FULL comment list once: `bd comment list <bead-id>`
-      (the `--tag reviewer` filter only identifies addressed deviations —
-      provenance is checked against the full list, since a fabricated ruling
-      can sit untagged). Every tool result you pull in is re-read on every
+      required, not optional.
+    - Read the bead's FULL comment list once: `bd comment list <bead-id>`. Every tool result you pull in is re-read on every
       later turn: read ranges, never whole files or full logs. A logged
       deviation excuses exactly the divergence it
       names, and an implemented deviation that was never logged is itself a
@@ -111,9 +92,7 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     **Invented behavior:**
     - List every observable behavior the diff exhibits that the task body
       does not mandate. Each is a finding unless a logged `[reviewer]`
-      deviation covers it — silence in the task plus silence in the comments
-      plus new behavior in the diff is exactly the escape this check exists
-      for.
+      deviation covers it.
 
     **Acceptance Gate verification:**
     - For each gate item, run the verification independently (don't trust the
@@ -140,8 +119,7 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
     - Run only this task's targeted tests — the dispatch names them: [exact
       commands, from the task's gate]. Add narrower checks freely; run
       falsification per your charter, inside REVIEW_WORKTREE only — never a
-      workspace, component, or full suite — those are the orchestrator's gate.
-    - Verify by reading code and running commands, not by trusting the report.
+      workspace, component, or full suite.
     - Images: never the same one twice, at most two reads per dispatch — per
       your charter.
 
@@ -159,25 +137,18 @@ Task tool (subagent_type: superpowers-beads:task-reviewer — lean toolset; edit
       purpose; never label it proposal because the gate omitted the input. A
       pre-existing failure the diff merely encounters is a proposal absent
       independent authority. A finding you cannot anchor is reported labeled
-      **proposal** — still worth reporting, but it rides a PASS and never
-      flips the verdict, whatever its severity — and it names the user path
+      **proposal**; it names the user path
       or command that reaches it, or carries `reachability unverified`.
     - **Gate status:** one line per gate item — `<item> | <exact command> |
       exit <n> | <the one output line that decides it>`. No narration of items
-      that passed; the line IS the evidence, and it is re-runnable by the
-      controller in one paste. Flag prominently any gate item the implementer
+      that passed. Flag prominently any gate item the implementer
       marked PASS that actually fails.
     - **Experiments:** each falsification run — what you broke, what caught it
-      (or didn't), and the revert. Report these even on a clean PASS: a
-      format that stops asking for them is a format whose reviewers stop
-      running them, and they are the strongest artifact this review produces.
+      (or didn't), and the revert. Report these even on a clean PASS.
     - **Proposals:** the unanchored findings, listed and labeled, each with the
-      path that reaches it or `reachability unverified`. They ride the PASS and
-      feed the backlog; dropping them starves the filing threshold.
+      path that reaches it or `reachability unverified`.
     - **Findings** (FAIL only), each exactly: authority / code file:line /
       reproduction command / observed output. No Strengths, no Assessment, no
-      prose tour of the diff — the durable receipt holds the long form, and
-      the controller reads it only when something is disputed.
-    - If Section 1 finds a spec failure, still report Section 2 briefly — the
-      fix dispatch wants both — but never let quality polish outrank a spec gap.
+      prose tour of the diff.
+    - If Section 1 finds a spec failure, still report Section 2 briefly, but never let quality polish outrank a spec gap.
 ```
