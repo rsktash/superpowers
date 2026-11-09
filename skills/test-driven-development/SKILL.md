@@ -348,12 +348,6 @@ Can't check all boxes? You skipped TDD. Start over.
 | Must mock everything | Code too coupled. Use dependency injection. |
 | Test setup huge | Extract helpers. Still complex? Simplify design. |
 
-## Debugging Integration
-
-Bug found? Write failing test reproducing it. Follow TDD cycle. Test proves fix and prevents regression.
-
-Never fix bugs without a test.
-
 ## Writing Good Tests
 
 When writing or changing tests, adding mocks, or adding test helpers, read writing-good-tests.md:
@@ -361,11 +355,3 @@ When writing or changing tests, adding mocks, or adding test helpers, read writi
 - Every test exercises the real thing — mock at the right level, never assert on the mock
 - Finish with the mutation check: each realistic mutation must fail at least one test
 
-## Final Rule
-
-```
-Production code → test exists and failed first
-Otherwise → not TDD
-```
-
-No exceptions without your human partner's permission.
