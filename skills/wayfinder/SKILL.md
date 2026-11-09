@@ -5,15 +5,13 @@ description: Use when a loose idea is too big for one session and wrapped in fog
 
 # Wayfinder — budget 1100 words
 
-(Adapted for bd from mattpocock/skills `wayfinder`, MIT, © Matt Pocock.)
-
 A loose idea has arrived — bigger than one session, and the way to the **destination** isn't visible. Wayfinding charts the way as a shared map on bd, then works its **decision tickets** — questions whose resolution is a decision, not slices of a build — one at a time until the route is clear.
 
 Naming the destination is the first act of charting; it fixes the scope and shapes every ticket. It might be a spec to hand to brainstorming/writing-plans, a decision to lock, or a change made in place.
 
 **Plan, don't do.** Each ticket resolves a decision; the map is done when nothing is left to decide before someone goes and builds. The pull to just do the work is the signal you've reached the map's edge — hand off to the normal spec → plan → execution cycle. A single unresolved fork inside an otherwise-clear plan needs only writing-plans' decision bead, not a map; wayfinder is for fog that spans sessions.
 
-**Refer by name.** In everything the human reads, call the map and its tickets by their titles — the bead id rides beside the name, never stands in for it. A wall of bare ids is illegible.
+**Refer by name.** In everything the human reads, call the map and its tickets by their titles — the bead id rides beside the name, never stands in for it.
 
 **bd conventions:** Read `skills/shared/bd-defaults.md` once per session, skip if already read.
 
@@ -86,7 +84,7 @@ Resolve **one ticket per session** (research tickets excepted — they batch).
 1. Load the map — `bd show <map-id>` plus body — the low-res view; zoom into related closed tickets on demand, never all of them.
 2. Choose: the ticket the human named, else the first frontier ticket from `bd ready --parent <map-id>`. Claim it first.
 3. Resolve it per its type, consulting the skills the map's Notes name.
-4. **Graduate before closing:** create any newly-specifiable tickets and wire their edges FIRST; then record the answer (`bd comment add <id> "<resolution>"`), close the ticket, and update the map body (append the gist to Decisions so far, clear graduated fog from Not yet specified). **Why first:** `bd close` auto-closes a parent when its last open child closes — closing the map's last ticket while fog remains silently closes the epic and buries the effort.
+4. **Graduate before closing:** create any newly-specifiable tickets and wire their edges FIRST; then record the answer (`bd comment add <id> "<resolution>"`), close the ticket, and update the map body (append the gist to Decisions so far, clear graduated fog from Not yet specified). (`bd close` auto-closes a parent whose last open child closes.)
 5. A resolution that invalidates other tickets updates or closes them; one that exposes a ticket past the destination rules it out of scope.
 
 The map is done when frontier and fog are both empty — the way is clear. Hand the destination onward: its Decisions-so-far index is the raw material for brainstorming's spec or writing-plans' tasks.

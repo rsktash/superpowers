@@ -7,6 +7,21 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.81] - 2026-11-09
+
+Net `skills/` word delta: **−9414** by `wc -w` (59786 → 50372); the agent charters shrink too, `agents/` 5419 → 4459
+(−960). Nothing added beyond the shared Epic gate section, which replaces three copies.
+
+- Skill-noise review: 382 of 401 owner-approved edits cut ids, dates, incident narrative, asides, restated rules
+  and over-long examples across 45 skill and agent files. The 19 rejected items stay as they were.
+- The epic gate and the needs-plan → amend-mode rule live once, in `skills/shared/plan-lane.md` (Epic gate);
+  hybrid-execution, opencode-execution and subagent-driven-development cite it.
+- systematic-debugging states its failed-fix bound as 2 throughout.
+- Upstream discipline cuts land in test-driven-development, systematic-debugging, verification-before-completion and
+  using-git-worktrees; verification-before-completion keeps the one-line regression recipe. Pressure runs (the
+  sunk-cost TDD scenario, the production-down debugging scenario) chose the compliant option before and after the cuts.
+- The mattpocock/skills MIT attributions moved from the skill bodies into `NOTICE`.
+
 ## [1.4.80] - 2026-11-09
 
 Net `skills/` word delta: **+74** by `wc -w` (super-orchestrator 1301 → 1347, shared/plan-lane 740 → 768); the

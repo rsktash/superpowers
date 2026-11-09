@@ -20,14 +20,3 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 
 Gemini CLI has no equivalent to Claude Code's `Task` tool. Skills that rely on subagent dispatch (`subagent-driven-development`) will fall back to single-session execution via `hybrid-execution`'s Inline Task Procedure.
 
-## Additional Gemini CLI tools
-
-These tools are available in Gemini CLI but have no Claude Code equivalent:
-
-| Tool | Purpose |
-|------|---------|
-| `list_directory` | List files and subdirectories |
-| `save_memory` | Persist facts to GEMINI.md across sessions |
-| `ask_user` | Request structured input from the user |
-| `tracker_create_task` | Rich task management (create, update, list, visualize) |
-| `enter_plan_mode` / `exit_plan_mode` | Switch to read-only research mode before making changes |

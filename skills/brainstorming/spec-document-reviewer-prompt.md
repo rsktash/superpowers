@@ -12,7 +12,7 @@ Task tool (general-purpose):
   prompt: |
     You are a spec document reviewer. Verify this spec is complete and ready for planning.
 
-    **Spec to review:** Read the spec content via `bd show [BEAD_ID] --full` (the default outlines long descriptions — `--full` forces the body)
+    **Spec to review:** Read the spec content via `bd show [BEAD_ID] --full`
 
     ## What to Check
 

@@ -63,13 +63,6 @@ specified in the instructions above.
 - Wrap instructions in XML tags — the model treats tagged blocks as authoritative
 - End with an explicit execution directive to prevent summarization of the instructions
 
-### When this workaround can be removed
-
-This approach compensates for Codex's plugin system not yet supporting an `agents`
-field in `plugin.json`. When `RawPluginManifest` gains an `agents` field, the
-plugin can symlink to `agents/` (mirroring the existing `skills/` symlink) and
-skills can dispatch named agent types directly.
-
 ## Environment Detection
 
 Skills that create worktrees or finish branches should detect their
@@ -83,8 +76,6 @@ BRANCH=$(git branch --show-current)
 
 - `GIT_DIR != GIT_COMMON` → already in a linked worktree (skip creation)
 - `BRANCH` empty → detached HEAD (cannot branch/push/PR from sandbox)
-
-See `using-git-worktrees`'s "Finishing: Merge Back and Clean Up" section for how it uses these signals.
 
 ## Codex App Finishing
 

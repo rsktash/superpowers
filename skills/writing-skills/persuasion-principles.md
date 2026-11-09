@@ -4,8 +4,6 @@
 
 LLMs respond to the same persuasion principles as humans. Understanding this psychology helps you design more effective skills - not to manipulate, but to ensure critical practices are followed even under pressure.
 
-**Research foundation:** Meincke et al. (2025) tested 7 persuasion principles with N=28,000 AI conversations. Persuasion techniques more than doubled compliance rates (33% → 72%, p < .001).
-
 ## The Seven Principles
 
 ### 1. Authority
@@ -101,26 +99,8 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 ❌ You should probably tell me if I'm wrong.
 ```
 
-### 6. Reciprocity
-**What it is:** Obligation to return benefits received.
-
-**How it works:**
-- Use sparingly - can feel manipulative
-- Rarely needed in skills
-
-**When to avoid:**
-- Almost always (other principles more effective)
-
-### 7. Liking
-**What it is:** Preference for cooperating with those we like.
-
-**How it works:**
-- **DON'T USE for compliance**
-- Conflicts with honest feedback culture
-- Creates sycophancy
-
-**When to avoid:**
-- Always for discipline enforcement
+### 6-7. Reciprocity, Liking
+Don't use: reciprocity reads as manipulation; liking breeds sycophancy.
 
 ## Principle Combinations by Skill Type
 
@@ -130,24 +110,6 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 | Guidance/technique | Moderate Authority + Unity | Heavy authority |
 | Collaborative | Unity + Commitment | Authority, Liking |
 | Reference | Clarity only | All persuasion |
-
-## Why This Works: The Psychology
-
-**Bright-line rules reduce rationalization:**
-- "YOU MUST" removes decision fatigue
-- Absolute language eliminates "is this an exception?" questions
-- Explicit anti-rationalization counters close specific loopholes
-
-**Implementation intentions create automatic behavior:**
-- Clear triggers + required actions = automatic execution
-- "When X, do Y" more effective than "generally do Y"
-- Reduces cognitive load on compliance
-
-**LLMs are parahuman:**
-- Trained on human text containing these patterns
-- Authority language precedes compliance in training data
-- Commitment sequences (statement → action) frequently modeled
-- Social proof patterns (everyone does X) establish norms
 
 ## Ethical Use
 
@@ -162,18 +124,6 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 - Guilt-based compliance
 
 **The test:** Would this technique serve the user's genuine interests if they fully understood it?
-
-## Research Citations
-
-**Cialdini, R. B. (2021).** *Influence: The Psychology of Persuasion (New and Expanded).* Harper Business.
-- Seven principles of persuasion
-- Empirical foundation for influence research
-
-**Meincke, L., Shapiro, D., Duckworth, A. L., Mollick, E., Mollick, L., & Cialdini, R. (2025).** Call Me A Jerk: Persuading AI to Comply with Objectionable Requests. University of Pennsylvania.
-- Tested 7 principles with N=28,000 LLM conversations
-- Compliance increased 33% → 72% with persuasion techniques
-- Authority, commitment, scarcity most effective
-- Validates parahuman model of LLM behavior
 
 ## Quick Reference
 

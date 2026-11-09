@@ -1,0 +1,10 @@
+Third-party notices
+
+Parts of these skills are adapted from mattpocock/skills (https://github.com/mattpocock/skills),
+MIT License, © Matt Pocock:
+
+- skills/wayfinder/SKILL.md — adapted for bd from mattpocock/skills `wayfinder`.
+- skills/writing-plans/SKILL.md — the tracer-bullet task shape and the expand–contract sequence,
+  adapted from mattpocock/skills `to-tickets`.
+- skills/writing-skills/SKILL.md, Text Economy — techniques adapted from mattpocock/skills
+  `writing-for-agents`.

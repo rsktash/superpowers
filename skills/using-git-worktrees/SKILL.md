@@ -61,12 +61,9 @@ git check-ignore -q .worktrees 2>/dev/null || git check-ignore -q worktrees 2>/d
 
 **If NOT ignored:**
 
-Per Jesse's rule "Fix broken things immediately":
 1. Add appropriate line to .gitignore
 2. Commit the change
 3. Proceed with worktree creation
-
-**Why critical:** Prevents accidentally committing worktree contents to repository.
 
 ### For Global Directory (~/.config/superpowers/worktrees)
 
@@ -120,13 +117,10 @@ if [ -f go.mod ]; then go mod download; fi
 ### 4. Verify Clean Baseline
 
 Run the full suite here, in your own shell. **Never compose the command from memory:** copy it
-from the project's runbook (`docs/dispatch-env.md` or equivalent) — the incident behind this
-rule was a memory-composed command running the wrong suite green while the file under change
-never executed.
+from the project's runbook (`docs/dispatch-env.md` or equivalent).
 
 Skip only on a green run in THIS worktree at THIS commit, this session.
-A CI receipt never qualifies — it proves that commit was green in CI's environment, not this
-worktree's.
+A CI receipt never qualifies.
 
 **If tests fail:** Report failures, ask whether to proceed or investigate.
 
@@ -140,18 +134,6 @@ Tests passing (<N> tests, 0 failures)
 Ready to implement <feature-name>
 ```
 
-## Quick Reference
-
-| Situation | Action |
-|-----------|--------|
-| `.worktrees/` exists | Use it (verify ignored) |
-| `worktrees/` exists | Use it (verify ignored) |
-| Both exist | Use `.worktrees/` |
-| Neither exists | Check CLAUDE.md → Ask user |
-| Directory not ignored | Add to .gitignore + commit |
-| Tests fail during baseline | Report failures + ask |
-| No package.json/Cargo.toml | Skip dependency install |
-
 ## Red Flags
 
 **Never:**
@@ -161,23 +143,14 @@ Ready to implement <feature-name>
 - Assume directory location when ambiguous
 - Skip CLAUDE.md check
 
-**Always:**
-- Follow directory priority: existing > CLAUDE.md > ask
-- Verify directory is ignored for project-local
-- Auto-detect and run project setup
-- Verify clean test baseline
-
 ## Finishing: Merge Back and Clean Up
 
-Once implementation is complete in the worktree, close it out and merge back. This is a solo-dev repo — there is no PR step, ever.
+Once implementation is complete in the worktree, close it out and merge back.
 
 ### 1. Full Test Suite
 
 Run the full suite in the worktree, in your own shell, with commands copied from the project's
-runbook (`docs/dispatch-env.md` or equivalent) — never composed from memory. Deterministic
-commands need a shell, not an agent: a dispatched gate burns a context window to report exit
-codes, and a disposable worktree without the runbook's setup reports BLOCKED instead of
-evidence. Record exact commands, exit codes, and output tails. Warm-environment projects
+runbook (`docs/dispatch-env.md` or equivalent) — never composed from memory. Record exact commands, exit codes, and output tails. Warm-environment projects
 (emulator/device gates) use their peer gate-runner session instead.
 
 **If tests fail:** stop, fix, re-run. Don't proceed to step 2 until green.
@@ -216,15 +189,12 @@ Then sweep every worktree the merged branch spawned: its task worktrees (branch 
 
 ### 5. Never Open a PR
 
-Solo-dev standing rule: work merges back to `<base>` locally, full stop. Do not `git push` the feature branch and do not run `gh pr create` — there's no reviewer on the other end.
+Work merges back to `<base>` locally. Do not `git push` the feature branch and do not run `gh pr create`.
 
 ## Integration
 
 **Called by:**
-- **brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows
 - **subagent-driven-development** - REQUIRED before executing any tasks
 - **hybrid-execution** - REQUIRED before executing any tasks
 - Any skill needing isolated workspace
 
-**Pairs with:**
-- Finishing lives inside this skill now — see `## Finishing: Merge Back and Clean Up` above.

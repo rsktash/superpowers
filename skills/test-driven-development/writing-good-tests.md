@@ -13,10 +13,6 @@ here:
 2. Every test exercises the real thing
 ```
 
-Strict TDD produces both naturally: a test written first and watched
-failing against real code has already proven it can fail, and only earns
-a mock when the real dependency proves slow or external.
-
 ## Principle 1: Name the Break
 
 Before writing the test body, answer: **what production change should
@@ -147,13 +143,6 @@ BEFORE adding a mock or test helper:
     Unmock it or delete the assertion.
 ```
 
-## Tests Ship With the Implementation
-
-The TDD cycle — failing test, minimal implementation, refactor — is what
-"complete" means. Ship the tests the behavior needs and only those:
-trivial code and human prose earn none, and a test written to satisfy
-process costs maintenance forever.
-
 ## The Mutation Check
 
 Before finishing, mentally mutate the production code; at least one test
@@ -167,21 +156,6 @@ should fail for each realistic mutation:
 
 A mutation nothing catches marks the behavior as unprotected — or the
 test as tautological.
-
-## Quick Reference
-
-| When you... | Do |
-|-------------|-----|
-| Write any test | Name the break it catches — a bug, not a decision |
-| Build an expected value | Derive it by hand; never with the code under test |
-| Test a script or document | Run it / pressure-test its consumer; never grep its text |
-| Reach for a dependency test | Test your boundary contract, not their documented mechanics |
-| Want to assert on a mocked element | Test the real component, or unmock it |
-| Are about to mock a method | Learn its side effects; mock the slow/external level |
-| Build a mock response | Mirror the real structure completely |
-| Need cleanup only tests use | Put it in test utilities |
-| Watch mock setup balloon | Switch to an integration test with real components |
-| Finish a test file | Run the mutation check |
 
 ## Warning Signs
 

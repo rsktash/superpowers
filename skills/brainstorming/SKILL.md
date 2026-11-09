@@ -22,7 +22,7 @@ Every project goes through this process. A todo list, a single-function utility,
 You MUST create a task for each of these items and complete them in order:
 
 1. **Explore project context** — check files, docs, recent commits
-2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
+2. **Offer visual companion** (if topic will involve visual questions) — see Visual Companion below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 surviving approaches** — prune first: a branch excluded by an AGENTS.md rule, a binding ruling, code, spec, or a document already read this session is not an approach. Present survivors with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
@@ -39,14 +39,13 @@ You MUST create a task for each of these items and complete them in order:
 **Understanding the idea:**
 
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- **Evidence before design (suspected problems only):** when the brainstorm's premise is a suspected defect, limitation, or incompatibility — not a requested feature — first show the problem exists: a repro, an error, a concrete failing case. If the premise dissolves under evidence, say so and stop; a brainstorm built on an unverified premise designs a solution to nothing. Feature/new-capability brainstorms are exempt.
+- **Evidence before design (suspected problems only):** when the brainstorm's premise is a suspected defect, limitation, or incompatibility — not a requested feature — first show the problem exists: a repro, an error, a concrete failing case. If the premise dissolves under evidence, say so and stop. Feature/new-capability brainstorms are exempt.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
 - For appropriately-scoped projects, ask one question per message — break a topic that needs more exploration into several; prefer multiple choice, open-ended is fine too
 - Focus on understanding: purpose, constraints, success criteria
 
 **Exploring approaches:**
 
-- Prune first (checklist step 4), then propose 2-3 surviving approaches with trade-offs
 - Present options conversationally — lead with your recommended option and explain why
 
 **Presenting the design:**
@@ -56,7 +55,7 @@ You MUST create a task for each of these items and complete them in order:
 - Ask after each section whether it looks right so far
 - Cover: architecture, components, data flow, error handling, testing
 - YAGNI ruthlessly — remove unnecessary features from all designs
-- Identify scope boundaries: which components will become separate implementation tasks? Where are the interfaces between them? What should each task NOT touch? This information feeds into writing-plans' Drift Detectors.
+- Identify scope boundaries: which components will become separate implementation tasks? Where are the interfaces between them? What should each task NOT touch?
 - Be ready to go back and clarify if something doesn't make sense
 - A fork the dialogue can't settle — one needing research, a prototype, or an external fact — doesn't stall the spec: record it in the spec as an explicitly open decision. writing-plans turns each open decision into a blocking decision bead, resolved before the tasks it gates are written.
 
@@ -65,7 +64,6 @@ You MUST create a task for each of these items and complete them in order:
 - Break the system into smaller units that each have one clear purpose, communicate through well-defined interfaces, and can be understood and tested independently
 - For each unit, you should be able to answer: what does it do, how do you use it, and what does it depend on?
 - Can someone understand what a unit does without reading its internals? Can you change the internals without breaking consumers? If not, the boundaries need work.
-- Smaller units are also easier for you: you reason better about code you can hold in context, and edits to focused files are more reliable. A large file is often doing too much.
 
 **Working in existing codebases:**
 
@@ -80,7 +78,7 @@ You MUST create a task for each of these items and complete them in order:
 
 - Write the spec to a scratch file, then create the bead:
   ```bash
-  # Write spec to scratch file (Edit tool shows diff for review)
+  # Write spec to scratch file
   # → .bd/.scratch/new-spec.md
   # Create bead from file:
   bd create "Feature: <title>" -t epic -p 1 --body-file .bd/.scratch/new-spec.md --json
@@ -88,7 +86,7 @@ You MUST create a task for each of these items and complete them in order:
   rm .bd/.scratch/new-spec.md
   ```
 - Parse the `id` field from the JSON output — it anchors the feature lifecycle.
-- Lineage: continuing a feature with an existing epic — introduced, upgraded, or edited earlier — names that predecessor, files `bd dep add <new-epic> <old-epic> --type related`, and reuses its `feature:<slug>` label rather than minting a second. No predecessor: mint the label, file no related link. Read the chain back with `bd authority <epic-id> --depth 3` (RELATED; label marks membership). Topics never carry lineage (R-43).
+- Lineage: continuing a feature with an existing epic — introduced, upgraded, or edited earlier — names that predecessor, files `bd dep add <new-epic> <old-epic> --type related`, and reuses its `feature:<slug>` label rather than minting a second. No predecessor: mint the label, file no related link. Read the chain back with `bd authority <epic-id> --depth 3` (RELATED; label marks membership). Topics never carry lineage.
 - Write a summary file for search:
   - Glob `docs/beads/YYYY-MM-DD-*.md` for the daily increment
   - Write to `docs/beads/{date}-{incr}-{bd-id}-{short-title}.md`
@@ -104,7 +102,7 @@ You MUST create a task for each of these items and complete them in order:
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 
 **Spec Self-Review:**
-After creating the spec bead, read it back via `bd show <bead-id> --full` (specs are usually long enough that the default would only print the outline) and look at it with fresh eyes:
+After creating the spec bead, read it back via `bd show <bead-id> --full` and look at it with fresh eyes:
 
 1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
@@ -124,11 +122,7 @@ Wait for the user's response. If they request changes, update the bead and re-ru
 **Lasting Rules Gate:**
 After the user approves the spec, propose the candidates: the decisions in it you judge must outlive this feature. A decision is a candidate only when all four hold: it holds after this feature ships, for work nobody has planned; an agent working elsewhere would break it, because without its reason it looks wrong; no AGENTS.md rule covers it already; it reaches beyond one place, or is a "must never" for security, cost or data. Show each as one proposed line in its folder's AGENTS.md format, with the folder and the facts you verified: the folders whose code it reaches, the test that pins it. "No candidates" is an answer. The user approves, edits or drops each; nothing is written into an AGENTS.md before that. Each approved line is its own AGENTS.md commit, landed before the planner dispatch, with `Check: none` until its test exists.
 
-**Implementation:**
-
-- Dispatch the `superpowers-beads:planner` agent to create a detailed implementation plan
-- Pass the root bead ID to it (not a file path)
-- Do NOT invoke any other skill; the owner may type the writing-plans slash command.
+**Implementation:** dispatch `superpowers-beads:planner` with the root bead ID (not a file path); the owner may type the writing-plans slash command.
 
 ## Visual Companion
 

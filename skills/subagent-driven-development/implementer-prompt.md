@@ -7,9 +7,9 @@ system prompt — shipped inside the plugin. The dispatch prompt carries ONLY
 what is specific to this task.
 
 ```
-Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smaller prefix; use general-purpose ONLY when the task genuinely needs browser/device/MCP tools):
+Task tool (subagent_type: superpowers-beads:implementer; use general-purpose ONLY when the task genuinely needs browser/device/MCP tools):
   description: "Implement <bead-id>: [task name]"
-  model: [REQUIRED — resolve per SKILL.md Model Selection; an omitted model silently inherits the session's most expensive one]
+  model: [REQUIRED — resolve per SKILL.md Model Selection]
   prompt: |
     You are implementing task <bead-id> ("[task name]") — one task of a larger plan.
 
@@ -18,16 +18,7 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
     1. Read `docs/dispatch-env.md` at the repo root (repo layout, bd invocation,
        test commands, worktree rules), and `docs/CONTEXT.md` (domain glossary)
        if it exists — bead bodies are written in its vocabulary.
-    2. `export BD_ACTOR=executor` (your bd writes are findings and questions;
-       rulings are refused to you). File either without `--topic` first so bd
-       prints the catalogue and pick an existing slug from it — never mint
-       one; none fits → the pending placeholder derived from the bead id by
-       the slugify rule in `skills/shared/bd-defaults.md` — `superpowers-bqp.8`
-       becomes `--topic pending-superpowers-bqp-8` — for now, a slug the
-       coordinator resolves at Close, until bd stores pending topic
-       statements itself, at which point pending is bd's own typed state in
-       place of that slug and an unresolved one still gets a slug from the
-       coordinator at Close — a finding never ends with no topic. Need a bd
+    2. `export BD_ACTOR=executor`. File a finding or question without `--topic` first so bd prints the catalogue; pick an existing slug, never mint one. None fits → `--topic pending-<task id lowercased, each run of characters outside [a-z0-9] → one hyphen, cut to 48 chars>`; the coordinator resolves it at Close. Need a bd
        command this prompt does not name? `bd prime` prints the full
        reference — never discover syntax via `--help`, the binary, or the
        database.
@@ -42,23 +33,20 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
        root one and each folder's own, loaded as you read files there. The
        header's LEGACY RULINGS block is REQUIRED reading, never skipped: it
        binds only where no AGENTS.md covers the code you touch, and there it
-       is inheritance-resolved — a ruling filed on the parent epic binds you
-       and is invisible on your bead alone. A rule OUTRANKS the body it
+       is inheritance-resolved. A rule OUTRANKS the body it
        contradicts and is settled:
-       implement it, never re-litigate it, never re-open it as a fork, never
-       ask about it again.
+       implement it; never re-open it.
        If the section index lists a `design` section, also read
        `bd show <bead-id> --section design`.
        Then `bd comment list <bead-id>` — narrative and evidence: review
        verdicts and BLOCKED reports land here, oldest to newest. Two things
        you must carry out of them:
        - An **open question** on the bead, or an inherited fork marked
-         unruled, is NOT yours to close (`bd question answer`/`close` refuse
-         your actor; `bd question list` shows what blocks you). If your work
+         unruled, is NOT yours to close. If your work
          reaches it, stop and report BLOCKED naming the fork.
        - A **prior review verdict** tells you what is already fixed and what is
          still owed. On a RESUMED task that verdict, not the body, is the true
-         state of the work — the body describes the task, not its progress.
+         state of the work.
     3. The body's directive sections govern you: **Context Anchor** (where this
        task fits), **Acceptance Gate** (the ONLY criteria for "done" — do not add
        your own), **Drift Detectors** (editing files outside the Files list →
@@ -76,9 +64,7 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
     ## Orchestrator Addenda
 
     [ONLY task-specific facts not already in the bead — each citing a same-session
-     tool run. Never restate body content: the bead is the single source of truth,
-     and every line here is resident in the controller's context for the rest of
-     its session. Empty is normal.]
+     tool run. Never restate body content. Empty is normal.]
 
     ## Exploration Map
 
@@ -94,8 +80,7 @@ Task tool (subagent_type: superpowers-beads:implementer — lean toolset, smalle
 
     ## Test Scope
 
-    Run ONLY this task's targeted tests: [exact commands]. Never the full suite —
-    the suite gate runs once, in the controller's session.
+    Run ONLY this task's targeted tests: [exact commands]. Never the full suite.
 
     Report per your charter (your system prompt). Status is one of:
     DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
