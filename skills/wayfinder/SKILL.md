@@ -5,8 +5,6 @@ description: Use when a loose idea is too big for one session and wrapped in fog
 
 # Wayfinder — budget 1100 words
 
-(Adapted for bd from mattpocock/skills `wayfinder`, MIT, © Matt Pocock.)
-
 A loose idea has arrived — bigger than one session, and the way to the **destination** isn't visible. Wayfinding charts the way as a shared map on bd, then works its **decision tickets** — questions whose resolution is a decision, not slices of a build — one at a time until the route is clear.
 
 Naming the destination is the first act of charting; it fixes the scope and shapes every ticket. It might be a spec to hand to brainstorming/writing-plans, a decision to lock, or a change made in place.

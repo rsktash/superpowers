@@ -56,7 +56,7 @@ Before defining tasks, map which files are created or modified and what each is 
 
 Default task shape: a **tracer bullet** — a narrow, complete path through every layer the feature touches (schema → logic → surface → tests), verifiable on its own. Horizontal layer-slices entangle: every seam needs refereeing and nothing is verifiable until the last slice lands. Prefactoring is its own task, first.
 
-The exception — wide mechanical refactors — sequence as **expand–contract**: add the new form beside the old; migrate call sites in batches sized by blast radius, each batch a task, CI green throughout; delete the old form last. (Both rules adapted from mattpocock/skills `to-tickets`, MIT.)
+The exception — wide mechanical refactors — sequence as **expand–contract**: add the new form beside the old; migrate call sites in batches sized by blast radius, each batch a task, CI green throughout; delete the old form last.
 
 ## Task Granularity
 

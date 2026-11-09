@@ -260,7 +260,7 @@ Use skill name only, with explicit requirement markers:
 
 ## Text Economy
 
-Run this pass over every skill you write or edit — it compresses without deleting doctrine. (Techniques adapted from mattpocock/skills `writing-for-agents`, MIT.)
+Run this pass over every skill you write or edit — it compresses without deleting doctrine.
 
 **Leading words.** A leading word is a compact concept the model already holds from pretraining (*tight loop*, *fog of war*, *frozen*, *tracer bullet*). Collapse multi-sentence restatements into one: "fast, deterministic, low-overhead loop" → *tight loop*; "a loop you believe in" → *red*. Repeated as a token across the document it anchors behavior in fewer tokens AND gives attention a sharper hook. Prefer an existing word over coining one — a made-up term recruits no priors and costs definition tokens.
 
