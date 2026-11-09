@@ -43,7 +43,7 @@ Skills use Claude Code tool names. Non-CC platforms: see `references/copilot-too
 
 ## The Rule
 
-**Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means that you should invoke the skill to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
+**Invoke relevant or requested skills BEFORE any response or action.** If an invoked skill turns out to be wrong for the situation, you don't need to use it.
 
 ```dot
 digraph skill_flow {
@@ -101,7 +101,7 @@ When multiple skills could apply, use this order:
 
 ## Spec/Plan Storage
 
-This fork uses beads (`bd` CLI) as the single source of truth for specs, plans, and task progress. The brainstorming, writing-plans, subagent-driven-development, and hybrid-execution skills all use `bd` commands instead of writing markdown files. Run `bd ready` to see what work is available. Read `skills/shared/bd-defaults.md` once per session, skip if already read.
+Specs, plans and task progress live in beads (`bd`); `bd ready` lists available work. Read `skills/shared/bd-defaults.md` once per session.
 
 ## Skill Types
 
