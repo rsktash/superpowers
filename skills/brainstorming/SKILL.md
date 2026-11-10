@@ -21,7 +21,7 @@ Every project goes through this process. A todo list, a single-function utility,
 
 You MUST create a task for each of these items and complete them in order:
 
-1. **Explore project context** — check files, docs, recent commits
+1. **Explore project context** — check files, docs, recent commits; then tell the user what in this area is not clean (see Working in existing codebases)
 2. **Offer visual companion** (if topic will involve visual questions) — see Visual Companion below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 surviving approaches** — prune first: a branch excluded by an AGENTS.md rule, a binding ruling, code, spec, or a document already read this session is not an approach. Present survivors with trade-offs and your recommendation
@@ -69,7 +69,7 @@ You MUST create a task for each of these items and complete them in order:
 
 - Explore the current structure before proposing changes. Follow existing patterns.
 - Check for project rules (the AGENTS.md of each folder the work touches, then CLAUDE.md) — designs must respect existing project constraints. Reference relevant rules in the spec so downstream skills inherit them.
-- Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
+- Where the code this work touches breaks a project rule or has problems that affect the work (e.g., a copy, a file that's grown too large, tangled responsibilities), say so in plain words before asking anything else: what is not clean, with two examples. Each rework is its own design section the user approves or sets aside; a set-aside one is one backlog line and the design builds around the code as it is. The spec lists the approved reworks.
 - Don't propose unrelated refactoring. Stay focused on what serves the current goal.
 
 ## After the Design
