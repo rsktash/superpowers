@@ -255,3 +255,32 @@ INCIDENT (Grain clause, 2026-09-12, solo session 8a9f872c, superpowers-awg): the
   0.61 in early August; two of the day's suite reruns were test-only failures. writing-good-tests.md
   (table-driven shape, change-detector ban) was referenced only from the TDD skill the executor
   reads, never from this planner. Codex, sonnet and GLM showed the same shape under the same text.
+
+### (2026-11-10) Vertical Slices: a preparation step goes ahead without a question when it moves toward an approved line.
+RULE CHANGE: "Prefactoring is its own task, first." is replaced by the owner-approved paragraph
+  on the preparation step: a task placed first that reshapes the code a later task must touch;
+  every body names its preparation step or says none is needed. No owner question when all
+  three hold — it cites the approved target or rule line it moves toward, it changes no
+  behaviour (existing tests pass unedited; untested code first gets tests pinning today's
+  behaviour), it is its own commit. It reshapes only what its task needs; other bad code is one
+  backlog line. A change to a shape other code depends on, or a new mechanism, where the target
+  is silent, is a decision bead asked once. Word delta: SKILL.md 2666 -> 2807 (budget 2960);
+  nothing displaced.
+
+CAUSE: the owner, 2026-11-10: «how to force agents to improve the code to align with clean arch
+  as we implement each task so I wasn't bothered for each small code details and at the same
+  time we didn't have in hand AI slop?» and «We will encounter refactoring as every task is
+  being implemented because the current code is not good». The same day a Biklod lane stopped
+  three times because a task's gate could not be met inside its Files. The draft, with the rest
+  of the set (project rule, lane step 7, implementer, reviewer template, digest), is
+  solo docs/beads/refactor-as-you-go.wording-draft.md; this commit applies its change 1 only.
+
+EVIDENCE: tests/skill-evals/writing-plans/test-preparation-changes-public-function.md fails on
+  2bfebcb (the planner expand–contracts a public function with no question) and passes on this
+  text. test-preparation-step-on-approved-target.md already passes its headline on 2bfebcb; its
+  "every body names its preparation step" criterion fails before and after, because the task
+  template carries no slot for it. Runs in that folder's CREATION-LOG.md.
+
+NOT CHANGED, deliberately: "a **tracer bullet**" and the rest of the paragraph stay word for
+  word (owner: «don't remove»); the expand–contract paragraph; line 77's "the export is
+  prefactoring — its own task, first", which the owner's approval did not cover.
