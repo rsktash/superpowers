@@ -328,3 +328,17 @@ NOT CHANGED, deliberately: Amend Mode runs steps 3–7 and so skips the check; l
 
 EVIDENCE: none run; the two preparation-step scenarios in tests/skill-evals/writing-plans are
   stale and are rewritten against this text before release.
+
+### (2026-11-10) Task Structure: the Context Anchor gains a Preparation line.
+RULE CHANGE: the task template gains "Preparation: [Task M | none needed — why]" under
+  "Depends on". It is the slot for the Vertical Slices sentence "every body names its
+  preparation step or says none is needed", which had none.
+
+CAUSE: the scenario test-preparation-step-on-approved-rework.md records that criterion as not
+  followed, before and after the 1.4.82 wording, because the template carried no slot. The
+  line was held out of 1.4.82: the coordinator read the owner's «push and update» as
+  releasing without it. Shown to the owner in the template with two filled examples;
+  «approve». The draft's "Reuse:" / "Nothing to reuse:" lines were not proposed — "Reuse is
+  cited, never re-implemented" already covers them.
+
+EVIDENCE: none run against this line.

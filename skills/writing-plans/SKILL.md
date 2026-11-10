@@ -95,6 +95,7 @@ Write each body to `.bd/.scratch/task-N.md`, lint it, create the bead, delete th
 Parent: [epic title] — [one-line purpose of the feature]
 This task: [what it does and WHY it matters to the plan]
 Depends on: [what prior tasks produced that this consumes, or "—"]
+Preparation: [Task M | none needed — why]
 
 **Execution:** [inline | subagent/cheap | subagent/standard | subagent/capable] — [one-line reason; if `review:trivial-deterministic` applies, name the executing task]
 
