@@ -7,6 +7,15 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.83] - 2026-11-10
+
+Net `skills/` word delta: **+138** by `wc -w` (51746 → 51884): loaded skill text +8 (writing-plans 2928 → 2936,
+budget 2960), the rest in the unloaded `SKILL.notes.txt` gloss. Nothing was removed to make room.
+
+- writing-plans: the task template's Context Anchor gains `Preparation: [Task M | none needed — why]`, the slot for
+  "every body names its preparation step or says none is needed", which 1.4.82 shipped without. No scenario was run
+  for this line.
+
 ## [1.4.82] - 2026-11-10
 
 Net `skills/` word delta: **+1374** by `wc -w` (50372 → 51746): loaded skill text +319 (writing-plans 2666 → 2928,
