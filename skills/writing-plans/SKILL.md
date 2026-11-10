@@ -33,7 +33,7 @@ Plan it now. That input has two shapes. A root epic bead id alone selects full m
 Complete in order:
 
 1. **Scope check** — one coherent project, no unresolved design fork
-2. **Map file structure** — what is created/modified, each file's responsibility
+2. **Map file structure** — what is created/modified, each file's responsibility; then the clean-up check, before any task is written
 3. **Decompose into task beads** — thin directive bodies per Task Structure
 4. **Lint every body** — `node <skill-dir>/scripts/lint-citations.mjs <body-file> --repo <root>` must exit 0 before its `bd create`. A body that fails the lint is not created; fix or delete the claim.
 5. **Write the exploration map** — symbol and seam rows per **Exploration Map**, into `docs/beads/<epic-id>.map.md` in the target repo
@@ -51,6 +51,8 @@ If the spec covers multiple independent subsystems, it should have been split du
 ## File Structure
 
 Before defining tasks, map which files are created or modified and what each is responsible for — this locks in the decomposition. Clear boundaries, one responsibility per file; prefer focused files you can hold in context; files that change together live together; follow the codebase's existing patterns.
+
+**Clean-up check.** In the mapped files, look for code the tasks must touch that breaks an AGENTS.md rule or the approved target and that the spec does not cover. Found → write no task that touches it; return `NEEDS_RULING` with one decision bead, "Decide: clean-up on the way", whose question carries one row per item: what is not clean, the line it breaks, the fix, its cost, and whether the fix is obvious (the cited line says where the code goes and there is one reasonable way there) or needs brainstorming (more than one way, a silent target, a new mechanism, or a change to a shape other code depends on — a shared type or contract, a module's public function, a table, a screen or text, a rule). The owner answers each row: do it, brainstorm it, or not now — one backlog line. Tasks touching that code are written after the answer.
 
 ## Vertical Slices
 

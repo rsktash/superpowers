@@ -308,3 +308,23 @@ OPEN: "a clean-up row" names the planner's clean-up check (a list returned befor
 EVIDENCE: none run. tests/skill-evals/writing-plans/test-preparation-step-on-approved-target.md
   and test-preparation-changes-public-function.md were written for the 3cc134c wording and are
   stale against this text; they are rewritten with the clean-up check.
+
+### (2026-11-10) File Structure gains the clean-up check, run before any task is written.
+RULE CHANGE: checklist item 2 gains "then the clean-up check, before any task is written";
+  File Structure gains the **Clean-up check** paragraph: unclean code the tasks must touch that
+  the spec does not cover stops every task touching it and returns NEEDS_RULING with one
+  decision bead, "Decide: clean-up on the way", one row per item, each marked obvious or needs
+  brainstorming; the owner answers do it / brainstorm it / not now; the tasks are written after
+  the answer. This closes the OPEN note of the entry above: the "clean-up row" now exists, and
+  the "target is silent" content removed there lives in the "needs brainstorming" side.
+
+CAUSE: the owner, 2026-11-10: «in planner stage shouldn't we evaluate the hidden clean up task
+  first if the spec wasn't about the clean up?» — an earlier draft had the planner write the
+  feature tasks and park the clean-up tasks beside them, which meant rewriting tasks after a
+  struck row. Approved as shown («the approval was for all»).
+
+NOT CHANGED, deliberately: Amend Mode runs steps 3–7 and so skips the check; line 77's "the
+  export is prefactoring — its own task, first".
+
+EVIDENCE: none run; the two preparation-step scenarios in tests/skill-evals/writing-plans are
+  stale and are rewritten against this text before release.
