@@ -284,3 +284,27 @@ EVIDENCE: tests/skill-evals/writing-plans/test-preparation-changes-public-functi
 NOT CHANGED, deliberately: "a **tracer bullet**" and the rest of the paragraph stay word for
   word (owner: «don't remove»); the expand–contract paragraph; line 77's "the export is
   prefactoring — its own task, first", which the owner's approval did not cover.
+
+### (2026-11-10) Vertical Slices: a preparation step is planned only where the owner said yes.
+RULE CHANGE: the 3cc134c sentence "It needs no owner question when all three hold …" and its
+  closing sentence "Where the target is silent … it is a decision bead, asked once." are
+  replaced by: "It is planned only for a rework the spec approved or a clean-up row the owner
+  answered "do it". Its gate proves it changes nothing a person or a caller can observe — code
+  with no tests first gets tests that pin what it does today — and it is its own commit."
+  "No behaviour change" stops deciding whether the owner is asked and becomes the preparation
+  task's finish check.
+
+CAUSE: the owner, 2026-11-10, on the earlier direction: «I think it is wrong direction. What I
+  need is the gradual improvement. So, when we are starting on a part of code and
+  brainstorming, planning skills being used AI must proactively remind me that the code is not
+  clean and fix it on the way.»; on the three conditions: «why are you deciding the task
+  relative to tests?»; then, shown this text as a diff: «approve the edit».
+
+OPEN: "a clean-up row" names the planner's clean-up check (a list returned before any task
+  touching the code is written), proposed to the owner as a separate edit and not yet approved;
+  the brainstorming edits likewise. The removed "target is silent" content is meant to live in
+  that check. Not released until those are settled.
+
+EVIDENCE: none run. tests/skill-evals/writing-plans/test-preparation-step-on-approved-target.md
+  and test-preparation-changes-public-function.md were written for the 3cc134c wording and are
+  stale against this text; they are rewritten with the clean-up check.
