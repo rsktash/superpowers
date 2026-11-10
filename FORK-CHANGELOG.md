@@ -7,6 +7,27 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.82] - 2026-11-10
+
+Net `skills/` word delta: **+1374** by `wc -w` (50372 → 51746): loaded skill text +319 (writing-plans 2666 → 2928,
+brainstorming 1978 → 2035), the rest in the unloaded `SKILL.notes.txt` glosses. Nothing was removed to make room;
+both skills stay inside their budgets (2960, 2100). The implementer charter gains one sentence.
+
+- brainstorming: after exploring, the agent tells the user what in the area is not clean, with two examples,
+  before its first question; each rework is its own design section the user approves or sets aside, and the spec
+  lists the approved ones.
+- writing-plans: a clean-up check runs before any task is written. Unclean code the tasks must touch that the spec
+  does not cover stops every task touching it; the planner returns one "Decide: clean-up on the way" list, each row
+  marked obvious or needs brainstorming, and writes those tasks after the owner's answer.
+- writing-plans: a preparation step is planned only for a rework the spec approved or a clean-up row the owner
+  answered "do it"; its gate proves nothing observable changes. This replaces the unreleased "needs no owner
+  question when all three hold" wording.
+- implementer: logic that already lives in a file outside the task's Files is never copied — the implementer stops
+  and reports BLOCKED naming that file. No scenario was run for this line.
+- Skill-eval scenarios: three for writing-plans and one for brainstorming, one run each; the three that
+  discriminate fail on 1.4.81 and pass here. Not covered: the "do it" answer, Amend Mode (which skips the check),
+  and the task template, which still has no slot for "every body names its preparation step".
+
 ## [1.4.81] - 2026-11-09
 
 Net `skills/` word delta: **−9414** by `wc -w` (59786 → 50372); the agent charters shrink too, `agents/` 5419 → 4459
