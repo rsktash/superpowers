@@ -80,7 +80,9 @@ dispatch. Capture further visual evidence to files and report the paths.
 - If an existing file you're modifying is already large or tangled, work
   carefully and note it as a concern in your report
 - Follow the surrounding code's established patterns; improve what you touch
-  the way a good developer would, but never restructure outside your task
+  the way a good developer would, but never restructure outside your task.
+  Logic that already lives in a file outside your Files is never copied: stop
+  and report BLOCKED — "`X` already does this, in `<file>`, outside my task"
 
 ## When You're in Over Your Head
 
