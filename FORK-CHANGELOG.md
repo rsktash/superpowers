@@ -7,6 +7,16 @@ version marks the fork's upstream sync point).
 Every entry states the net `skills/` word delta. Additions displace: a release
 that grows the corpus names what it failed to remove.
 
+## [1.4.84] - 2026-11-11
+
+Net `skills/` word delta: **+303** by `wc -w` (51884 → 52187): loaded skill text +61 (brainstorming 2035 → 2096,
+budget 2100), the rest in the unloaded `SKILL.notes.txt` gloss. Nothing was removed to make room.
+
+- brainstorming: "Foundation before features" — on a new project, or for a module with no written foundation, the
+  subjects, which service owns which data, state and rules, how services ask each other, and the form every module
+  takes are designed and approved before any feature, and each later design is checked against it. One pressure
+  scenario was run without and with the line (notes file).
+
 ## [1.4.83] - 2026-11-10
 
 Net `skills/` word delta: **+138** by `wc -w` (51746 → 51884): loaded skill text +8 (writing-plans 2928 → 2936,
