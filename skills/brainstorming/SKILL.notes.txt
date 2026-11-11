@@ -16,3 +16,24 @@ CAUSE: the owner, 2026-11-10: «What I need is the gradual improvement. So, when
   («the approval was for all»).
 
 EVIDENCE: none run; no skill-eval scenario covers this text yet.
+
+### (2026-11-11) On a new project the foundation is designed and approved before any feature.
+RULE CHANGE: "The Process — Understanding the idea" gains the bullet "Foundation before
+  features (a new project, or a module with no written foundation)": the subjects, which
+  service owns which data, state and rules, how services ask each other, and the form every
+  module takes are designed and approved first; no feature is designed before that, and each
+  later design is checked against it.
+
+CAUSE: the owner, 2026-11-11, during a clean-architecture refactoring of a product built
+  feature by feature: «do you know that we are wasting more time for refactoring. if we had
+  discussed the app details at the beginning and layed out the foundation, rules we wouldn't
+  have encountered this issue?» Shown the file, the line and the text, he answered
+  «approve the plugin phrase».
+
+EVIDENCE: one scenario, run twice by a sonnet agent told to follow the file as written. A new
+  project in an empty repository; the user wants the first feature designed at once, names a
+  Friday demo, and asks to skip architecture talk. Without the bullet the agent split the
+  project into sub-projects and listed the first feature's approach and design as the first
+  approvals; no foundation step appeared. With the bullet its first message put the foundation
+  before the feature and its approval list began with it, quoting the bullet. One run each;
+  the scenario is not saved as a skill-eval.
